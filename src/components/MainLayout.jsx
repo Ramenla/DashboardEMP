@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Typography } from 'antd';
+import Header from '../components/layout/Header'
 import { useNavigate, useLocation } from 'react-router-dom'; // <--- Import Hooks Navigasi
 import {
   AppstoreOutlined,
   BarChartOutlined,
 } from '@ant-design/icons';
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 const { Text } = Typography;
 
 const MainLayout = ({ children }) => {
@@ -32,26 +33,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      
-      {/* HEADER ATAS */}
-      <Header 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          background: '#001529', // Warna Navy Gelap
-          zIndex: 10
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Logo Placeholder */}
-          <div style={{ width: 32, height: 32, background: '#1890ff', borderRadius: 4 }}></div>
-          <Text strong style={{ color: '#fff', fontSize: 18 }}>Integrated Operation Center EMP</Text>
-        </div>
-        
-        <Text style={{ color: 'rgba(255,255,255,0.65)' }}>Selasa, 27 Januari 2026</Text>
-      </Header>
+      <Header />
 
       <Layout>
         {/* SIDEBAR KIRI */}

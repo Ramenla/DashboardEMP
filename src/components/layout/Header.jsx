@@ -1,39 +1,80 @@
 import React from 'react';
+import { Layout } from 'antd';
+import logoMigas from '../../assets/logo-skk-migas.png';
+import logoEMP from '../../assets/logo-emp.png';
 
 const Header = () => {
-  // Tanggal hardcoded sesuai gambar, nanti bisa pakai new Date()
-  const currentDate = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-document.getElementById('tanggal').innerText = currentDate;
-  
+  // Tanggal otomatis update
+  const [currentDate, setCurrentDate] = React.useState('');
+
+  // Update tanggal setiap hari
+  React.useEffect(() => {
+    const updateDate = () => {
+      const date = new Date();
+      const formattedDate = date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      setCurrentDate(formattedDate);
+    };
+
+    updateDate(); // Set initial date
+    // Update date every minute (optional)
+    const interval = setInterval(updateDate, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <header className="w-full h-16 bg-[#1e293b] text-white flex items-center justify-between px-6 shadow-md z-20 relative">
+    <header 
+      style=
+      {
+        { 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          padding: '0 24px',
+          background: '#001529', // Warna Navy Gelap
+          zIndex: 10
+        }
+      }
+    >
       {/* Bagian Kiri: Logo */}
-      <div className="flex items-center gap-4">
-        {/* Placeholder Logo 1 (SKK Migas) */}
-        <div className="h-8 w-8 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">
-          SKK
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        
+        {/* Logo SKK Migas */}
+        <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
+          <img 
+            src={logoMigas} 
+            alt="SKK Migas" 
+            style={{ height: '100%', width: 'auto' }}
+          />
         </div>
-        {/* Placeholder Logo 2 (EMP) */}
-        <div className="h-8 w-16 bg-green-500 rounded flex items-center justify-center text-xs font-bold text-black">
-          EMP
+
+        {/* Separator */}
+        <div style={{ height: 24, width: 1, background: '#9ca3af' }} />
+
+        {/* Logo EMP */}
+        <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
+          <img 
+            src={logoEMP} 
+            alt="Energi Mega Persada" 
+            style={{ height: '100%', width: 'auto' }}
+          />
         </div>
       </div>
 
       {/* Bagian Tengah: Judul Dashboard */}
-      <div className="absolute left-1/2 transform -translate-x-1/2">
-        <h1 className="text-xl font-bold tracking-wide">
+      <div style={{ flex: 1, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600, color:'white' }}>
           Integrated Operation Center EMP
         </h1>
       </div>
 
       {/* Bagian Kanan: Tanggal */}
-      <div className="text-sm font-medium text-slate-300">
+      <div style={{ fontSize: 14, color: '#cbd5f5' }}>
         {currentDate}
       </div>
     </header>

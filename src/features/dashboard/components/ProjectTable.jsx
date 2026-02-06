@@ -126,6 +126,7 @@ const ProjectTable = ({ dataSource = [] }) => {
          dataSource={dataSource} // Data dinamis
          pagination={false} 
          showHeader={false} 
+         scroll={{ y: 220 }}
        />
     </Card>
   );

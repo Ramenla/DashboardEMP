@@ -1,58 +1,86 @@
-import React from 'react';
-import { Typography, Radio, Segmented, Space, Badge } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Typography, Radio, Segmented, Badge } from 'antd';
 import GanttChart from '../features/progress/components/GanttChart';
+import ProjectDetailDrawer from '../components/ui/ProjectDetailDrawer';
+import { projectsData } from '../data/mockData';
 
 const { Title } = Typography;
 
 const ProjectProgress = () => {
+  const [priorityFilter, setPriorityFilter] = useState('Semua');
+  
+  // GANTI NAMA: default 'Monthly' (Inggris/Standar)
+  const [calendarView, setCalendarView] = useState('Monthly'); 
+  
+  const [groupedData, setGroupedData] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const filtered = projectsData.filter(p => 
+      priorityFilter === 'Semua' ? true : p.priority === priorityFilter
+    );
+
+    const categories = ['Exploration', 'Drilling', 'Facility', 'Operation'];
+    const result = categories.map(catName => ({
+        title: catName,
+        projects: filtered.filter(p => p.category === catName)
+    })).filter(group => group.projects.length > 0);
+
+    setGroupedData(result);
+  }, [priorityFilter]);
+
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setIsDrawerOpen(true);
+  };
+
   return (
     <div>
-      {/* JUDUL HALAMAN */}
       <Title level={3} style={{ marginBottom: 24, color: '#001529' }}>Project Progress</Title>
 
-      {/* FILTER BAR & LEGEND */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start', 
-        flexWrap: 'wrap', 
-        gap: 16,
-        marginBottom: 24 
-      }}>
-        
-        {/* BAGIAN KIRI: Filter Cards */}
-        <div style={{ display: 'flex', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           
-          {/* Filter Kalender */}
-          <div style={{ background: '#fff', padding: 16, borderRadius: 8, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: '#666' }}>Filter Kalender</div>
-             <Segmented options={['Hari', 'Minggu', 'Bulan']} defaultValue="Bulan" />
+          {/* FILTER KALENDER: Nama Baru */}
+          <div style={{ background: '#fff', padding: 16, borderRadius: 8 }}>
+             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>View Mode</div>
+             <Segmented 
+               options={['Daily', 'Weekly', 'Monthly']} // Nama diganti sesuai request
+               value={calendarView} 
+               onChange={setCalendarView} 
+             />
           </div>
 
-          {/* Filter Prioritas */}
-          <div style={{ background: '#fff', padding: 16, borderRadius: 8, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: '#666' }}>Filter Prioritas</div>
-             <Radio.Group defaultValue="Tinggi" buttonStyle="solid">
-                <Radio.Button value="Rendah">Rendah</Radio.Button>
-                <Radio.Button value="Sedang">Sedang</Radio.Button>
-                <Radio.Button value="Tinggi">Tinggi</Radio.Button>
+          <div style={{ background: '#fff', padding: 16, borderRadius: 8 }}>
+             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Filter Prioritas</div>
+             <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid">
+                <Radio.Button value="Semua">All</Radio.Button>
+                <Radio.Button value="Rendah">Low</Radio.Button>
+                <Radio.Button value="Sedang">Medium</Radio.Button>
+                <Radio.Button value="Tinggi">High</Radio.Button>
              </Radio.Group>
           </div>
-
         </div>
 
-        {/* BAGIAN KANAN: Legend */}
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', background: '#fff', padding: '10px 20px', borderRadius: 8 }}>
-            <Badge color="#52c41a" text="Sedang berjalan" />
-            <Badge color="#ff4d4f" text="Terhenti" />
-            <Badge color="#fadb14" text="Tertunda" />
+            <Badge color="#52c41a" text="On Track" />
+            <Badge color="#ff4d4f" text="Critical/Stop" />
+            <Badge color="#faad14" text="Delayed" />
         </div>
-
       </div>
 
-      {/* CHART AREA */}
-      <GanttChart />
-      
+      <GanttChart 
+        data={groupedData} 
+        viewMode={calendarView} 
+        onProjectClick={handleProjectClick} 
+      />
+
+      <ProjectDetailDrawer 
+        project={selectedProject} 
+        open={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+      />
     </div>
   );
 };

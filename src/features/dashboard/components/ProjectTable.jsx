@@ -3,7 +3,7 @@ import { Card, Table, Tag, Progress, Typography } from 'antd';
 
 const { Text } = Typography;
 
-// Helper Warna (Tetap sama)
+// Helper Warna
 const getPriorityColor = (priority) => {
   switch (priority) {
     case 'Kritis': return 'red';
@@ -19,6 +19,7 @@ const getStatusColor = (status) => {
     case 'Berjalan': return 'success';
     case 'Tertunda': return 'warning';
     case 'Kritis': return 'error';
+    case 'Terhenti': return 'error'; // Tambahan untuk status Terhenti
     default: return 'default';
   }
 };
@@ -26,12 +27,13 @@ const getStatusColor = (status) => {
 const columns = [
   {
     title: 'Kode Project',
-    dataIndex: 'code',
-    key: 'code',
+    dataIndex: 'id', // Sesuaikan dengan key di mockData ('id')
+    key: 'id',
     render: (text, record) => (
       <div>
         <div style={{ fontWeight: 'bold', fontSize: 13 }}>{text}</div>
-        <Tag color={getStatusColor(record.status)} style={{ marginTop: 4, borderRadius: 10, fontSize: 10 }}>
+        <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>{record.name}</div>
+        <Tag color={getStatusColor(record.status)} style={{ borderRadius: 10, fontSize: 10 }}>
           {record.status}
         </Tag>
       </div>
@@ -88,10 +90,14 @@ const columns = [
   },
   {
     title: 'Issue',
-    dataIndex: 'issue',
-    key: 'issue',
+    dataIndex: 'issues', // Mengambil array issues
+    key: 'issues',
     width: 200,
-    render: (text) => <Text type="secondary" style={{ fontSize: 12 }}>{text}</Text>,
+    render: (issues) => (
+        issues && issues.length > 0 ? 
+        <Text type="secondary" style={{ fontSize: 12, color: '#cf1322' }}>{issues[0]}</Text> : 
+        <Text type="secondary" style={{ fontSize: 12 }}>-</Text>
+    ),
   },
   {
     title: 'Budget',
@@ -99,34 +105,40 @@ const columns = [
     key: 'budget',
     render: (val) => (
       <div style={{ textAlign: 'center' }}>
-         <Progress type="circle" percent={val} width={40} format={() => `${val}%`} />
+         <Progress type="circle" percent={val} width={40} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
          <div style={{ fontSize: 10, color: '#999' }}>Used</div>
       </div>
     ),
   },
 ];
 
-// PERUBAHAN DI SINI: Menerima props 'dataSource' dari Dashboard
-const ProjectTable = ({ dataSource = [] }) => {
+// Menerima props onRowClick
+const ProjectTable = ({ dataSource = [], onRowClick }) => {
   return (
     <Card bordered={false} style={{ borderRadius: 8 }}>
-       {/* Header Filter Kecil */}
        <div style={{ display: 'flex', gap: 24, marginBottom: 16, fontSize: 12, color: '#666', fontWeight: 500 }}>
           <span>Kode Project</span>
           <span>Prioritas</span>
           <span>Kategori</span>
           <span>Progress ke Target</span>
           <span>Deviasi</span>
-          <span>Issue</span>
+          <span>Issue Utama</span>
           <span>Budget</span>
        </div>
        
        <Table 
          columns={columns} 
-         dataSource={dataSource} // Data dinamis
-         pagination={false} 
-         showHeader={false} 
-         scroll={{ y: 220 }}
+         dataSource={dataSource} 
+         pagination={{ pageSize: 10 }} // Pagination karena datanya 50
+         rowKey="id" // Penting: ID unik
+         showHeader={false}
+         // FITUR KLIK BARIS:
+         onRow={(record) => ({
+           onClick: () => {
+             if (onRowClick) onRowClick(record);
+           },
+           style: { cursor: 'pointer' }
+         })}
        />
     </Card>
   );

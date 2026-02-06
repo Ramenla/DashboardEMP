@@ -2,7 +2,14 @@ import React from 'react';
 
 const Header = () => {
   // Tanggal hardcoded sesuai gambar, nanti bisa pakai new Date()
-  const currentDate = "Selasa, 27 Januari 2026";
+  const currentDate = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+document.getElementById('tanggal').innerText = currentDate;
+  
 
   return (
     <header className="w-full h-16 bg-[#1e293b] text-white flex items-center justify-between px-6 shadow-md z-20 relative">

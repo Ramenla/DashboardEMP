@@ -1,28 +1,30 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Typography, Avatar } from 'antd';
+import { Layout, Menu, Typography } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom'; // <--- Import Hooks Navigasi
 import {
   AppstoreOutlined,
   BarChartOutlined,
-  UserOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
+  
+  // Hooks agar menu bisa interaktif
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Menu Items
+  // Daftar Menu Sidebar
   const items = [
     {
-      key: '1',
+      key: '/dashboard', // Key harus sama dengan URL di App.jsx
       icon: <AppstoreOutlined />,
       label: 'Project Posture',
     },
     {
-      key: '2',
+      key: '/progress',
       icon: <BarChartOutlined />,
       label: 'Project Progress',
     },
@@ -31,14 +33,14 @@ const MainLayout = ({ children }) => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       
-      {/* HEADER (Full Width) */}
+      {/* HEADER ATAS */}
       <Header 
         style={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
           padding: '0 24px',
-          background: '#001529', // Warna Dark Navy
+          background: '#001529', // Warna Navy Gelap
           zIndex: 10
         }}
       >
@@ -52,7 +54,7 @@ const MainLayout = ({ children }) => {
       </Header>
 
       <Layout>
-        {/* SIDEBAR */}
+        {/* SIDEBAR KIRI */}
         <Sider 
           width={240} 
           theme="light" 
@@ -62,13 +64,16 @@ const MainLayout = ({ children }) => {
         >
           <Menu
             mode="inline"
-            defaultSelectedKeys={['1']}
+            // Menandai menu mana yang aktif berdasarkan URL saat ini
+            selectedKeys={[location.pathname]} 
             style={{ height: '100%', borderRight: 0, paddingTop: 16 }}
             items={items}
+            // Fungsi ketika menu diklik: Pindah Halaman
+            onClick={(item) => navigate(item.key)} 
           />
         </Sider>
 
-        {/* KONTEN TENGAH */}
+        {/* AREA KONTEN TENGAH */}
         <Layout style={{ padding: '24px' }}>
           <Content
             style={{

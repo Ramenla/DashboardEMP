@@ -1,11 +1,59 @@
 import React from 'react';
-import Card from '../../../components/ui/Card';
+import { Card, Badge } from 'antd';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { name: 'Rendah', value: 8 },
+  { name: 'Sedang', value: 8 },
+  { name: 'Tinggi', value: 8 },
+];
+
+const COLORS = ['#d9d9d9', '#ffec3d', '#ff4d4f']; // Abu, Kuning, Merah
 
 const PriorityCard = () => {
+  const total = data.reduce((acc, cur) => acc + cur.value, 0);
+
   return (
-    <Card title="Prioritas Project" className="h-full">
-      <div className="flex items-center justify-center h-48 bg-yellow-50 rounded border border-yellow-100 border-dashed text-yellow-400">
-        Donut Chart
+    <Card title="Prioritas Project" bordered={false} style={{ height: '100%', borderRadius: 8 }}>
+      <div style={{ position: 'relative', width: '100%', height: 200 }}>
+        {/* Angka Total di Tengah */}
+        <div style={{ 
+            position: 'absolute', top: '50%', left: '50%', 
+            transform: 'translate(-50%, -50%)', textAlign: 'center' 
+        }}>
+          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>{total}</h2>
+        </div>
+
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={data}
+              innerRadius={55}
+              outerRadius={75}
+              paddingAngle={2}
+              dataKey="value"
+              startAngle={90}
+              endAngle={-270}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none"/>
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Legend Custom di Bawah */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 10 }}>
+        {data.map((item, index) => (
+          <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: COLORS[index] }}></span>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                <span style={{ fontWeight: 'bold' }}>{item.value}</span>
+                <span style={{ color: '#999', fontSize: 10 }}>{item.name}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );

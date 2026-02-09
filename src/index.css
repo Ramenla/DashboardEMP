@@ -6,7 +6,7 @@ body {
   /* Warna background khas dashboard Antd */
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Always Visible */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

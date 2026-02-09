@@ -13,18 +13,29 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
     onFilterChange({ ...filters, [key]: value });
   };
 
+  // Helper untuk toggle radio button (klik lagi = unselect)
+  const handleRadioClick = (e, key, value) => {
+    // Jika nilai yang diklik sama dengan nilai saat ini, set jadi kosong (unselect)
+    if (filters[key] === value) {
+      // Kita perlu cegah default behavior agar RadioGroup tidak memaksa select kembali (walaupun state akan update)
+      // Tapi biasanya state change cukup.
+      // Namun onChange tidak fire jika klik yang sama.
+      handleChange(key, '');
+    }
+  };
+
   return (
-    <Card 
-      title={<div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>Filter <Button type="text" size="small" icon={<ReloadOutlined/>} onClick={onReset}>Reset</Button></div>} 
-      bordered={false} 
+    <Card
+      title={<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Filter <Button type="text" size="small" icon={<ReloadOutlined />} onClick={onReset}>Reset</Button></div>}
+      bordered={false}
       style={{ height: '100%', borderRadius: 8 }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        
+
         {/* 1. Search */}
-        <Input 
-          placeholder="Cari Kode..." 
-          prefix={<SearchOutlined style={{ color: '#ccc' }} />} 
+        <Input
+          placeholder="Cari Kode..."
+          prefix={<SearchOutlined style={{ color: '#ccc' }} />}
           style={{ borderRadius: 20 }}
           value={filters.search} // Controlled Component
           onChange={(e) => handleChange('search', e.target.value)}
@@ -32,7 +43,7 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         {/* 2. Checkbox Category */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Checkbox.Group 
+          <Checkbox.Group
             options={categories}
             value={filters.categories}
             onChange={(checkedValues) => handleChange('categories', checkedValues)}
@@ -43,32 +54,32 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         {/* 3. Prioritas */}
         <div>
           <Title level={5} style={{ fontSize: 13, marginBottom: 8, color: '#555' }}>Prioritas</Title>
-          <Radio.Group 
+          <Radio.Group
             value={filters.priority}
             onChange={(e) => handleChange('priority', e.target.value)}
-            buttonStyle="solid" 
-            size="middle" 
+            buttonStyle="solid"
+            size="middle"
             style={{ width: '100%', display: 'flex' }}
           >
-            <Radio.Button value="Rendah" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Rendah</Radio.Button>
-            <Radio.Button value="Sedang" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Sedang</Radio.Button>
-            <Radio.Button value="Tinggi" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tinggi</Radio.Button>
+            <Radio.Button value="Rendah" onClick={(e) => handleRadioClick(e, 'priority', 'Rendah')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Rendah</Radio.Button>
+            <Radio.Button value="Sedang" onClick={(e) => handleRadioClick(e, 'priority', 'Sedang')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Sedang</Radio.Button>
+            <Radio.Button value="Tinggi" onClick={(e) => handleRadioClick(e, 'priority', 'Tinggi')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tinggi</Radio.Button>
           </Radio.Group>
         </div>
 
         {/* 4. Status */}
         <div>
           <Title level={5} style={{ fontSize: 13, marginBottom: 8, color: '#555' }}>Status Project</Title>
-          <Radio.Group 
+          <Radio.Group
             value={filters.status}
             onChange={(e) => handleChange('status', e.target.value)}
-            buttonStyle="solid" 
-            size="middle" 
+            buttonStyle="solid"
+            size="middle"
             style={{ width: '100%', display: 'flex' }}
           >
-            <Radio.Button value="Kritis" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Kritis</Radio.Button>
-            <Radio.Button value="Tertunda" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tertunda</Radio.Button>
-            <Radio.Button value="Berjalan" style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Berjalan</Radio.Button>
+            <Radio.Button value="Kritis" onClick={(e) => handleRadioClick(e, 'status', 'Kritis')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Kritis</Radio.Button>
+            <Radio.Button value="Tertunda" onClick={(e) => handleRadioClick(e, 'status', 'Tertunda')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tertunda</Radio.Button>
+            <Radio.Button value="Berjalan" onClick={(e) => handleRadioClick(e, 'status', 'Berjalan')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Berjalan</Radio.Button>
           </Radio.Group>
         </div>
 
@@ -76,15 +87,15 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         {/* Kita ubah fungsi slider ini jadi Filter Budget Used agar lebih masuk akal */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: -4 }}>
-             <Title level={5} style={{ fontSize: 13, color: '#555' }}>Max Budget Used</Title>
-             <span style={{fontSize:12, fontWeight:'bold'}}>{filters.maxBudget}%</span>
+            <Title level={5} style={{ fontSize: 13, color: '#555' }}>Max Budget Used</Title>
+            <span style={{ fontSize: 12, fontWeight: 'bold' }}>{filters.maxBudget}%</span>
           </div>
-          <Slider 
+          <Slider
             min={0}
             max={100}
             value={filters.maxBudget}
             onChange={(val) => handleChange('maxBudget', val)}
-            trackStyle={{ backgroundColor: '#001529' }} 
+            trackStyle={{ backgroundColor: '#001529' }}
             handleStyle={{ borderColor: '#001529' }}
           />
         </div>

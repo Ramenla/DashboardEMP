@@ -9,7 +9,7 @@ const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}> {/* Fix viewport */}
       <Header />
 
       <Layout>
@@ -22,7 +22,8 @@ const MainLayout = ({ children }) => {
           marginLeft: collapsed ? 80 : 210, // Adjust margin based on sidebar state
           marginTop: 40, // Adjust for fixed header
           transition: 'margin-left 0.2s', // Smooth transition
-          minHeight: 'calc(100vh - 40px)' // Ensure full height
+          height: 'calc(100vh - 40px)', // Fixed height
+          overflowY: 'auto' // Scroll only here
         }}>
           <Content
             style={{

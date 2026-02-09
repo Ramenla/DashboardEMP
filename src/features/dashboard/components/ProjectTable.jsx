@@ -44,7 +44,7 @@ const columns = [
     dataIndex: 'priority',
     key: 'priority',
     render: (priority) => (
-      <Tag color={getPriorityColor(priority)} className="w-[60px] text-center">
+      <Tag color={getPriorityColor(priority)} className="w-[50px] text-center">
         {priority}
       </Tag>
     ),

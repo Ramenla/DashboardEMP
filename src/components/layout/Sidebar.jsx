@@ -9,8 +9,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const { Sider } = Layout;
 
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ collapsed, onCollapse }) => {
 
   // Hooks untuk navigasi interaktif
   const navigate = useNavigate();
@@ -36,9 +35,16 @@ const Sidebar = () => {
       theme="light"
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
+      onCollapse={onCollapse}
       trigger={null} // Hilangkan trigger default di bawah
-      style={{ position: 'relative' }} // Untuk positioning tombol custom
+      style={{
+        position: 'fixed',
+        left: 0,
+        height: '100vh',
+        zIndex: 100,
+        top: 0, // Mulai dari atas, nanti Header akan menutupi atau di atasnya jika perlu adjustment
+        paddingTop: 64, // Beri jarak untuk Header
+      }}
     >
       {/* Header Section - Icon Minimize */}
       <div style={{
@@ -64,7 +70,7 @@ const Sidebar = () => {
         )}
 
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => onCollapse(!collapsed)}
           style={{
             border: 'none',
             background: 'transparent',

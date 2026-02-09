@@ -37,7 +37,12 @@ const Header = () => {
           justifyContent: 'space-between',
           padding: '0 24px',
           background: '#001529', // Warna Navy Gelap
-          zIndex: 10
+          zIndex: 1000,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: 64, // Explicit height
         }
       }
     >

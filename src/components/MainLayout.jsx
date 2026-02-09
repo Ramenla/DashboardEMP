@@ -20,9 +20,9 @@ const MainLayout = ({ children }) => {
         <Layout style={{
           padding: '16px 24px 24px',
           marginLeft: collapsed ? 80 : 210, // Adjust margin based on sidebar state
-          marginTop: 64, // Adjust for fixed header
+          marginTop: 40, // Adjust for fixed header
           transition: 'margin-left 0.2s', // Smooth transition
-          minHeight: 'calc(100vh - 64px)' // Ensure full height
+          minHeight: 'calc(100vh - 40px)' // Ensure full height
         }}>
           <Content
             style={{

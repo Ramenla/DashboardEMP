@@ -42,7 +42,8 @@ const Header = () => {
           top: 0,
           left: 0,
           width: '100%',
-          height: 64, // Explicit height
+          height: 40, // Explicit height
+          borderRadius: '0 0 10px 10px',
         }
       }
     >
@@ -79,7 +80,7 @@ const Header = () => {
       </div>
 
       {/* Bagian Kanan: Tanggal */}
-      <div style={{ fontSize: 14, color: '#cbd5f5' }}>
+      <div style={{ fontSize: 12, color: '#cbd5f5' }}>
         {currentDate}
       </div>
     </header>

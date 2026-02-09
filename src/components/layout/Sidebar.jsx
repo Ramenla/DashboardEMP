@@ -43,7 +43,7 @@ const Sidebar = ({ collapsed, onCollapse }) => {
         height: '100vh',
         zIndex: 100,
         top: 0, // Mulai dari atas, nanti Header akan menutupi atau di atasnya jika perlu adjustment
-        paddingTop: 64, // Beri jarak untuk Header
+        paddingTop: 48, // Beri jarak untuk Header
       }}
     >
       {/* Header Section - Icon Minimize */}

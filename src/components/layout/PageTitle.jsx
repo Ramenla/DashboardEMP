@@ -10,6 +10,7 @@ const { Title } = Typography;
  * @param {React.ReactNode} icon - Optional icon di sebelah kiri title
  * @param {string} subtitle - Optional subtitle di bawah title
  * @param {React.ReactNode} actions - Optional action buttons di sebelah kanan
+ * @param {string|number} marginTop - Optional distance from the top (margin)
  * @param {object} style - Custom style override
  */
 const PageTitle = ({
@@ -18,6 +19,7 @@ const PageTitle = ({
     icon,
     subtitle,
     actions,
+    marginTop = 0,
     style = { background: 'white', padding: '10px 20px', borderRadius: '8px' }
 }) => {
     return (
@@ -25,7 +27,8 @@ const PageTitle = ({
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: subtitle ? 'flex-start' : 'center',
-            marginBottom: 24
+            marginBottom: 24,
+            marginTop: marginTop
         }}>
             <div style={{ flex: 1 }}>
                 <Title

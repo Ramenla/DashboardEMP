@@ -36,7 +36,7 @@ const ProjectProgress = () => {
 
   return (
     <div>
-      <PageTitle>Project Progress</PageTitle>
+      <PageTitle marginTop={-25}>Project Progress</PageTitle>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>

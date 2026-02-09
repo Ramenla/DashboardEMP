@@ -15,7 +15,7 @@ const MainLayout = ({ children }) => {
         <Sidebar />
 
         {/* AREA KONTEN TENGAH */}
-        <Layout style={{ padding: '24px' }}>
+        <Layout style={{ padding: '16px 24px 24px' }}>
           <Content
             style={{
               margin: 0,

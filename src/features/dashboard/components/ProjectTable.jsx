@@ -62,14 +62,14 @@ const columns = [
     render: (_, record) => (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#888' }}>
-           <span>{record.progress}%</span>
-           <span>Target {record.target}%</span>
+          <span>{record.progress}%</span>
+          <span>Target {record.target}%</span>
         </div>
-        <Progress 
-          percent={record.progress} 
-          success={{ percent: record.target, strokeColor: '#52c41a' }} 
-          showInfo={false} 
-          size="small" 
+        <Progress
+          percent={record.progress}
+          success={{ percent: record.target, strokeColor: '#52c41a' }}
+          showInfo={false}
+          size="small"
           strokeColor="#1890ff"
         />
       </div>
@@ -83,7 +83,7 @@ const columns = [
       const isNegative = dev < 0;
       return (
         <span style={{ color: isNegative ? '#ff4d4f' : '#52c41a', fontWeight: 'bold' }}>
-          {dev > 0 ? '+' : ''}{dev}% <span style={{fontSize: 10, fontWeight: 'normal', color: '#999'}}>vs target</span>
+          {dev > 0 ? '+' : ''}{dev}% <span style={{ fontSize: 10, fontWeight: 'normal', color: '#999' }}>vs target</span>
         </span>
       );
     },
@@ -94,8 +94,8 @@ const columns = [
     key: 'issues',
     width: 200,
     render: (issues) => (
-        issues && issues.length > 0 ? 
-        <Text type="secondary" style={{ fontSize: 12, color: '#cf1322' }}>{issues[0]}</Text> : 
+      issues && issues.length > 0 ?
+        <Text type="secondary" style={{ fontSize: 12, color: '#cf1322' }}>{issues[0]}</Text> :
         <Text type="secondary" style={{ fontSize: 12 }}>-</Text>
     ),
   },
@@ -105,8 +105,8 @@ const columns = [
     key: 'budget',
     render: (val) => (
       <div style={{ textAlign: 'center' }}>
-         <Progress type="circle" percent={val} width={40} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
-         <div style={{ fontSize: 10, color: '#999' }}>Used</div>
+        <Progress type="circle" percent={val} width={40} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
+        <div style={{ fontSize: 10, color: '#999' }}>Used</div>
       </div>
     ),
   },
@@ -116,30 +116,19 @@ const columns = [
 const ProjectTable = ({ dataSource = [], onRowClick }) => {
   return (
     <Card bordered={false} style={{ borderRadius: 8 }}>
-       <div style={{ display: 'flex', gap: 24, marginBottom: 16, fontSize: 12, color: '#666', fontWeight: 500 }}>
-          <span>Kode Project</span>
-          <span>Prioritas</span>
-          <span>Kategori</span>
-          <span>Progress ke Target</span>
-          <span>Deviasi</span>
-          <span>Issue Utama</span>
-          <span>Budget</span>
-       </div>
-       
-       <Table 
-         columns={columns} 
-         dataSource={dataSource} 
-         pagination={{ pageSize: 10 }} // Pagination karena datanya 50
-         rowKey="id" // Penting: ID unik
-         showHeader={false}
-         // FITUR KLIK BARIS:
-         onRow={(record) => ({
-           onClick: () => {
-             if (onRowClick) onRowClick(record);
-           },
-           style: { cursor: 'pointer' }
-         })}
-       />
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        pagination={{ pageSize: 10 }} // Pagination karena datanya 50
+        rowKey="id" // Penting: ID unik
+        // FITUR KLIK BARIS:
+        onRow={(record) => ({
+          onClick: () => {
+            if (onRowClick) onRowClick(record);
+          },
+          style: { cursor: 'pointer' }
+        })}
+      />
     </Card>
   );
 };

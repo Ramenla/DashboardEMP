@@ -1,42 +1,102 @@
-import React from 'react';
-import { Menu } from 'lucide-react'; // Ikon Menu
+import React, { useState } from 'react';
+import { Layout, Menu } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  AppstoreOutlined,
+  BarChartOutlined,
+} from '@ant-design/icons';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+const { Sider } = Layout;
 
 const Sidebar = () => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Hooks untuk navigasi interaktif
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Daftar Menu Sidebar
+  const items = [
+    {
+      key: '/dashboard',
+      icon: <AppstoreOutlined />,
+      label: 'Project Posture',
+    },
+    {
+      key: '/progress',
+      icon: <BarChartOutlined />,
+      label: 'Project Progress',
+    },
+  ];
+
   return (
-    <aside className="w-64 h-full bg-white border-r border-gray-200 flex flex-col pt-4">
-      
-      {/* Label Menu Header */}
-      <div className="px-6 mb-6 flex items-center gap-2 text-gray-800 font-bold text-lg">
-        <Menu size={24} />
-        <span>Menu</span>
+    <Sider
+      width={210}
+      theme="light"
+      collapsible
+      collapsed={collapsed}
+      onCollapse={(value) => setCollapsed(value)}
+      trigger={null} // Hilangkan trigger default di bawah
+      style={{ position: 'relative' }} // Untuk positioning tombol custom
+    >
+      {/* Header Section - Icon Minimize */}
+      <div style={{
+        height: 48,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'space-between', // Center saat collapsed
+        paddingRight: collapsed ? 0 : 16,
+        paddingLeft: collapsed ? 0 : 16,
+        borderBottom: '1px solid #f0f0f0'
+      }}>
+        {/* Tulisan Menu - Hilang saat collapsed */}
+        {!collapsed && (
+          <h2 style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 600,
+            color: '#1f2937'
+          }}>Menu</h2>
+        )}
+
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            padding: 6,
+            borderRadius: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background 0.3s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ?
+            <ChevronRight size={20} color="#666" /> :
+            <ChevronLeft size={20} color="#666" />
+          }
+        </button>
       </div>
 
-      {/* Navigasi Link */}
-      <nav className="flex-1 px-4 space-y-2">
-        
-        {/* Item 1: Active State (Sesuai Gambar) */}
-        <a 
-          href="#" 
-          className="block w-full px-4 py-3 bg-[#1e293b] text-white rounded-md font-medium shadow-sm transition-colors"
-        >
-          Project Posture
-        </a>
-
-        {/* Item 2: Inactive State */}
-        <a 
-          href="#" 
-          className="block w-full px-4 py-3 text-gray-400 font-medium hover:bg-gray-50 hover:text-gray-600 rounded-md transition-colors"
-        >
-          Project Progress
-        </a>
-
-      </nav>
-
-      {/* Footer Sidebar (Opsional) */}
-      <div className="p-4 text-xs text-gray-400 text-center">
-        v1.0.0
-      </div>
-    </aside>
+      <Menu
+        mode="inline"
+        // Menandai menu mana yang aktif berdasarkan URL saat ini
+        selectedKeys={[location.pathname]}
+        style={{ height: 'calc(100% - 48px)', borderRight: 0, paddingTop: 8 }}
+        items={items}
+        // Fungsi ketika menu diklik: Pindah Halaman
+        onClick={(item) => navigate(item.key)}
+      />
+    </Sider>
   );
 };
 

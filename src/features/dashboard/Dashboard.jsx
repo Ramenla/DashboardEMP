@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Row, Col, Typography } from 'antd';
+import { Row, Col } from 'antd';
 
 // Data Pusat
-import { projectsData } from '../data/mockData';
+import { projectsData } from '../../shared/data/mockData';
 
 // Components
-import BudgetCard from '../features/dashboard/components/BudgetCard';
-import IssueCard from '../features/dashboard/components/IssueCard';
-import PriorityCard from '../features/dashboard/components/PriorityCard';
-import StatusCard from '../features/dashboard/components/StatusCard';
-import FilterCard from '../features/dashboard/components/FilterCard';
-import ProjectTable from '../features/dashboard/components/ProjectTable';
-import ProjectDetailDrawer from '../components/ui/ProjectDetailDrawer'; // Drawer Baru
-
-const { Title } = Typography;
+import PageTitle from '../../components/layout/PageTitle';
+import BudgetCard from './components/BudgetCard';
+import IssueCard from './components/IssueCard';
+import PriorityCard from './components/PriorityCard';
+import StatusCard from './components/StatusCard';
+import FilterCard from './components/FilterCard';
+import ProjectTable from './components/ProjectTable';
+import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 
 const Dashboard = () => {
   // 1. STATE FILTER
@@ -66,8 +65,8 @@ const Dashboard = () => {
   // 4. LOGIC FILTERING
   useEffect(() => {
     const result = projectsData.filter((item) => {
-      const matchSearch = item.id.toLowerCase().includes(filters.search.toLowerCase()) || 
-                          item.name.toLowerCase().includes(filters.search.toLowerCase());
+      const matchSearch = item.id.toLowerCase().includes(filters.search.toLowerCase()) ||
+        item.name.toLowerCase().includes(filters.search.toLowerCase());
       const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
       const matchPriority = filters.priority === '' || item.priority === filters.priority;
       const matchStatus = filters.status === '' || item.status === filters.status;
@@ -84,7 +83,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ paddingBottom: 24 }}>
-      <Title level={3} style={{ marginBottom: 24, color: '#001529' }}>Project Posture</Title>
+      <PageTitle>Project Posture</PageTitle>
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
@@ -95,10 +94,10 @@ const Dashboard = () => {
         </Col>
 
         <Col xs={24} lg={6}>
-           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%' }}>
-             <div style={{ flex: 1 }}><PriorityCard data={priorityStats} /></div>
-             <div style={{ flex: 1 }}><StatusCard data={statusStats} /></div>
-           </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%' }}>
+            <div style={{ flex: 1 }}><PriorityCard data={priorityStats} /></div>
+            <div style={{ flex: 1 }}><StatusCard data={statusStats} /></div>
+          </div>
         </Col>
 
         <Col xs={24} lg={6}>
@@ -110,16 +109,16 @@ const Dashboard = () => {
 
       <Row style={{ marginTop: 24 }}>
         <Col span={24}>
-           {/* Pass Handler ke Tabel */}
-           <ProjectTable dataSource={filteredData} onRowClick={handleProjectClick} />
+          {/* Pass Handler ke Tabel */}
+          <ProjectTable dataSource={filteredData} onRowClick={handleProjectClick} />
         </Col>
       </Row>
 
       {/* Drawer Component */}
-      <ProjectDetailDrawer 
-        project={selectedProject} 
-        open={isDrawerOpen} 
-        onClose={closeDrawer} 
+      <ProjectDetailDrawer
+        project={selectedProject}
+        open={isDrawerOpen}
+        onClose={closeDrawer}
       />
     </div>
   );

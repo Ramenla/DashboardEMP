@@ -23,17 +23,17 @@ const Header = () => {
     updateDate(); // Set initial date
     // Update date every minute (optional)
     const interval = setInterval(updateDate, 60000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <header 
+    <header
       style=
       {
-        { 
-          display: 'flex', 
-          alignItems: 'center', 
+        {
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 24px',
           background: '#001529', // Warna Navy Gelap
@@ -43,12 +43,12 @@ const Header = () => {
     >
       {/* Bagian Kiri: Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        
+
         {/* Logo SKK Migas */}
         <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
-          <img 
-            src={logoMigas} 
-            alt="SKK Migas" 
+          <img
+            src={logoMigas}
+            alt="SKK Migas"
             style={{ height: '100%', width: 'auto' }}
           />
         </div>
@@ -58,9 +58,9 @@ const Header = () => {
 
         {/* Logo EMP */}
         <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
-          <img 
-            src={logoEMP} 
-            alt="Energi Mega Persada" 
+          <img
+            src={logoEMP}
+            alt="Energi Mega Persada"
             style={{ height: '100%', width: 'auto' }}
           />
         </div>
@@ -68,7 +68,7 @@ const Header = () => {
 
       {/* Bagian Tengah: Judul Dashboard */}
       <div style={{ flex: 1, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, color:'white' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 1600, color: 'white' }}>
           Integrated Operation Center EMP
         </h1>
       </div>

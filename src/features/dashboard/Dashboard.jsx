@@ -82,32 +82,32 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={{ paddingBottom: 24 }}>
+    <div className="pb-6">
       <PageTitle marginTop={-25}>Project Posture</PageTitle>
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%' }}>
-            <div style={{ flex: 1 }}><BudgetCard /></div>
-            <div style={{ flex: 1 }}><IssueCard /></div>
+          <div className="flex flex-col gap-6 h-full">
+            <div className="flex-1"><BudgetCard /></div>
+            <div className="flex-1"><IssueCard /></div>
           </div>
         </Col>
 
         <Col xs={24} lg={6}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%' }}>
-            <div style={{ flex: 1 }}><PriorityCard data={priorityStats} /></div>
-            <div style={{ flex: 1 }}><StatusCard data={statusStats} /></div>
+          <div className="flex flex-col gap-6 h-full">
+            <div className="flex-1"><PriorityCard data={priorityStats} /></div>
+            <div className="flex-1"><StatusCard data={statusStats} /></div>
           </div>
         </Col>
 
         <Col xs={24} lg={6}>
-          <div style={{ height: '100%' }}>
+          <div className="h-full">
             <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />
           </div>
         </Col>
       </Row>
 
-      <Row style={{ marginTop: 24 }}>
+      <Row className="mt-6">
         <Col span={24}>
           {/* Pass Handler ke Tabel */}
           <ProjectTable dataSource={filteredData} onRowClick={handleProjectClick} />

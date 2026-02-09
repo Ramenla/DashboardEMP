@@ -9,7 +9,7 @@ const MainLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Layout style={{ height: '100vh', overflow: 'hidden' }}> {/* Fix viewport */}
+    <Layout className="h-screen overflow-hidden">
       <Header />
 
       <Layout>
@@ -17,20 +17,10 @@ const MainLayout = ({ children }) => {
         <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
 
         {/* AREA KONTEN TENGAH */}
-        <Layout style={{
-          padding: '16px 24px 24px',
-          marginLeft: collapsed ? 80 : 210, // Adjust margin based on sidebar state
-          marginTop: 40, // Adjust for fixed header
-          transition: 'margin-left 0.2s', // Smooth transition
-          height: 'calc(100vh - 40px)', // Fixed height
-          overflowY: 'auto' // Scroll only here
-        }}>
-          <Content
-            style={{
-              margin: 0,
-              minHeight: 280,
-            }}
-          >
+        <Layout 
+          className={`px-0 py-10 mt-12 transition-[margin-left] duration-200 h-[calc(100vh-40px)] overflow-y-auto ${collapsed ? 'ml-3' : 'ml-[15px]'}`}
+        >
+          <Content className="m-1 min-h-[280px]">
             {children}
           </Content>
         </Layout>

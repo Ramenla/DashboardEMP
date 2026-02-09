@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Layout, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -36,54 +36,21 @@ const Sidebar = ({ collapsed, onCollapse }) => {
       collapsible
       collapsed={collapsed}
       onCollapse={onCollapse}
-      trigger={null} // Hilangkan trigger default di bawah
-      style={{
-        position: 'fixed',
-        left: 0,
-        height: '100vh',
-        zIndex: 100,
-        top: 0, // Mulai dari atas, nanti Header akan menutupi atau di atasnya jika perlu adjustment
-        paddingTop: 48, // Beri jarak untuk Header
-      }}
+      trigger={null}
+      className="fixed left-0 h-screen z-[100] top-0 pt-12"
     >
       {/* Header Section - Icon Minimize */}
-      <div style={{
-        height: 48,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between', // Center saat collapsed
-        paddingRight: collapsed ? 0 : 16,
-        paddingLeft: collapsed ? 0 : 16,
-        borderBottom: '1px solid #f0f0f0'
-      }}>
+      <div className={`h-12 flex items-center border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
         {/* Tulisan Menu - Hilang saat collapsed */}
         {!collapsed && (
-          <h2 style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            margin: 0,
-            fontSize: 20,
-            fontWeight: 600,
-            color: '#1f2937'
-          }}>Menu</h2>
+          <h2 className="flex items-center justify-start m-0 text-xl font-semibold text-gray-800">
+            Menu
+          </h2>
         )}
 
         <button
           onClick={() => onCollapse(!collapsed)}
-          style={{
-            border: 'none',
-            background: 'transparent',
-            cursor: 'pointer',
-            padding: 6,
-            borderRadius: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'background 0.3s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          className="border-none bg-transparent cursor-pointer p-1.5 rounded flex items-center justify-center transition-colors duration-300 hover:bg-gray-100"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ?
@@ -95,11 +62,9 @@ const Sidebar = ({ collapsed, onCollapse }) => {
 
       <Menu
         mode="inline"
-        // Menandai menu mana yang aktif berdasarkan URL saat ini
         selectedKeys={[location.pathname]}
-        style={{ height: 'calc(100% - 48px)', borderRight: 0, paddingTop: 8 }}
+        className="h-[calc(100%-48px)] border-r-0 pt-2"
         items={items}
-        // Fungsi ketika menu diklik: Pindah Halaman
         onClick={(item) => navigate(item.key)}
       />
     </Sider>

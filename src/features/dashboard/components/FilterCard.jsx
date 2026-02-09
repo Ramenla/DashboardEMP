@@ -4,91 +4,88 @@ import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
-// PERUBAHAN: Menerima props filters & onFilterChange
 const FilterCard = ({ filters, onFilterChange, onReset }) => {
   const categories = ['Exploration', 'Drilling', 'Operation', 'Facility'];
 
-  // Fungsi helper agar kodingan lebih rapi saat memanggil onFilterChange
   const handleChange = (key, value) => {
     onFilterChange({ ...filters, [key]: value });
   };
 
-  // Helper untuk toggle radio button (klik lagi = unselect)
   const handleRadioClick = (e, key, value) => {
-    // Jika nilai yang diklik sama dengan nilai saat ini, set jadi kosong (unselect)
     if (filters[key] === value) {
-      // Kita perlu cegah default behavior agar RadioGroup tidak memaksa select kembali (walaupun state akan update)
-      // Tapi biasanya state change cukup.
-      // Namun onChange tidak fire jika klik yang sama.
       handleChange(key, '');
     }
   };
 
   return (
     <Card
-      title={<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Filter <Button type="text" size="small" icon={<ReloadOutlined />} onClick={onReset}>Reset</Button></div>}
+      title={
+        <div className="flex justify-between items-center">
+          Filter 
+          <Button type="text" size="small" icon={<ReloadOutlined />} onClick={onReset}>Reset</Button>
+        </div>
+      }
       bordered={false}
-      style={{ height: '100%', borderRadius: 8 }}
+      className="h-full rounded-lg"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div className="flex flex-col gap-6">
 
         {/* 1. Search */}
         <Input
           placeholder="Cari Kode..."
-          prefix={<SearchOutlined style={{ color: '#ccc' }} />}
-          style={{ borderRadius: 20 }}
-          value={filters.search} // Controlled Component
+          prefix={<SearchOutlined className="text-gray-300" />}
+          className="rounded-full"
+          value={filters.search}
           onChange={(e) => handleChange('search', e.target.value)}
         />
 
         {/* 2. Checkbox Category */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex flex-col gap-2">
           <Checkbox.Group
             options={categories}
             value={filters.categories}
             onChange={(checkedValues) => handleChange('categories', checkedValues)}
-            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+            className="flex flex-col gap-2"
           />
         </div>
 
         {/* 3. Prioritas */}
         <div>
-          <Title level={5} style={{ fontSize: 13, marginBottom: 8, color: '#555' }}>Prioritas</Title>
+          <Title level={5} className="text-[13px] mb-2 text-gray-600">Prioritas</Title>
           <Radio.Group
             value={filters.priority}
             onChange={(e) => handleChange('priority', e.target.value)}
             buttonStyle="solid"
             size="middle"
-            style={{ width: '100%', display: 'flex' }}
+            className="w-full flex"
           >
-            <Radio.Button value="Rendah" onClick={(e) => handleRadioClick(e, 'priority', 'Rendah')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Rendah</Radio.Button>
-            <Radio.Button value="Sedang" onClick={(e) => handleRadioClick(e, 'priority', 'Sedang')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Sedang</Radio.Button>
-            <Radio.Button value="Tinggi" onClick={(e) => handleRadioClick(e, 'priority', 'Tinggi')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tinggi</Radio.Button>
+            <Radio.Button value="Rendah" onClick={(e) => handleRadioClick(e, 'priority', 'Rendah')} className="flex-1 text-center text-xs">Rendah</Radio.Button>
+            <Radio.Button value="Sedang" onClick={(e) => handleRadioClick(e, 'priority', 'Sedang')} className="flex-1 text-center text-xs">Sedang</Radio.Button>
+            <Radio.Button value="Tinggi" onClick={(e) => handleRadioClick(e, 'priority', 'Tinggi')} className="flex-1 text-center text-xs">Tinggi</Radio.Button>
           </Radio.Group>
         </div>
 
         {/* 4. Status */}
         <div>
-          <Title level={5} style={{ fontSize: 13, marginBottom: 8, color: '#555' }}>Status Project</Title>
+          <Title level={5} className="text-[13px] mb-2 text-gray-600">Status Project</Title>
           <Radio.Group
             value={filters.status}
             onChange={(e) => handleChange('status', e.target.value)}
             buttonStyle="solid"
             size="middle"
-            style={{ width: '100%', display: 'flex' }}
+            className="w-full flex"
           >
-            <Radio.Button value="Kritis" onClick={(e) => handleRadioClick(e, 'status', 'Kritis')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Kritis</Radio.Button>
-            <Radio.Button value="Tertunda" onClick={(e) => handleRadioClick(e, 'status', 'Tertunda')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Tertunda</Radio.Button>
-            <Radio.Button value="Berjalan" onClick={(e) => handleRadioClick(e, 'status', 'Berjalan')} style={{ flex: 1, textAlign: 'center', fontSize: 12 }}>Berjalan</Radio.Button>
+            <Radio.Button value="Kritis" onClick={(e) => handleRadioClick(e, 'status', 'Kritis')} className="flex-1 text-center text-xs">Kritis</Radio.Button>
+            <Radio.Button value="Tertunda" onClick={(e) => handleRadioClick(e, 'status', 'Tertunda')} className="flex-1 text-center text-xs">Tertunda</Radio.Button>
+            <Radio.Button value="Berjalan" onClick={(e) => handleRadioClick(e, 'status', 'Berjalan')} className="flex-1 text-center text-xs">Berjalan</Radio.Button>
           </Radio.Group>
         </div>
 
-        {/* 5. Issue Slider (Filter Budget Used < X %) */}
-        {/* Kita ubah fungsi slider ini jadi Filter Budget Used agar lebih masuk akal */}
+        {/* 5. Budget Slider */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: -4 }}>
-            <Title level={5} style={{ fontSize: 13, color: '#555' }}>Max Budget Used</Title>
-            <span style={{ fontSize: 12, fontWeight: 'bold' }}>{filters.maxBudget}%</span>
+          <div className="flex justify-between -mb-1">
+            <Title level={5} className="text-[13px] text-gray-600">Max Budget Used</Title>
+            <span className="text-xs font-bold">{filters.maxBudget}%</span>
           </div>
           <Slider
             min={0}

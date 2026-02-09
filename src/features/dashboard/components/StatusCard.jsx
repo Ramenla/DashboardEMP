@@ -5,9 +5,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 const StatusCard = ({ data }) => {
   // 1. Definisikan Warna
   const COLORS = {
-    'Berjalan': '#52c41a', // Hijau (Antd Success)
-    'Tertunda': '#faad14', // Kuning (Antd Warning)
-    'Kritis': '#ff4d4f',   // Merah (Antd Error)
+    'Berjalan': '#52c41a',
+    'Tertunda': '#faad14',
+    'Kritis': '#ff4d4f',
   };
 
   // 2. Fallback Data
@@ -21,16 +21,12 @@ const StatusCard = ({ data }) => {
   const total = chartData.reduce((acc, cur) => acc + cur.value, 0);
 
   return (
-    <Card title="Status Project" bordered={false} style={{ height: '100%', borderRadius: 8 }}>
-      <div style={{ position: 'relative', width: '100%', height: 200 }}>
+    <Card title="Status Project" bordered={false} className="h-full rounded-lg">
+      <div className="relative w-full h-[200px]">
         
         {/* Angka Total di Tengah */}
-        <div style={{ 
-            position: 'absolute', top: '50%', left: '50%', 
-            transform: 'translate(-50%, -50%)', textAlign: 'center',
-            zIndex: 10
-        }}>
-          <h2 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', color: '#333' }}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10">
+          <h2 className="m-0 text-[28px] font-bold text-gray-700">
             {total}
           </h2>
         </div>
@@ -57,16 +53,16 @@ const StatusCard = ({ data }) => {
       </div>
 
        {/* Custom Legend */}
-       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 12 }}>
+       <div className="flex justify-center gap-4 mt-3">
         {chartData.map((item) => (
-          <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ 
-                width: 10, height: 10, borderRadius: '50%', 
-                backgroundColor: COLORS[item.name] || '#ccc' 
-            }}></span>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                <span style={{ fontWeight: 'bold', fontSize: 14 }}>{item.value}</span>
-                <span style={{ color: '#8c8c8c', fontSize: 11 }}>{item.name}</span>
+          <div key={item.name} className="flex items-center gap-1.5">
+            <span 
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ backgroundColor: COLORS[item.name] || '#ccc' }}
+            />
+            <div className="flex flex-col leading-tight">
+                <span className="font-bold text-sm">{item.value}</span>
+                <span className="text-gray-400 text-[11px]">{item.name}</span>
             </div>
           </div>
         ))}

@@ -24,35 +24,26 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
   const isNegative = currentDeviation < 0;
 
   // --- LOGIC: GENERATE DATA S-CURVE DUMMY ---
-  // Kita membuat data simulasi 6 periode (misal: bulan)
   const sCurveData = useMemo(() => {
     const data = [];
     const periods = ['Bulan 1', 'Bulan 2', 'Bulan 3', 'Bulan 4', 'Bulan 5', 'Bulan 6'];
     const numPeriods = periods.length;
 
-    // Nilai akhir yang harus dicapai pada Bulan ke-6
-    const finalPV = project.target;      // Planned Value (Target)
-    const finalEV = project.progress;    // Earned Value (Actual Progress)
-    const finalAC = project.budgetUsed;  // Actual Cost (Budget Used)
+    const finalPV = project.target;
+    const finalEV = project.progress;
+    const finalAC = project.budgetUsed;
 
     for (let i = 0; i < numPeriods; i++) {
-      const progressRatio = (i + 1) / numPeriods; // 0.16, 0.33, ..., 1.0
+      const progressRatio = (i + 1) / numPeriods;
 
-      // Faktor kurva S sederhana untuk membuat garis melengkung
-      // Semakin kecil pangkatnya, semakin linear garisnya
       const pvFactor = Math.pow(progressRatio, 1.2);
-      const evFactor = Math.pow(progressRatio, project.status === 'Kritis' || project.status === 'Tertunda' ? 1.5 : 1.2); // Kalau kritis, progress awal lebih lambat
-      const acFactor = Math.pow(progressRatio, finalAC > finalEV ? 1.1 : 1.3); // Kalau boros, biaya naik lebih cepat di awal
+      const evFactor = Math.pow(progressRatio, project.status === 'Kritis' || project.status === 'Tertunda' ? 1.5 : 1.2);
+      const acFactor = Math.pow(progressRatio, finalAC > finalEV ? 1.1 : 1.3);
 
       data.push({
         name: periods[i],
-        // PV (Planned): Target Ideal (Biru Putus-putus)
         pv: parseFloat((finalPV * pvFactor).toFixed(1)),
-
-        // EV (Earned): Realisasi Progress (Hijau Solid)
         ev: parseFloat((finalEV * evFactor).toFixed(1)),
-
-        // AC (Cost): Realisasi Biaya (Merah Solid)
         ac: parseFloat((finalAC * acFactor).toFixed(1)),
       });
     }
@@ -63,43 +54,42 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
   return (
     <Drawer
       title={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: 24 }}>
-          <div style={{ marginLeft: 16 }}>
-            <div style={{ fontSize: 12, color: '#888' }}>{project.id}</div>
-            <div style={{ fontSize: 16, fontWeight: 'bold' }}>{project.name}</div>
+        <div className="flex justify-between items-center pr-6">
+          <div className="ml-4">
+            <div className="text-xs text-gray-400">{project.id}</div>
+            <div className="text-base font-bold">{project.name}</div>
           </div>
           <Tag color={getStatusColor(project.status)}>{project.status}</Tag>
         </div>
       }
-      width={700} // Lebar drawer diperbesar sedikit untuk grafik
+      width={700}
       onClose={onClose}
       open={open}
-      styles={{ body: { paddingBottom: 80, paddingTop: 0 } }} // AntD v5
-      bodyStyle={{ paddingBottom: 80, paddingTop: 0 }} // AntD v4 (just in case)
+      styles={{ body: { paddingBottom: 80, paddingTop: 0 } }}
     >
       {/* 1. INFORMASI UMUM */}
-      <div style={{ marginBottom: 24 }}>
-        <Title level={5} style={{ marginBottom: 16, marginTop: 16 }}>Informasi Umum</Title>
+      <div className="mb-6">
+        <Title level={5} className="mb-4 mt-4">Informasi Umum</Title>
         <Row gutter={[16, 16]}>
           <Col span={12}>
-            <Text type="secondary" style={{ fontSize: 12 }}>Kategori</Text>
+            <Text type="secondary" className="text-xs">Kategori</Text>
             <div><Tag color="blue">{project.category}</Tag></div>
           </Col>
           <Col span={12}>
-            <Text type="secondary" style={{ fontSize: 12 }}>Prioritas</Text>
+            <Text type="secondary" className="text-xs">Prioritas</Text>
             <div><Tag color={project.priority === 'Tinggi' ? 'red' : 'gold'}>{project.priority}</Tag></div>
           </Col>
           <Col span={12}>
-            <Text type="secondary" style={{ fontSize: 12 }}>Project Manager</Text>
-            <div style={{ fontWeight: 500 }}><UserOutlined /> {project.manager || 'Manager Name'}</div>
+            <Text type="secondary" className="text-xs">Project Manager</Text>
+            <div className="font-medium"><UserOutlined /> {project.manager || 'Manager Name'}</div>
           </Col>
           <Col span={12}>
-            <Text type="secondary" style={{ fontSize: 12 }}>Sponsor</Text>
-            <div style={{ fontWeight: 500 }}>{project.sponsor || 'Sponsor Name'}</div>
+            <Text type="secondary" className="text-xs">Sponsor</Text>
+            <div className="font-medium">{project.sponsor || 'Sponsor Name'}</div>
           </Col>
           <Col span={24}>
-            <Text type="secondary" style={{ fontSize: 12 }}>Strategi Project</Text>
-            <div style={{ fontWeight: 500 }}>{project.strategy || 'Standard Execution'}</div>
+            <Text type="secondary" className="text-xs">Strategi Project</Text>
+            <div className="font-medium">{project.strategy || 'Standard Execution'}</div>
           </Col>
         </Row>
       </div>
@@ -107,20 +97,20 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       <Divider />
 
       {/* 2. PERFORMA & GRAFIK S-CURVE */}
-      <div style={{ marginBottom: 24 }}>
+      <div className="mb-6">
         <Title level={5}>Performa & Analisis S-Curve</Title>
 
         {/* Progress Bars Summary */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+        <div className="mb-6">
+          <div className="flex justify-between text-xs">
             <span>Actual Progress (EV)</span>
             <strong>{project.progress}%</strong>
           </div>
           <Progress percent={project.progress} status="active" strokeColor="#52c41a" />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 8 }}>
+          <div className="flex justify-between text-xs mt-2">
             <span>Deviation (EV vs PV {project.target}%)</span>
-            <span style={{ color: isNegative ? 'red' : 'green', fontWeight: 'bold' }}>
+            <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
               {currentDeviation > 0 ? '+' : ''}{currentDeviation}%
             </span>
           </div>
@@ -133,13 +123,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
         </div>
 
         {/* --- MULTI-LINE CHART (S-CURVE) --- */}
-        <Card size="small" style={{ background: '#fff', borderRadius: 8, border: '1px solid #f0f0f0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 8 }}>
-            <LineChartOutlined style={{ color: '#1890ff' }} />
-            <span style={{ fontWeight: 600, fontSize: 13 }}>Grafik S-Curve (PV vs EV vs AC)</span>
+        <Card size="small" className="bg-white rounded-lg border border-gray-100">
+          <div className="flex items-center mb-4 gap-2">
+            <LineChartOutlined className="text-blue-500" />
+            <span className="font-semibold text-[13px]">Grafik S-Curve (PV vs EV vs AC)</span>
           </div>
 
-          <div style={{ width: '100%', height: 250 }}>
+          <div className="w-full h-[250px]">
             <ResponsiveContainer>
               <LineChart data={sCurveData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -152,35 +142,32 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                 />
                 <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
 
-                {/* GARIS 1: Planned Value (PV) - Biru Putus-putus */}
                 <Line
                   type="monotone"
                   dataKey="pv"
                   name="Planned Value (PV)"
                   stroke="#1890ff"
                   strokeWidth={2}
-                  strokeDasharray="5 5" // Membuat garis putus-putus
+                  strokeDasharray="5 5"
                   dot={{ r: 3, fill: '#1890ff', strokeWidth: 0 }}
                 />
 
-                {/* GARIS 2: Earned Value (EV) - Hijau Solid */}
                 <Line
                   type="monotone"
                   dataKey="ev"
                   name="Earned Value (EV)"
                   stroke="#52c41a"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#52c41a', strokeWidth: 0, shape: 'square' }} // Marker kotak
+                  dot={{ r: 4, fill: '#52c41a', strokeWidth: 0, shape: 'square' }}
                 />
 
-                {/* GARIS 3: Actual Cost (AC) - Merah Solid */}
                 <Line
                   type="monotone"
                   dataKey="ac"
                   name="Actual Cost (AC)"
                   stroke="#ff4d4f"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#ff4d4f', strokeWidth: 0 }} // Marker lingkaran
+                  dot={{ r: 4, fill: '#ff4d4f', strokeWidth: 0 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -188,9 +175,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
         </Card>
 
         {/* Budget & Cost Stats */}
-        <Row gutter={16} style={{ marginTop: 16 }}>
+        <Row gutter={16} className="mt-4">
           <Col span={8}>
-            <Card size="small" style={{ background: '#f9f9f9', borderRadius: 8, border: 'none', textAlign: 'center' }}>
+            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
               <Statistic
                 title="Planned (PV)"
                 value={project.target}
@@ -200,7 +187,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
             </Card>
           </Col>
           <Col span={8}>
-            <Card size="small" style={{ background: '#f9f9f9', borderRadius: 8, border: 'none', textAlign: 'center' }}>
+            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
               <Statistic
                 title="Earned (EV)"
                 value={project.progress}
@@ -210,7 +197,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
             </Card>
           </Col>
           <Col span={8}>
-            <Card size="small" style={{ background: '#f9f9f9', borderRadius: 8, border: 'none', textAlign: 'center' }}>
+            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
               <Statistic
                 title="Actual Cost (AC)"
                 value={project.budgetUsed}
@@ -226,15 +213,15 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       <Divider />
 
       {/* 3. ISSUE LIST */}
-      <div style={{ marginBottom: 24 }}>
-        <Title level={5} style={{ color: '#ff4d4f' }}><WarningOutlined /> Kendala & Isu</Title>
+      <div className="mb-6">
+        <Title level={5} className="text-red-500"><WarningOutlined /> Kendala & Isu</Title>
         {project.issues && project.issues.length > 0 ? (
           <List
             size="small"
             dataSource={project.issues}
             renderItem={(item, index) => (
               <List.Item>
-                <Text style={{ fontSize: 13 }}>{index + 1}. {item}</Text>
+                <Text className="text-[13px]">{index + 1}. {item}</Text>
               </List.Item>
             )}
           />
@@ -247,25 +234,120 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
       {/* 4. TIMELINE */}
       <div>
-        <Title level={5} style={{ marginBottom: 16 }}><CalendarOutlined /> Timeline Utama</Title>
-        <Steps direction="vertical" size="small" current={1}>
-          {project.timelineEvents && project.timelineEvents.map((evt, idx) => (
-            <Step
-              key={idx}
-              title={evt.title}
-              description={evt.date}
-              status={evt.status}
-            />
-          ))}
-          {/* Fallback jika data timelineEvents kosong */}
-          {(!project.timelineEvents || project.timelineEvents.length === 0) && (
-            <>
-              <Step title="Start Project" description={project.startDate} status="finish" />
-              <Step title="Execution" description="On Progress" status="process" />
-              <Step title="Closing" description={project.endDate} status="wait" />
-            </>
-          )}
-        </Steps>
+        <Title level={5} className="mb-3"><CalendarOutlined /> Timeline Project</Title>
+        
+        {/* Timeline Events - Horizontal List */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          {/* Calculate timeline events based on project dates */}
+          {(() => {
+            const today = new Date();
+            const startDate = new Date(project.startDate);
+            const endDate = new Date(project.endDate);
+            
+            // Calculate milestone dates
+            const quarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.25);
+            const midDate = new Date(startDate.getTime() + (endDate - startDate) * 0.5);
+            const threeQuarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.75);
+            
+            const events = [
+              {
+                date: project.startDate,
+                time: '08:00',
+                title: 'Project Kick Off',
+                description: 'Project initiation meeting dan team mobilization telah dilakukan.',
+                status: 'completed',
+                completed: startDate < today
+              },
+              {
+                date: quarterDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                time: '14:30',
+                title: 'Design Phase Completed',
+                description: 'Engineering design dan approval selesai. Dokumen siap untuk eksekusi.',
+                status: 'completed',
+                completed: quarterDate < today
+              },
+              {
+                date: midDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                time: '10:15',
+                title: 'Construction in Progress',
+                description: 'Main construction dan installation sedang berlangsung.',
+                status: 'process',
+                completed: false
+              },
+              {
+                date: threeQuarterDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                time: '16:00',
+                title: 'Testing & Commissioning',
+                description: 'System testing dan commissioning akan dilakukan.',
+                status: 'pending',
+                completed: false
+              },
+              {
+                date: project.endDate,
+                time: '18:00',
+                title: 'Project Handover',
+                description: 'Final inspection dan project handover ke client.',
+                status: 'pending',
+                completed: false
+              }
+            ];
+            
+            return (
+              <div className="relative">
+                {events.map((event, index) => (
+                  <div key={index} className="flex items-start gap-3 mb-4 last:mb-0">
+                    {/* Left: Icon & Line */}
+                    <div className="flex flex-col items-center">
+                      {/* Icon */}
+                      {event.completed ? (
+                        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0"></div>
+                      )}
+                      {/* Vertical line to next item */}
+                      {index < events.length - 1 && (
+                        <div className="w-px h-12 bg-gray-300 my-1"></div>
+                      )}
+                    </div>
+                    
+                    {/* Right: Content */}
+                    <div className="flex-1 pb-2">
+                      <div className="flex items-baseline gap-2 mb-0.5">
+                        <span className="text-[10px] text-gray-500 font-mono">{event.date} {event.time}</span>
+                        <span className={`text-xs font-semibold ${event.completed ? 'text-green-600' : 'text-gray-700'}`}>
+                          {event.title}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-600 leading-relaxed">
+                        {event.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Progress Info */}
+        <div className="mt-3 p-2.5 bg-blue-50 rounded-lg border border-blue-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[9px] text-gray-500 mb-0.5">Overall Progress</div>
+              <div className="text-lg font-bold text-blue-600">{project.progress}%</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[9px] text-gray-500 mb-0.5">Status</div>
+              <Tag color={project.status === 'Berjalan' ? 'success' : project.status === 'Tertunda' ? 'warning' : 'error'}>
+                {project.status}
+              </Tag>
+            </div>
+          </div>
+        </div>
       </div>
 
     </Drawer>

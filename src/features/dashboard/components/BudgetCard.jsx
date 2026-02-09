@@ -19,8 +19,8 @@ const data = [
 
 const BudgetCard = () => {
   return (
-    <Card title="Budget" bordered={false} style={{ height: '100%', borderRadius: 8 }}>
-      <div style={{ width: '100%', height: 260 }}>
+    <Card title="Budget" bordered={false} className="h-full rounded-lg">
+      <div className="w-full h-[260px]">
         <ResponsiveContainer>
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
@@ -35,7 +35,7 @@ const BudgetCard = () => {
               axisLine={false} 
               tickLine={false} 
               tick={{fontSize: 10, fill: '#999'}} 
-              interval={0} // Tampilkan semua bulan
+              interval={0}
             />
             <YAxis 
               axisLine={false} 

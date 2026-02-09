@@ -8,20 +8,20 @@ const columns = [
     key: 'rank',
     width: 60,
     align: 'center',
-    render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    render: (text) => <span className="font-bold">{text}</span>,
   },
   {
     title: 'Issue',
     dataIndex: 'issue',
     key: 'issue',
-    render: (text) => <span style={{ fontWeight: 500 }}>{text}</span>,
+    render: (text) => <span className="font-medium">{text}</span>,
   },
   {
     title: 'Kategori Terdampak',
     dataIndex: 'category',
     key: 'category',
     render: (text) => (
-        <span style={{ fontSize: 12, color: '#666' }}>{text}</span>
+        <span className="text-xs text-gray-500">{text}</span>
     ),
   },
   {
@@ -43,14 +43,14 @@ const data = [
 
 const IssueCard = () => {
   return (
-    <Card title="Top 5 Issue" bordered={false} style={{ height: '100%', borderRadius: 8 }}>
+    <Card title="Top 5 Issue" bordered={false} className="h-full rounded-lg">
       <Table 
         columns={columns} 
         dataSource={data} 
         pagination={false} 
         size="small"
         rowClassName="text-xs"
-        scroll={{ y: 220 }} // Agar bisa discroll jika data panjang
+        scroll={{ y: 220 }}
       />
     </Card>
   );

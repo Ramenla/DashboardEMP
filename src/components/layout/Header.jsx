@@ -1,5 +1,4 @@
 import React from 'react';
-import { Layout } from 'antd';
 import logoMigas from '../../assets/logo-skk-migas.png';
 import logoEMP from '../../assets/logo-emp.png';
 
@@ -28,59 +27,40 @@ const Header = () => {
   }, []);
 
   return (
-    <header
-      style=
-      {
-        {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          background: '#001529', // Warna Navy Gelap
-          zIndex: 1000,
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: 40, // Explicit height
-          borderRadius: '0 0 10px 10px',
-        }
-      }
-    >
+    <header className="flex items-center justify-between px-6 bg-[#001529] z-[1000] fixed top-0 left-0 w-full h-10 rounded-b-[10px]">
       {/* Bagian Kiri: Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-
+      <div className="flex items-center gap-4">
         {/* Logo SKK Migas */}
-        <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
+        <div className="h-9 flex items-center">
           <img
             src={logoMigas}
             alt="SKK Migas"
-            style={{ height: '100%', width: 'auto' }}
+            className="h-full w-auto"
           />
         </div>
 
         {/* Separator */}
-        <div style={{ height: 24, width: 1, background: '#9ca3af' }} />
+        <div className="h-6 w-px bg-gray-400" />
 
         {/* Logo EMP */}
-        <div style={{ height: 36, display: 'flex', alignItems: 'center' }}>
+        <div className="h-9 flex items-center">
           <img
             src={logoEMP}
             alt="Energi Mega Persada"
-            style={{ height: '100%', width: 'auto' }}
+            className="h-full w-auto"
           />
         </div>
       </div>
 
       {/* Bagian Tengah: Judul Dashboard */}
-      <div style={{ flex: 1, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 1600, color: 'white' }}>
+      <div className="flex-1 text-center">
+        <h1 className="text-lg font-semibold text-white">
           Integrated Operation Center EMP
         </h1>
       </div>
 
       {/* Bagian Kanan: Tanggal */}
-      <div style={{ fontSize: 12, color: '#cbd5f5' }}>
+      <div className="text-xs text-[#cbd5f5]">
         {currentDate}
       </div>
     </header>

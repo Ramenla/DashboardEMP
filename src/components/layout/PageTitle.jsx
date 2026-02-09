@@ -11,7 +11,6 @@ const { Title } = Typography;
  * @param {string} subtitle - Optional subtitle di bawah title
  * @param {React.ReactNode} actions - Optional action buttons di sebelah kanan
  * @param {string|number} marginTop - Optional distance from the top (margin)
- * @param {object} style - Custom style override
  */
 const PageTitle = ({
     children,
@@ -20,43 +19,28 @@ const PageTitle = ({
     subtitle,
     actions,
     marginTop = 0,
-    style = { background: 'white', padding: '10px 20px', borderRadius: '8px' }
 }) => {
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: subtitle ? 'flex-start' : 'center',
-            marginBottom: 24,
-            marginTop: marginTop
-        }}>
-            <div style={{ flex: 1 }}>
+        <div 
+            className={`flex justify-between mb-3 ${subtitle ? 'items-start' : 'items-center'}`}
+            style={{ marginTop }}
+        >
+            <div className="flex-1">
                 <Title
                     level={level}
-                    style={{
-                        marginBottom: subtitle ? 8 : 0,
-                        color: '#001529',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        ...style
-                    }}
+                    className={`flex items-center gap-2 bg-white py-2.5 px-5 rounded-lg text-[#001529] ${subtitle ? 'mb-2' : 'mb-0'}`}
                 >
-                    {icon && <span style={{ display: 'flex', alignItems: 'center' }}>{icon}</span>}
+                    {icon && <span className="flex items-center">{icon}</span>}
                     {children}
                 </Title>
                 {subtitle && (
-                    <div style={{
-                        color: '#6b7280',
-                        fontSize: 14,
-                        marginTop: 4
-                    }}>
+                    <div className="text-gray-500 text-sm mt-1">
                         {subtitle}
                     </div>
                 )}
             </div>
             {actions && (
-                <div style={{ marginLeft: 16 }}>
+                <div className="ml-4">
                     {actions}
                 </div>
             )}

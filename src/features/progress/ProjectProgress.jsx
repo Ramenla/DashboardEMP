@@ -7,10 +7,7 @@ import { projectsData } from '../../shared/data/mockData';
 
 const ProjectProgress = () => {
   const [priorityFilter, setPriorityFilter] = useState('Semua');
-
-  // GANTI NAMA: default 'Monthly' (Inggris/Standar)
   const [calendarView, setCalendarView] = useState('Monthly');
-
   const [groupedData, setGroupedData] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -38,21 +35,21 @@ const ProjectProgress = () => {
     <div>
       <PageTitle marginTop={-25}>Project Progress</PageTitle>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+      <div className="flex justify-between mb-6 flex-wrap gap-4">
+        <div className="flex gap-4 flex-wrap">
 
-          {/* FILTER KALENDER: Nama Baru */}
-          <div style={{ background: '#fff', padding: 16, borderRadius: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>View Mode</div>
+          {/* FILTER KALENDER */}
+          <div className="bg-white p-4 rounded-lg">
+            <div className="text-xs font-semibold mb-2">View Mode</div>
             <Segmented
-              options={['Daily', 'Weekly', 'Monthly']} // Nama diganti sesuai request
+              options={['Daily', 'Weekly', 'Monthly']}
               value={calendarView}
               onChange={setCalendarView}
             />
           </div>
 
-          <div style={{ background: '#fff', padding: 16, borderRadius: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>Filter Prioritas</div>
+          <div className="bg-white p-4 rounded-lg">
+            <div className="text-xs font-semibold mb-2">Filter Prioritas</div>
             <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid">
               <Radio.Button value="Semua">All</Radio.Button>
               <Radio.Button value="Rendah">Low</Radio.Button>
@@ -62,7 +59,7 @@ const ProjectProgress = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', background: '#fff', padding: '10px 20px', borderRadius: 8 }}>
+        <div className="flex gap-4 items-center bg-white py-2.5 px-5 rounded-lg">
           <Badge color="#52c41a" text="On Track" />
           <Badge color="#ff4d4f" text="Critical/Stop" />
           <Badge color="#faad14" text="Delayed" />

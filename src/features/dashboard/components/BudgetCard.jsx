@@ -1,28 +1,14 @@
 import React from 'react';
 import { Card } from 'antd';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const data = [
-  { name: 'JAN', value: 1500 },
-  { name: 'FEB', value: 2500 },
-  { name: 'MAR', value: 2000 },
-  { name: 'APR', value: 3000 },
-  { name: 'MAY', value: 4500 },
-  { name: 'JUN', value: 3200 },
-  { name: 'JUL', value: 3800 },
-  { name: 'AUG', value: 3500 },
-  { name: 'SEP', value: 4200 },
-  { name: 'OCT', value: 3800 },
-  { name: 'NOV', value: 3000 },
-  { name: 'DEC', value: 4800 },
-];
+import { budgetTrendData } from '../../../shared/data/mockData';
 
 const BudgetCard = () => {
   return (
     <Card title="Budget" bordered={false} className="h-full rounded-lg">
       <div className="w-full h-[260px]">
         <ResponsiveContainer>
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart data={budgetTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#1890ff" stopOpacity={0.8}/>

@@ -305,11 +305,15 @@ export const projectsData = [
   // --- 3. DATA TOP ISSUES (Otomatis ambil dari project yang bermasalah) ---
   export const topIssuesData = projectsData
     .filter(p => p.issues.length > 0) // Ambil yang punya isu
-    .map((p, index) => ({
+    .map((p) => ({
       key: p.id,
-      rank: index + 1,
       issue: p.issues[0], // Ambil isu pertama saja untuk tabel ringkas
       category: p.category,
       total: p.issues.length + Math.floor(Math.random() * 5) // Dummy total count
     }))
-    .slice(0, 5); // Hanya ambil 5 teratas
+    .sort((a, b) => b.total - a.total) // Sort descending by total (terbanyak di atas)
+    .slice(0, 5) // Hanya ambil 5 teratas
+    .map((item, index) => ({
+      ...item,
+      rank: index + 1 // Set rank setelah sorting
+    }));

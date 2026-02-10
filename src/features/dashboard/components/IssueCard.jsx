@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Table, Tag } from 'antd';
+import { topIssuesData } from '../../../shared/data/mockData';
 
 const columns = [
   {
@@ -8,13 +9,13 @@ const columns = [
     key: 'rank',
     width: 60,
     align: 'center',
-    render: (text) => <span className="font-bold">{text}</span>,
+    render: (text) => <span className="font-bold">#{text}</span>,
   },
   {
     title: 'Issue',
     dataIndex: 'issue',
     key: 'issue',
-    render: (text) => <span className="font-medium">{text}</span>,
+    render: (text) => <span className="font-medium text-sm">{text}</span>,
   },
   {
     title: 'Kategori Terdampak',
@@ -29,16 +30,8 @@ const columns = [
     dataIndex: 'total',
     key: 'total',
     align: 'right',
-    render: (text) => <b>{text}</b>,
+    render: (text) => <b className="text-sm">{text}</b>,
   },
-];
-
-const data = [
-  { key: '1', rank: 1, issue: 'Kendala Cuaca', category: 'Eksplorasi, Drilling', total: 20 },
-  { key: '2', rank: 2, issue: 'Masalah Perizinan Lahan', category: 'Eksplorasi', total: 15 },
-  { key: '3', rank: 3, issue: 'Keterlambatan Material', category: 'Facility', total: 12 },
-  { key: '4', rank: 4, issue: 'ESP Bermasalah', category: 'Operation', total: 9 },
-  { key: '5', rank: 5, issue: 'Tanah dan Pondasi', category: 'Facility', total: 5 },
 ];
 
 const IssueCard = () => {
@@ -46,7 +39,7 @@ const IssueCard = () => {
     <Card title="Top 5 Issue" bordered={false} className="h-full rounded-lg">
       <Table 
         columns={columns} 
-        dataSource={data} 
+        dataSource={topIssuesData} 
         pagination={false} 
         size="small"
         rowClassName="text-xs"

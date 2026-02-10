@@ -84,8 +84,10 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
         let colIndex = 1;
 
         if (viewMode === 'Daily') {
+             let lastMonthShown = -1; 
              while (currentDate <= maxDate) {
                  const dayOfMonth = currentDate.getDate();
+                 const currentMonth = currentDate.getMonth();
                  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
                  
                  bottomRow.push(
@@ -94,7 +96,8 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                      </div>
                  );
                  
-                 if (dayOfMonth === 1 || colIndex === 1) {
+                 // Show month header only when we encounter a new month
+                 if (currentMonth !== lastMonthShown) {
                      const remainingInMonth = daysInMonth - dayOfMonth + 1;
                      const remainingInGrid = Math.round(getDaysDiff(currentDate, maxDate)) + 1;
                      const span = Math.min(remainingInMonth, remainingInGrid);
@@ -104,27 +107,53 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                              {currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
                          </div>
                      );
+                     lastMonthShown = currentMonth;
                  }
                  currentDate.setDate(currentDate.getDate() + 1);
                  colIndex++;
              }
         } 
         else if (viewMode === 'Weekly') {
+             let lastWeeklyMonth = -1;
+             let monthStartCol = 1;
+             let monthStartDate = new Date(minDate);
+             
              while (currentDate <= maxDate) {
+                 const curMonth = currentDate.getMonth();
+                 
                  bottomRow.push(
                      <div key={`w-${colIndex}`} style={{ gridColumn: colIndex }} className="text-center text-[10px] border-r border-gray-100 py-1.5">
                          {currentDate.getDate()}
                      </div>
                  );
-                 if ((colIndex - 1) % 4 === 0) {
-                     topRow.push(
-                        <div key={`mw-${colIndex}`} style={{ gridColumn: `${colIndex} / span 4` }} className="text-left pl-2 text-[11px] font-bold border-r border-gray-200 bg-gray-50 py-1.5">
-                             {currentDate.toLocaleString('id-ID', { month: 'short' })}
-                         </div>
-                     );
+                 
+                 // When month changes, push the previous month header
+                 if (curMonth !== lastWeeklyMonth) {
+                     if (lastWeeklyMonth !== -1) {
+                         const span = colIndex - monthStartCol;
+                         topRow.push(
+                             <div key={`mw-${monthStartCol}`} style={{ gridColumn: `${monthStartCol} / span ${Math.max(1, span)}` }} className="text-left pl-2 text-[11px] font-bold border-r border-gray-200 bg-gray-50 py-1.5">
+                                 {monthStartDate.toLocaleString('id-ID', { month: 'short' })}
+                             </div>
+                         );
+                     }
+                     monthStartCol = colIndex;
+                     monthStartDate = new Date(currentDate);
+                     lastWeeklyMonth = curMonth;
                  }
+                 
                  currentDate.setDate(currentDate.getDate() + 7);
                  colIndex++;
+             }
+             
+             // Push the last month header
+             if (lastWeeklyMonth !== -1) {
+                 const span = colIndex - monthStartCol;
+                 topRow.push(
+                     <div key={`mw-${monthStartCol}`} style={{ gridColumn: `${monthStartCol} / span ${Math.max(1, span)}` }} className="text-left pl-2 text-[11px] font-bold border-r border-gray-200 bg-gray-50 py-1.5">
+                         {monthStartDate.toLocaleString('id-ID', { month: 'short' })}
+                     </div>
+                 );
              }
         }
         else {

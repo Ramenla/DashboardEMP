@@ -6,7 +6,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const { Title, Text } = Typography;
 const { Step } = Steps;
 
-// Helper Warna Status
+/**
+ * helper function untuk mendapatkan warna tag berdasarkan status project
+ * @param {string} status - status project (Berjalan, Tertunda, Kritis, dll)
+ * @returns {string} nama color untuk Ant Design Tag component
+ */
 const getStatusColor = (status) => {
   switch (status) {
     case 'Berjalan': return 'success';
@@ -16,14 +20,27 @@ const getStatusColor = (status) => {
   }
 };
 
+/**
+ * komponen drawer untuk menampilkan detail lengkap suatu project
+ * menampilkan info umum, progress, budget, chart s-curve, dan timeline
+ * @param {Object} props - props komponen
+ * @param {Object} props.project - data project yang akan ditampilkan
+ * @param {boolean} props.open - state apakah drawer visible
+ * @param {Function} props.onClose - callback untuk menutup drawer
+ * @returns {JSX.Element|null} drawer dengan detail project, atau null jika project tidak tersedia
+ */
 const ProjectDetailDrawer = ({ project, open, onClose }) => {
   if (!project) return null;
 
-  // Hitung Deviasi Saat Ini
+  // hitung deviasi saat ini
   const currentDeviation = project.progress - project.target;
   const isNegative = currentDeviation < 0;
 
-  // --- LOGIC: GENERATE DATA S-CURVE DUMMY ---
+  /**
+   * generate dummy s-curve data untuk chart PV (planned value), EV (earned value), AC (actual cost)
+   * data di-generate berdasarkan target, progress, dan budget project
+   * @returns {Array} array of objects dengan data PV, EV, AC per bulan
+   */
   const sCurveData = useMemo(() => {
     const data = [];
     const periods = ['Bulan 1', 'Bulan 2', 'Bulan 3', 'Bulan 4', 'Bulan 5', 'Bulan 6'];
@@ -67,7 +84,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       open={open}
       styles={{ body: { paddingBottom: 80, paddingTop: 0 } }}
     >
-      {/* 1. INFORMASI UMUM */}
+      {/* 1. informasi umum */}
       <div className="mb-6">
         <Title level={5} className="mb-4 mt-4">Informasi Umum</Title>
         <Row gutter={[16, 16]}>
@@ -96,11 +113,11 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
       <Divider />
 
-      {/* 2. PERFORMA & GRAFIK S-CURVE */}
+      {/* 2. performa & grafik s-curve */}
       <div className="mb-6">
         <Title level={5}>Performa & Analisis S-Curve</Title>
 
-        {/* Progress Bars Summary */}
+        {/* progress bars summary */}
         <div className="mb-6">
           <div className="flex justify-between text-xs">
             <span>Actual Progress (EV)</span>
@@ -122,7 +139,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           />
         </div>
 
-        {/* --- MULTI-LINE CHART (S-CURVE) --- */}
+        {/* multi-line chart (s-curve) */}
         <Card size="small" className="bg-white rounded-lg border border-gray-100">
           <div className="flex items-center mb-4 gap-2">
             <LineChartOutlined className="text-blue-500" />
@@ -174,7 +191,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           </div>
         </Card>
 
-        {/* Budget & Cost Stats */}
+        {/* budget & cost stats */}
         <Row gutter={16} className="mt-4">
           <Col span={8}>
             <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
@@ -212,7 +229,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
       <Divider />
 
-      {/* 3. ISSUE LIST */}
+      {/* 3. issue list */}
       <div className="mb-6">
         <Title level={5} className="text-red-500"><WarningOutlined /> Kendala & Isu</Title>
         {project.issues && project.issues.length > 0 ? (
@@ -232,19 +249,19 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
       <Divider />
 
-      {/* 4. TIMELINE */}
+      {/* 4. timeline */}
       <div>
         <Title level={5} className="mb-3"><CalendarOutlined /> Timeline Project</Title>
         
-        {/* Timeline Events - Horizontal List */}
+        {/* timeline events - horizontal list */}
         <div className="bg-gray-50 rounded-lg p-4">
-          {/* Calculate timeline events based on project dates */}
+          {/* calculate timeline events based on project dates */}
           {(() => {
             const today = new Date();
             const startDate = new Date(project.startDate);
             const endDate = new Date(project.endDate);
             
-            // Calculate milestone dates
+            // calculate milestone dates
             const quarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.25);
             const midDate = new Date(startDate.getTime() + (endDate - startDate) * 0.5);
             const threeQuarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.75);
@@ -296,9 +313,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <div className="relative">
                 {events.map((event, index) => (
                   <div key={index} className="flex items-start gap-3 mb-4 last:mb-0">
-                    {/* Left: Icon & Line */}
+                    {/* left: icon & line */}
                     <div className="flex flex-col items-center">
-                      {/* Icon */}
+                      {/* icon */}
                       {event.completed ? (
                         <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
                           <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,13 +325,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0"></div>
                       )}
-                      {/* Vertical line to next item */}
+                      {/* vertical line to next item */}
                       {index < events.length - 1 && (
                         <div className="w-px h-12 bg-gray-300 my-1"></div>
                       )}
                     </div>
                     
-                    {/* Right: Content */}
+                    {/* right: content */}
                     <div className="flex-1 pb-2">
                       <div className="flex items-baseline gap-2 mb-0.5">
                         <span className="text-[10px] text-gray-500 font-mono">{event.date} {event.time}</span>
@@ -333,7 +350,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           })()}
         </div>
 
-        {/* Progress Info */}
+        {/* progress info */}
         <div className="mt-3 p-2.5 bg-blue-50 rounded-lg border border-blue-100">
           <div className="flex items-center justify-between">
             <div>

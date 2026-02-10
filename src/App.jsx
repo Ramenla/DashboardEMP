@@ -4,17 +4,21 @@ import MainLayout from './components/MainLayout';
 import { Dashboard } from './features/dashboard';
 import { ProjectProgress } from './features/progress';
 
+/**
+ * komponen utama aplikasi yang mengatur routing
+ * @returns {JSX.Element} struktur routing aplikasi dengan MainLayout sebagai wrapper
+ */
 function App() {
   return (
     <MainLayout>
       <Routes>
-        {/* Jika user buka halaman awal (root), lempar ke dashboard */}
+        {/* jika user buka halaman awal (root), langsung ke dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Rute Halaman Dashboard */}
+        {/* rute halaman dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Rute Halaman Progress */}
+        {/* rute halaman progress */}
         <Route path="/progress" element={<ProjectProgress />} />
       </Routes>
     </MainLayout>

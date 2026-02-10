@@ -2,7 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { Tag, Tooltip, Empty } from 'antd';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 
-// --- Helper Warna & Tanggal ---
+/**
+ * helper function untuk mendapatkan warna project bar berdasarkan status
+ * @param {string} status - status project (Berjalan, Kritis, Tertunda, dll)
+ * @returns {Object} object dengan main color dan light color untuk gradient
+ */
 const getColors = (status) => {
   switch (status) {
     case 'Berjalan': return { main: '#00b96b', light: '#d9f7be' };
@@ -13,24 +17,48 @@ const getColors = (status) => {
   }
 };
 
+/**
+ * parse string tanggal menjadi date object
+ * @param {string} dateStr - string tanggal
+ * @returns {Date} date object
+ */
 const parseDate = (dateStr) => new Date(dateStr);
 
+/**
+ * menghitung selisih hari antara dua tanggal
+ * @param {Date} start - tanggal awal
+ * @param {Date} end - tanggal akhir
+ * @returns {number} jumlah hari
+ */
 const getDaysDiff = (start, end) => {
   const oneDay = 1000 * 60 * 60 * 24;
   return (end - start) / oneDay;
 };
 
-// --- STYLE CONSTANTS ---
+// konstanta style
 const SIDEBAR_WIDTH = 280; 
 
+/**
+ * komponen gantt chart untuk menampilkan timeline project
+ * mendukung 3 mode tampilan: daily, weekly, monthly
+ * @param {Object} props - props komponen
+ * @param {Array} props.data - array of categories dengan projects di dalamnya
+ * @param {string} props.viewMode - mode tampilan: 'Daily', 'Weekly', atau 'Monthly'
+ * @param {Function} props.onProjectClick - callback ketika project bar diklik
+ * @returns {JSX.Element} gantt chart dengan category grouping dan expand/collapse
+ */
 const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
   const [expandedKeys, setExpandedKeys] = useState(['0', '1', '2', '3', '4']);
 
+  /**
+   * toggle expand/collapse untuk category
+   * @param {string} key - key category yang akan di-toggle
+   */
   const toggleCategory = (key) => {
     setExpandedKeys(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
-  // --- 1. LOGIC: RANGE TANGGAL ---
+  // range tanggal
   const { minDate, maxDate, totalDays } = useMemo(() => {
     let allStarts = [];
     let allEnds = [];
@@ -50,19 +78,19 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
     let min = new Date(Math.min(...allStarts));
     let max = new Date(Math.max(...allEnds));
 
-    // For all views, ensure we start from current year
+    // untuk semua view, pastikan dimulai dari tahun berjalan
     const yearStart = new Date(currentYear, 0, 1);
     
     if (viewMode === 'Monthly') {
-        // Monthly: always show Jan-Dec of current year
+        // bulanan: selalu tampilkan jan-des tahun berjalan
         min = new Date(currentYear, 0, 1);
         max = new Date(currentYear, 11, 31);
     } else {
-        // Daily/Weekly: add buffer but don't go before current year
+        // harian/mingguan: tambah buffer tapi jangan sebelum tahun berjalan
         min.setDate(min.getDate() - 3);
         max.setDate(max.getDate() + 3);
         
-        // Don't show dates before January 1 of current year
+        // jangan tampilkan tanggal sebelum 1 januari tahun berjalan
         if (min < yearStart) {
             min = yearStart;
         }
@@ -73,7 +101,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
   }, [data, viewMode]);
 
 
-  // --- 2. CONFIG VIEW ---
+  // konfigurasi view
   const config = useMemo(() => {
     const colWidth = viewMode === 'Daily' ? 30 : viewMode === 'Weekly' ? 40 : 'minmax(40px, 1fr)';
     
@@ -146,7 +174,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                  colIndex++;
              }
              
-             // Push the last month header
+             // tambahkan header bulan terakhir
              if (lastWeeklyMonth !== -1) {
                  const span = colIndex - monthStartCol;
                  topRow.push(
@@ -178,7 +206,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
   }, [viewMode, minDate, maxDate]);
 
 
-  // --- 3. TODAY MARKER POSITION ---
+  // posisi maker hari ini 
   const todayPositionLeft = useMemo(() => {
     const today = new Date();
     if (today < minDate || today > maxDate) return null;
@@ -191,11 +219,11 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
         return ((monthIndex + monthProgress) / 12) * 100;
     } 
     else if (viewMode === 'Weekly') {
-        // Calculate more accurate week position
+        // hitung posisi minggu dengan lebih akurat
         const diffTime = today.getTime() - minDate.getTime();
         const diffDays = diffTime / (1000 * 3600 * 24);
         const totalGridDays = getDaysDiff(minDate, maxDate);
-        // Direct percentage based on days
+        // persentase langsung berdasarkan jumlah hari
         return (diffDays / totalGridDays) * 100;
     } 
     else {
@@ -206,7 +234,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
   }, [minDate, maxDate, viewMode, totalDays]);
 
 
-  // --- 4. BAR POSITION LOGIC ---
+  // logic posisi bar
   const getBarPosition = (startStr, endStr) => {
     const s = parseDate(startStr);
     const e = parseDate(endStr);
@@ -232,7 +260,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
 
   const timelineWidth = viewMode === 'Monthly' ? '100%' : 'max-content';
 
-  // Sticky sidebar style object (dynamic due to width constant)
+  // style object sidebar sticky (dinamis karena konstanta width)
   const stickyLeftStyle = {
     position: 'sticky',
     left: 0,
@@ -245,24 +273,24 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
       
       <div className="flex flex-col min-w-full" style={{ width: timelineWidth }}>
         
-        {/* === HEADER === */}
+        {/* header */}
         <div className="flex border-b border-gray-100 h-16">
-            {/* STICKY SIDEBAR: HEADER */}
+            {/* sidebar sticky: header */}
             <div style={stickyLeftStyle} className="bg-gray-50 border-r border-gray-200 z-[100] flex items-center px-4 text-sm shadow-[4px_0_8px_rgba(0,0,0,0.02)]">
                 Project Timeline
             </div>
             
-            {/* SCROLLABLE TIMELINE: HEADER */}
+            {/* timeline scrollable: header */}
             <div className="flex-grow relative" style={{ display: 'grid', gridTemplateColumns: gridTemplateColumns }}>
                 
-                {/* TODAY MARKER (HEADER PART) */}
+                {/* marker hari ini (bagian header) */}
                 {todayPositionLeft !== null && (
                     <div className="absolute z-10" style={{ left: `${todayPositionLeft}%`, top: 70, bottom: 0, borderLeft: '2px dashed #ff4d4f' }}>
                         <div className="w-2 h-2 bg-red-500 rounded-full absolute -top-1 -left-[5px] shadow" />
                     </div>
                 )}
 
-                {/* Grid Rows */}
+                {/* grid rows */}
                 {viewMode !== 'Monthly' && (
                     <div className="border-b border-gray-100 h-8 items-center" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'subgrid' }}>
                             {config.headers.topRow}
@@ -274,7 +302,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
             </div>
         </div>
 
-        {/* === BODY === */}
+        {/* isi */}
         <div className="bg-white">
             {data.length === 0 ? <Empty description="Tidak ada data project" className="m-5" /> : (
                 <>
@@ -284,34 +312,34 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                     return (
                         <React.Fragment key={idx}>
                             
-                            {/* CATEGORY ROW */}
+                            {/* baris kategori */}
                             <div 
                                 className="flex border-b border-gray-100 cursor-pointer h-10 relative"
                                 onClick={() => toggleCategory(String(idx))}
                             >
-                                {/* STICKY SIDEBAR: CATEGORY */}
+                                {/* sidebar sticky: kategori */}
                                 <div style={stickyLeftStyle} className="z-[100] bg-gray-50 border-r border-gray-200 flex items-center px-4 gap-2 shadow-[4px_0_8px_rgba(0,0,0,0.02)]">
                                     {isExpanded ? <DownOutlined className="text-[10px]"/> : <RightOutlined className="text-[10px]"/>}
                                     <span className="font-bold text-xs uppercase text-gray-600">{cat.title}</span>
                                     <Tag className="ml-auto rounded-[10px] text-[10px] border-none">{cat.projects.length}</Tag>
                                 </div>
 
-                                {/* TIMELINE GRID BACKGROUND */}
+                                {/* latar belakang grid timeline */}
                                 <div className="flex-grow relative" style={{ display: 'grid', gridTemplateColumns: gridTemplateColumns }}>
                                     
-                                     {/* Background Lines */}
+                                     {/* garis latar */}
                                      {Array.from({length: config.totalCols}).map((_, c) => (
                                         <div key={c} style={{ gridColumn: c+1 }} className="border-r border-gray-50 h-full"></div>
                                     ))}
 
-                                    {/* TODAY MARKER (CATEGORY PART) */}
+                                    {/* marker hari ini (bagian kategori) */}
                                     {todayPositionLeft !== null && (
                                         <div className="absolute top-0 bottom-0 z-[1]" style={{ left: `${todayPositionLeft}%`, borderLeft: '2px dashed #ff4d4f' }}></div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* PROJECT ROWS */}
+                            {/* baris project */}
                             {isExpanded && cat.projects.map(proj => {
                                 const pos = getBarPosition(proj.startDate, proj.endDate);
                                 if (pos.col < 1) return null;
@@ -320,26 +348,26 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                                 return (
                                     <div key={proj.id} className="flex h-[50px] border-b border-gray-100 items-center relative">
                                         
-                                        {/* STICKY SIDEBAR: PROJECT NAME */}
+                                        {/* sidebar sticky: nama project */}
                                         <div style={stickyLeftStyle} className="z-[100] bg-white border-r border-gray-200 flex flex-col justify-center px-4 shadow-[4px_0_8px_rgba(0,0,0,0.02)] h-full">
                                             <div className="text-[13px] font-semibold text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">{proj.name}</div>
                                             <div className="text-[10px] text-gray-400 font-mono">{proj.id}</div>
                                         </div>
 
-                                        {/* TIMELINE AREA */}
+                                        {/* area timeline */}
                                         <div className="flex-grow h-full relative" style={{ display: 'grid', gridTemplateColumns: gridTemplateColumns }}>
                                             
-                                            {/* Grid Lines */}
+                                            {/* garis grid */}
                                             {Array.from({length: config.totalCols}).map((_, c) => (
                                                 <div key={c} style={{ gridColumn: c+1 }} className="border-r border-gray-50 h-full"></div>
                                             ))}
 
-                                            {/* TODAY MARKER (PROJECT PART) */}
+                                            {/* marker hari ini (bagian project) */}
                                             {todayPositionLeft !== null && (
                                                 <div className="absolute top-0 bottom-0 z-[2] pointer-events-none" style={{ left: `${todayPositionLeft}%`, borderLeft: '2px dashed #ff4d4f' }}></div>
                                             )}
 
-                                            {/* PROJECT BAR */}
+                                            {/* bar project */}
                                             <Tooltip title={`${proj.name} (${proj.progress}%)`}>
                                                 <div 
                                                     onClick={() => onProjectClick && onProjectClick(proj)}

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Row, Col } from 'antd';
 
-// Data Pusat
+// import data
 import { projectsData } from '../../shared/data/mockData';
 
-// Components
+// import components
 import PageTitle from '../../components/layout/PageTitle';
 import BudgetCard from './components/BudgetCard';
 import IssueCard from './components/IssueCard';
@@ -14,8 +14,13 @@ import FilterCard from './components/FilterCard';
 import ProjectTable from './components/ProjectTable';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 
+/**
+ * komponen dashboard utama yang menampilkan ringkasan project dengan filtering
+ * menampilkan chart budget, top issues, distribusi priority & status, filter, dan tabel project
+ * @returns {JSX.Element} dashboard dengan berbagai widget statistic dan tabel project yang dapat difilter
+ */
 const Dashboard = () => {
-  // 1. STATE FILTER
+  // state untuk semua filter yang tersedia
   const [filters, setFilters] = useState({
     search: '',
     categories: [],
@@ -24,24 +29,36 @@ const Dashboard = () => {
     maxBudget: 100,
   });
 
+  // state untuk menyimpan data yang sudah difilter
   const [filteredData, setFilteredData] = useState(projectsData);
 
-  // 2. STATE DRAWER (DETAIL)
+  // state untuk drawer detail project
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Handler Klik Project
+  /**
+   * handler ketika user klik pada row project di tabel
+   * membuka drawer dan set project yang dipilih
+   * @param {Object} project - data project yang diklik
+   */
   const handleProjectClick = (project) => {
     setSelectedProject(project);
     setIsDrawerOpen(true);
   };
 
+  /**
+   * handler untuk menutup drawer detail project
+   */
   const closeDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedProject(null);
   };
 
-  // 3. LOGIC STATS (Donut Chart)
+  /**
+   * menghitung statistik priority dari data yang sudah difilter
+   * untuk ditampilkan di PriorityCard dalam bentuk donut chart
+   * @returns {Array} array dengan count untuk setiap level priority (Rendah, Sedang, Tinggi)
+   */
   const priorityStats = useMemo(() => {
     const stats = [{ name: 'Rendah', value: 0 }, { name: 'Sedang', value: 0 }, { name: 'Tinggi', value: 0 }];
     filteredData.forEach(p => {
@@ -52,6 +69,11 @@ const Dashboard = () => {
     return stats;
   }, [filteredData]);
 
+  /**
+   * menghitung statistik status dari data yang sudah difilter
+   * untuk ditampilkan di StatusCard dalam bentuk donut chart
+   * @returns {Array} array dengan count untuk setiap status (Kritis, Tertunda, Berjalan)
+   */
   const statusStats = useMemo(() => {
     const stats = [{ name: 'Kritis', value: 0 }, { name: 'Tertunda', value: 0 }, { name: 'Berjalan', value: 0 }];
     filteredData.forEach(p => {
@@ -62,7 +84,10 @@ const Dashboard = () => {
     return stats;
   }, [filteredData]);
 
-  // 4. LOGIC FILTERING
+  /**
+   * effect untuk melakukan filtering data project berdasarkan semua filter yang aktif
+   * berjalan setiap kali ada perubahan pada state filters
+   */
   useEffect(() => {
     const result = projectsData.filter((item) => {
       const matchSearch = item.id.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -77,6 +102,9 @@ const Dashboard = () => {
     setFilteredData(result);
   }, [filters]);
 
+  /**
+   * handler untuk reset semua filter ke nilai default
+   */
   const handleReset = () => {
     setFilters({ search: '', categories: [], priority: '', status: '', maxBudget: 100 });
   };
@@ -109,12 +137,12 @@ const Dashboard = () => {
 
       <Row className="mt-6">
         <Col span={24}>
-          {/* Pass Handler ke Tabel */}
+          {/* pass handler ke tabel */}
           <ProjectTable dataSource={filteredData} onRowClick={handleProjectClick} />
         </Col>
       </Row>
 
-      {/* Drawer Component */}
+      {/* drawer component */}
       <ProjectDetailDrawer
         project={selectedProject}
         open={isDrawerOpen}

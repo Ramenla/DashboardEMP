@@ -276,6 +276,7 @@ export const projectsData = [
       sponsor: 'SCM', manager: 'Logistics Mgr', strategy: 'Inventory Reduction', startDate: '01 Mar 2026', endDate: '30 Jun 2026', issues: [], timelineEvents: []
     },
   ].map(p => ({
+
     ...p,
     // Default value untuk field yang mungkin kosong agar tidak error
     issues: p.issues || [],
@@ -286,7 +287,7 @@ export const projectsData = [
     ]
   }));
   
-  // --- 2. DATA BUDGET CHART (Aggregated Dummy) ---
+  // DATA BUDGET
   export const budgetTrendData = [
     { name: 'JAN', value: 4500 },
     { name: 'FEB', value: 5200 },
@@ -302,18 +303,14 @@ export const projectsData = [
     { name: 'DEC', value: 9500 },
   ];
   
-  // --- 3. DATA TOP ISSUES (Otomatis ambil dari project yang bermasalah) ---
+  // --- 3. DATA TOP ISSUES 
   export const topIssuesData = projectsData
     .filter(p => p.issues.length > 0) // Ambil yang punya isu
-    .map((p) => ({
+    .map((p, index) => ({
       key: p.id,
+      rank: index + 1,
       issue: p.issues[0], // Ambil isu pertama saja untuk tabel ringkas
       category: p.category,
       total: p.issues.length + Math.floor(Math.random() * 5) // Dummy total count
     }))
-    .sort((a, b) => b.total - a.total) // Sort descending by total (terbanyak di atas)
-    .slice(0, 5) // Hanya ambil 5 teratas
-    .map((item, index) => ({
-      ...item,
-      rank: index + 1 // Set rank setelah sorting
-    }));
+    .slice(0, 5); // Hanya ambil 5 teratas

@@ -2,6 +2,10 @@ import React from 'react';
 import { Card, Table, Tag } from 'antd';
 import { topIssuesData } from '../../../shared/data/mockData';
 
+/**
+ * konfigurasi kolom untuk tabel top 5 issue
+ * menampilkan rank, issue description, kategori terdampak, dan total count
+ */
 const columns = [
   {
     title: 'Rank',
@@ -34,6 +38,11 @@ const columns = [
   },
 ];
 
+/**
+ * komponen card untuk menampilkan top 5 issue yang paling sering muncul
+ * data diurutkan berdasarkan frekuensi tertinggi (rank 1 = paling banyak)
+ * @returns {JSX.Element} card dengan tabel top 5 issue
+ */
 const IssueCard = () => {
   return (
     <Card title="Top 5 Issue" bordered={false} className="h-full rounded-lg">

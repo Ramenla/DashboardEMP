@@ -2,36 +2,42 @@ import React from 'react';
 import { Card } from 'antd';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
+/**
+ * komponen card untuk menampilkan distribusi status project dalam donut chart
+ * @param {Object} props - props komponen
+ * @param {Array} props.data - array dengan count untuk tiap status (Kritis, Tertunda, Berjalan)
+ * @returns {JSX.Element} card dengan donut chart dan legend distribusi status
+ */
 const StatusCard = ({ data }) => {
-  // 1. Definisikan Warna
+  // mapping warna untuk setiap status
   const COLORS = {
     'Berjalan': '#52c41a',
     'Tertunda': '#faad14',
     'Kritis': '#ff4d4f',
   };
 
-  // 2. Fallback Data
+  // data default jika tidak ada data yang diberikan
   const chartData = data || [
     { name: 'Kritis', value: 0 },
     { name: 'Tertunda', value: 0 },
     { name: 'Berjalan', value: 0 },
   ];
 
-  // 3. Hitung Total
+  // hitung total
   const total = chartData.reduce((acc, cur) => acc + cur.value, 0);
 
   return (
     <Card title="Status Project" bordered={false} className="h-full rounded-lg">
       <div className="relative w-full h-[200px]">
         
-        {/* Angka Total di Tengah */}
+        {/* angka total di tengah */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10">
           <h2 className="m-0 text-[28px] font-bold text-gray-700">
             {total}
           </h2>
         </div>
 
-        {/* Grafik */}
+        {/* grafik */}
         <ResponsiveContainer>
           <PieChart>
             <Pie
@@ -52,7 +58,7 @@ const StatusCard = ({ data }) => {
         </ResponsiveContainer>
       </div>
 
-       {/* Custom Legend */}
+       {/* custom legend */}
        <div className="flex justify-center gap-4 mt-3">
         {chartData.map((item) => (
           <div key={item.name} className="flex items-center gap-1.5">

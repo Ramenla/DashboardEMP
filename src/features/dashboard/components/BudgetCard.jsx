@@ -3,6 +3,11 @@ import { Card } from 'antd';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { budgetTrendData } from '../../../shared/data/mockData';
 
+/**
+ * komponen card yang menampilkan trend budget dalam bentuk area chart
+ * menggunakan data bulanan dari mockData untuk visualisasi
+ * @returns {JSX.Element} card dengan area chart menampilkan trend budget per bulan
+ */
 const BudgetCard = () => {
   return (
     <Card title="Budget" bordered={false} className="h-full rounded-lg">

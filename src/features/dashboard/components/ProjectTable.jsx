@@ -3,7 +3,11 @@ import { Card, Table, Tag, Progress, Typography } from 'antd';
 
 const { Text } = Typography;
 
-// Helper Warna
+/**
+ * helper function untuk mendapatkan warna tag berdasarkan priority
+ * @param {string} priority - level priority (Kritis, Tinggi, Sedang, Rendah)
+ * @returns {string} nama color untuk Ant Design Tag
+ */
 const getPriorityColor = (priority) => {
   switch (priority) {
     case 'Kritis': return 'red';
@@ -14,6 +18,11 @@ const getPriorityColor = (priority) => {
   }
 };
 
+/**
+ * helper function untuk mendapatkan warna tag berdasarkan status project
+ * @param {string} status - status project (Berjalan, Tertunda, Kritis, Terhenti)
+ * @returns {string} nama color untuk Ant Design Tag
+ */
 const getStatusColor = (status) => {
   switch (status) {
     case 'Berjalan': return 'success';
@@ -112,20 +121,35 @@ const columns = [
   },
 ];
 
-const ProjectTable = ({ dataSource = [], onRowClick }) => {
+/**
+ * komponen tabel untuk menampilkan daftar project dengan informasi lengkap
+ * menampilkan kode, prioritas, kategori, progress, budget, dan tanggal
+ * mendukung klik row untuk membuka detail project
+ * @param {Object} props - props komponen
+ * @param {Array} props.dataSource - array of project objects untuk ditampilkan di tabel
+ * @param {Function} props.onRowClick - callback ketika row diklik, menerima object project
+ * @returns {JSX.Element} card dengan table project yang dapat diklik
+ */
+const ProjectTable = ({ dataSource, onRowClick }) => {
   return (
     <Card bordered={false} className="rounded-lg">
       <Table
-        columns={columns}
         dataSource={dataSource}
-        pagination={{ pageSize: 10 }}
-        rowKey="id"
+        columns={columns}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: false,
+          showTotal: (total, range) => (
+            <Text type="secondary" className="text-xs">
+              Menampilkan {range[0]}-{range[1]} dari {total} project
+            </Text>
+          ),
+        }}
+        rowClassName="cursor-pointer hover:bg-gray-50 transition"
         onRow={(record) => ({
-          onClick: () => {
-            if (onRowClick) onRowClick(record);
-          },
-          className: 'cursor-pointer'
+          onClick: () => onRowClick(record),
         })}
+        size="small"
       />
     </Card>
   );

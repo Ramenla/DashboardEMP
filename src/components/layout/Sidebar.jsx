@@ -9,13 +9,20 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const { Sider } = Layout;
 
+/**
+ * komponen sidebar navigasi dengan fitur collapse/expand
+ * @param {Object} props - props komponen
+ * @param {boolean} props.collapsed - state apakah sidebar sedang di-collapse
+ * @param {Function} props.onCollapse - callback untuk toggle collapse state
+ * @returns {JSX.Element} sidebar dengan menu navigasi dan tombol toggle collapse
+ */
 const Sidebar = ({ collapsed, onCollapse }) => {
 
-  // Hooks untuk navigasi interaktif
+  // hooks untuk navigasi interaktif
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Daftar Menu Sidebar
+  // daftar menu sidebar
   const items = [
     {
       key: '/dashboard',
@@ -39,9 +46,9 @@ const Sidebar = ({ collapsed, onCollapse }) => {
       trigger={null}
       className="fixed left-0 h-screen z-[100] top-0 pt-12"
     >
-      {/* Header Section - Icon Minimize */}
+      {/* header section - icon minimize */}
       <div className={`h-12 flex items-center border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
-        {/* Tulisan Menu - Hilang saat collapsed */}
+        {/* tulisan menu - hilang saat collapsed */}
         {!collapsed && (
           <h2 className="flex items-center justify-start m-0 text-xl font-semibold text-gray-800">
             Menu

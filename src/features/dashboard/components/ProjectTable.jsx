@@ -20,7 +20,7 @@ const getPriorityColor = (priority) => {
 
 /**
  * helper function untuk mendapatkan warna tag berdasarkan status project
- * @param {string} status - status project (Berjalan, Tertunda, Kritis, Terhenti)
+ * @param {string} status - status project (Berjalan, Tertunda, Kritis)
  * @returns {string} nama color untuk Ant Design Tag
  */
 const getStatusColor = (status) => {
@@ -28,7 +28,6 @@ const getStatusColor = (status) => {
     case 'Berjalan': return 'success';
     case 'Tertunda': return 'warning';
     case 'Kritis': return 'error';
-    case 'Terhenti': return 'error';
     default: return 'default';
   }
 };

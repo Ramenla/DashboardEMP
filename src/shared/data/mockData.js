@@ -46,7 +46,7 @@ export const projectsData = [
       sponsor: 'HSE Dept', manager: 'Rina S', strategy: 'Consultant', startDate: '01 Mar 2026', endDate: '30 Aug 2026', issues: [], timelineEvents: []
     },
     { 
-      id: 'EXP-109', name: 'Land Acquisition Seismic', category: 'Exploration', status: 'Terhenti', priority: 'Tinggi', 
+      id: 'EXP-109', name: 'Land Acquisition Seismic', category: 'Exploration', status: 'Kritis', priority: 'Tinggi', 
       progress: 10, target: 40, budgetUsed: 20, budgetTotal: 2000000000, startMonth: 0, duration: 6, 
       sponsor: 'Legal & Relations', manager: 'Joko S', strategy: 'Social Approach', startDate: '01 Jan 2026', endDate: '30 Jun 2026',
       issues: ['Penolakan warga lokal', 'Sengketa tanah'], timelineEvents: [{date: 'Jan', title: 'Sosialisasi', status: 'finish'}, {date: 'Feb', title: 'Negosiasi', status: 'error'}]
@@ -168,7 +168,7 @@ export const projectsData = [
       sponsor: 'HSE', manager: 'Rina M', strategy: 'New Filtration', startDate: '01 Apr 2026', endDate: '30 Jul 2026', issues: [], timelineEvents: []
     },
     { 
-      id: 'FCL-306', name: 'Flare Stack Replacement', category: 'Facility', status: 'Terhenti', priority: 'Tinggi', 
+      id: 'FCL-306', name: 'Flare Stack Replacement', category: 'Facility', status: 'Kritis', priority: 'Tinggi', 
       progress: 5, target: 30, budgetUsed: 20, budgetTotal: 3000000000, startMonth: 2, duration: 3, 
       sponsor: 'Operations', manager: 'Lukman H', strategy: 'Shutdown Job', startDate: '01 Mar 2026', endDate: '30 May 2026', 
       issues: ['Kontraktor bangkrut', 'Tender ulang'], timelineEvents: []
@@ -255,7 +255,7 @@ export const projectsData = [
       issues: ['Chemical tidak efektif', 'Cost membengkak'], timelineEvents: []
     },
     { 
-      id: 'OPS-407', name: 'Rotating Equip Overhaul', category: 'Operation', status: 'Terhenti', priority: 'Tinggi', 
+      id: 'OPS-407', name: 'Rotating Equip Overhaul', category: 'Operation', status: 'Kritis', priority: 'Tinggi', 
       progress: 60, target: 90, budgetUsed: 80, budgetTotal: 800000000, startMonth: 2, duration: 2, 
       sponsor: 'Maintenance', manager: 'Pump Spv', strategy: 'Major Overhaul', startDate: '01 Mar 2026', endDate: '30 Apr 2026', 
       issues: ['Sparepart obsolete', 'Menunggu pabrikan'], timelineEvents: []
@@ -303,14 +303,15 @@ export const projectsData = [
     { name: 'DEC', value: 9500 },
   ];
   
-  // --- 3. DATA TOP ISSUES 
+  //  DATA TOP ISSUES 
   export const topIssuesData = projectsData
-    .filter(p => p.issues.length > 0) // Ambil yang punya isu
-    .map((p, index) => ({
-      key: p.id,
-      rank: index + 1,
-      issue: p.issues[0], // Ambil isu pertama saja untuk tabel ringkas
-      category: p.category,
-      total: p.issues.length + Math.floor(Math.random() * 5) // Dummy total count
-    }))
-    .slice(0, 5); // Hanya ambil 5 teratas
+  .filter(p => p.issues.length > 0)
+  .map((p, i) => ({
+    key: p.id,
+    issue: p.issues[0],
+    category: p.category,
+    total: p.issues.length + (p.budgetUsed % 5) + (p.progress % 3) + i
+  }))
+  .sort((a, b) => b.total - a.total)
+  .slice(0, 5)
+  .map((item, index) => ({ ...item, rank: index + 1 }));

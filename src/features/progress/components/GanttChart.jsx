@@ -10,7 +10,6 @@ import { DownOutlined, RightOutlined } from '@ant-design/icons';
 const getColors = (status) => {
   switch (status) {
     case 'Berjalan': return { main: '#00b96b', light: '#d9f7be' };
-    case 'Terhenti': 
     case 'Kritis': return { main: '#ff4d4f', light: '#ffccc7' };
     case 'Tertunda': return { main: '#faad14', light: '#ffe58f' };
     default: return { main: '#d9d9d9', light: '#f5f5f5' };

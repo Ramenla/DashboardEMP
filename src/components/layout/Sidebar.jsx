@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
+  DashboardOutlined,
   AppstoreOutlined,
   BarChartOutlined,
 } from '@ant-design/icons';
@@ -26,6 +27,11 @@ const Sidebar = ({ collapsed, onCollapse }) => {
   const items = [
     {
       key: '/dashboard',
+      icon: <DashboardOutlined />,
+      label: 'Dashboard',
+    },
+    {
+      key: '/posture',
       icon: <AppstoreOutlined />,
       label: 'Project Posture',
     },

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 import { Dashboard } from './features/dashboard';
 import { ProjectProgress } from './features/progress';
+import { ProjectPosture } from './features/posture';
 
 /**
  * komponen utama aplikasi yang mengatur routing
@@ -17,6 +18,9 @@ function App() {
 
         {/* rute halaman dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* rute halaman posture */}
+        <Route path="/posture" element={<ProjectPosture />} />
 
         {/* rute halaman progress */}
         <Route path="/progress" element={<ProjectProgress />} />

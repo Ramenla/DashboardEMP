@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Input, Checkbox, Radio, Slider, Typography, Button, Divider } from 'antd';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Card, Checkbox, Radio, Slider, Typography, Button, Divider, Select } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -15,6 +15,16 @@ const { Text } = Typography;
  */
 const FilterCard = ({ filters, onFilterChange, onReset }) => {
   const categories = ['Exploration', 'Drilling', 'Operation', 'Facility'];
+  const locations = [
+    'Blok Langsa',
+    'Blok Malacca Strait',
+    'Blok Bentu',
+    'Blok Korinci Baru',
+    'Blok Singa',
+    'Blok Kangean',
+    'Blok Gebang',
+    'Kantor Pusat Jakarta',
+  ];
 
   /**
    * helper untuk update satu field pada object filters
@@ -37,84 +47,83 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
     }
   };
 
-  // style label section
-  const labelStyle = { fontSize: 11, color: '#8c8c8c', marginBottom: 4, display: 'block', fontWeight: 600 };
+  // tailwind class untuk label section
+  const labelClass = 'text-[11px] text-gray-400 mb-0.5 block font-semibold';
 
   return (
     <Card
-      bordered={false}
-      className="rounded-lg"
-      bodyStyle={{ padding: '12px 16px' }}
+      className="rounded-lg "
     >
       <div className="flex flex-row flex-wrap gap-4 items-end">
 
-        {/* 1. search */}
-        <div style={{ flex: '0 1 180px' }}>
-          <Text style={labelStyle}>Cari</Text>
-          <Input
-            placeholder="Kode / nama..."
-            prefix={<SearchOutlined style={{ color: '#bfbfbf', fontSize: 12 }} />}
-            size="small"
-            value={filters.search}
-            onChange={(e) => handleChange('search', e.target.value)}
-          />
-        </div>
-
-        <Divider type="vertical" style={{ height: 32, margin: '0 4px' }} />
-
         {/* 2. checkbox category */}
-        <div style={{ flex: '0 1 auto' }}>
-          <Text style={labelStyle}>Kategori</Text>
+        <div className="shrink-0 basis-auto">
+          <Text className={labelClass}>Kategori</Text>
           <Checkbox.Group
             options={categories}
             value={filters.categories}
             onChange={(checkedValues) => handleChange('categories', checkedValues)}
-            className="flex flex-row gap-2"
-            style={{ fontSize: 12 }}
+            className="flex flex-row gap-2 text-xs"
           />
         </div>
 
-        <Divider type="vertical" style={{ height: 32, margin: '0 4px' }} />
+        <Divider type="vertical" className="h-8 mx-1" />
+
+        {/* 2.5. lokasi */}
+        <div className="shrink basis-[180px]">
+          <Text className={labelClass}>Lokasi</Text>
+          <Select
+            placeholder="Semua Lokasi"
+            value={filters.location || undefined}
+            onChange={(val) => handleChange('location', val || '')}
+            allowClear
+            size="small"
+            className="w-full text-[11px]"
+            options={locations.map(loc => ({ label: loc, value: loc }))}
+          />
+        </div>
+
+        <Divider type="vertical" className="h-8 mx-1" />
 
         {/* 3. prioritas */}
-        <div style={{ flex: '0 1 auto' }}>
-          <Text style={labelStyle}>Prioritas</Text>
+        <div className="shrink-0 basis-auto">
+          <Text className={labelClass}>Prioritas</Text>
           <Radio.Group
             value={filters.priority}
             onChange={(e) => handleChange('priority', e.target.value)}
             buttonStyle="solid"
             size="small"
           >
-            <Radio.Button value="Rendah" onClick={(e) => handleRadioClick(e, 'priority', 'Rendah')} style={{ fontSize: 11 }}>Rendah</Radio.Button>
-            <Radio.Button value="Sedang" onClick={(e) => handleRadioClick(e, 'priority', 'Sedang')} style={{ fontSize: 11 }}>Sedang</Radio.Button>
-            <Radio.Button value="Tinggi" onClick={(e) => handleRadioClick(e, 'priority', 'Tinggi')} style={{ fontSize: 11 }}>Tinggi</Radio.Button>
+            <Radio.Button value="Rendah" onClick={(e) => handleRadioClick(e, 'priority', 'Rendah')} className="text-[11px]">Rendah</Radio.Button>
+            <Radio.Button value="Sedang" onClick={(e) => handleRadioClick(e, 'priority', 'Sedang')} className="text-[11px]">Sedang</Radio.Button>
+            <Radio.Button value="Tinggi" onClick={(e) => handleRadioClick(e, 'priority', 'Tinggi')} className="text-[11px]">Tinggi</Radio.Button>
           </Radio.Group>
         </div>
 
-        <Divider type="vertical" style={{ height: 32, margin: '0 4px' }} />
+        <Divider type="vertical" className="h-8 mx-1" />
 
         {/* 4. status */}
-        <div style={{ flex: '0 1 auto' }}>
-          <Text style={labelStyle}>Status</Text>
+        <div className="shrink-0 basis-auto">
+          <Text className={labelClass}>Status</Text>
           <Radio.Group
             value={filters.status}
             onChange={(e) => handleChange('status', e.target.value)}
             buttonStyle="solid"
             size="small"
           >
-            <Radio.Button value="Kritis" onClick={(e) => handleRadioClick(e, 'status', 'Kritis')} style={{ fontSize: 11 }}>Kritis</Radio.Button>
-            <Radio.Button value="Tertunda" onClick={(e) => handleRadioClick(e, 'status', 'Tertunda')} style={{ fontSize: 11 }}>Tertunda</Radio.Button>
-            <Radio.Button value="Berjalan" onClick={(e) => handleRadioClick(e, 'status', 'Berjalan')} style={{ fontSize: 11 }}>Berjalan</Radio.Button>
+            <Radio.Button value="Kritis" onClick={(e) => handleRadioClick(e, 'status', 'Kritis')} className="text-[11px]">Kritis</Radio.Button>
+            <Radio.Button value="Tertunda" onClick={(e) => handleRadioClick(e, 'status', 'Tertunda')} className="text-[11px]">Tertunda</Radio.Button>
+            <Radio.Button value="Berjalan" onClick={(e) => handleRadioClick(e, 'status', 'Berjalan')} className="text-[11px]">Berjalan</Radio.Button>
           </Radio.Group>
         </div>
 
-        <Divider type="vertical" style={{ height: 32, margin: '0 4px' }} />
+        <Divider type="vertical" className="h-8 mx-1" />
 
         {/* 5. budget slider */}
-        <div style={{ flex: '0 1 160px', minWidth: 120 }}>
-          <div className="flex justify-between" style={{ marginBottom: -2 }}>
-            <Text style={labelStyle}>Budget Maks</Text>
-            <span style={{ fontSize: 11, fontWeight: 700 }}>{filters.maxBudget}%</span>
+        <div className="shrink basis-[160px] min-w-[120px]">
+          <div className="flex justify-between -mb-0.5">
+            <Text className={labelClass}>Budget Maks</Text>
+            <span className="text-[11px] font-bold">{filters.maxBudget}%</span>
           </div>
           <Slider
             min={0}
@@ -123,13 +132,13 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
             onChange={(val) => handleChange('maxBudget', val)}
             trackStyle={{ backgroundColor: '#001529' }}
             handleStyle={{ borderColor: '#001529' }}
-            style={{ margin: '6px 0 0' }}
+            className="mt-1.5 mb-0"
           />
         </div>
 
         {/* reset button */}
-        <div style={{ marginLeft: 'auto' }}>
-          <Button type="text" size="small" icon={<ReloadOutlined />} onClick={onReset} style={{ fontSize: 12 }}>
+        <div className="ml-auto mb-2.5">
+          <Button type="text" size="small" icon={<ReloadOutlined />} onClick={onReset} className="text-xs">
             Reset
           </Button>
         </div>

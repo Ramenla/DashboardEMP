@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Row, Col } from 'antd';
+import { Row, Col, Card, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 // import data
 import { projectsData } from '../../shared/data/mockData';
@@ -20,6 +21,7 @@ const ProjectPosture = () => {
   const [filters, setFilters] = useState({
     search: '',
     categories: [],
+    location: '',
     priority: '',
     status: '',
     maxBudget: 100,
@@ -59,11 +61,12 @@ const ProjectPosture = () => {
       const matchSearch = item.id.toLowerCase().includes(filters.search.toLowerCase()) ||
         item.name.toLowerCase().includes(filters.search.toLowerCase());
       const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
+      const matchLocation = filters.location === '' || item.location === filters.location;
       const matchPriority = filters.priority === '' || item.priority === filters.priority;
       const matchStatus = filters.status === '' || item.status === filters.status;
       const matchBudget = item.budgetUsed <= filters.maxBudget;
 
-      return matchSearch && matchCategory && matchPriority && matchStatus && matchBudget;
+      return matchSearch && matchCategory && matchLocation && matchPriority && matchStatus && matchBudget;
     });
     setFilteredData(result);
   }, [filters]);
@@ -72,13 +75,27 @@ const ProjectPosture = () => {
    * handler untuk reset semua filter ke nilai default
    */
   const handleReset = () => {
-    setFilters({ search: '', categories: [], priority: '', status: '', maxBudget: 100 });
+    setFilters({ search: '', categories: [], location: '', priority: '', status: '', maxBudget: 100 });
   };
 
   return (
-    <div className="pb-6">
-      <PageTitle marginTop={-25}>Project Posture</PageTitle>
+    <div className="pb-6 ">
+      <PageTitle marginTop={-30}>Project Posture</PageTitle>
 
+      {/* search bar card */}
+      <Card className="rounded-lg mb-4">
+        <Input
+          placeholder="Cari berdasarkan kode atau nama project..."
+          prefix={<SearchOutlined className="text-gray-400" />}
+          size="large"
+          allowClear
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          className="rounded-lg"
+        />
+      </Card>
+
+      {/* filter bar */}
       <Row gutter={[24, 24]}>
         <Col span={24}>
           <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />

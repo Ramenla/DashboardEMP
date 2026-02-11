@@ -136,7 +136,7 @@ const ProjectTable = ({ dataSource, onRowClick }) => {
         dataSource={dataSource}
         columns={columns}
         pagination={{
-          pageSize: 10,
+          pageSize: 5,
           showSizeChanger: false,
           showTotal: (total, range) => (
             <Text type="secondary" className="text-xs">

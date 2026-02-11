@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Tag, Tooltip, Empty } from 'antd';
+import { Tag, Tooltip, Empty, Progress } from 'antd';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 
 /**
@@ -366,8 +366,71 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                                                 <div className="absolute top-0 bottom-0 z-[2] pointer-events-none" style={{ left: `${todayPositionLeft}%`, borderLeft: '2px dashed #ff4d4f' }}></div>
                                             )}
 
-                                            {/* bar project */}
-                                            <Tooltip title={`${proj.name} (${proj.progress}%)`}>
+                                            {/* bar project dengan tooltip detail */}
+                                            <Tooltip
+                                                title={
+                                                    <div style={{ minWidth: 240, padding: 4 }}>
+                                                        {/* header: nama & id */}
+                                                        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 2 }}>{proj.name}</div>
+                                                        <div style={{ fontSize: 11, opacity: 0.7, marginBottom: 8, fontFamily: 'monospace' }}>{proj.id}</div>
+
+                                                        {/* tags: status & priority */}
+                                                        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                                                            <Tag color={colors.main} style={{ fontSize: 10, margin: 0, lineHeight: '18px' }}>{proj.status}</Tag>
+                                                            <Tag color={proj.priority === 'Tinggi' ? 'red' : proj.priority === 'Sedang' ? 'orange' : 'blue'} style={{ fontSize: 10, margin: 0, lineHeight: '18px' }}>{proj.priority}</Tag>
+                                                        </div>
+
+                                                        {/* progress */}
+                                                        <div style={{ marginBottom: 6 }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>
+                                                                <span>Progress</span>
+                                                                <span style={{ fontWeight: 600 }}>{proj.progress}% / Target {proj.target}%</span>
+                                                            </div>
+                                                            <Progress
+                                                                percent={proj.progress}
+                                                                success={{ percent: Math.min(proj.progress, proj.target), strokeColor: colors.main }}
+                                                                strokeColor={proj.progress > proj.target ? '#52c41a' : colors.main}
+                                                                trailColor="rgba(255,255,255,0.15)"
+                                                                size="small"
+                                                                showInfo={false}
+                                                            />
+                                                        </div>
+
+                                                        {/* budget */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                                                            <span>Budget Terpakai</span>
+                                                            <span style={{ fontWeight: 600 }}>{proj.budgetUsed}%</span>
+                                                        </div>
+
+                                                        {/* timeline */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                                                            <span>Periode</span>
+                                                            <span style={{ fontWeight: 600 }}>{proj.startDate} — {proj.endDate}</span>
+                                                        </div>
+
+                                                        {/* manager */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: proj.issues?.length > 0 ? 8 : 0 }}>
+                                                            <span>Manager</span>
+                                                            <span style={{ fontWeight: 600 }}>{proj.manager}</span>
+                                                        </div>
+
+                                                        {/* issues */}
+                                                        {proj.issues?.length > 0 && (
+                                                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 6 }}>
+                                                                <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 4, color: '#ff7875' }}>Issues ({proj.issues.length})</div>
+                                                                {proj.issues.map((issue, i) => (
+                                                                    <div key={i} style={{ fontSize: 10, opacity: 0.85, paddingLeft: 8, position: 'relative', marginBottom: 2 }}>
+                                                                        <span style={{ position: 'absolute', left: 0 }}>•</span>
+                                                                        {issue}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                }
+                                                placement="top"
+                                                overlayInnerStyle={{ borderRadius: 8 }}
+                                            >
                                                 <div 
                                                     onClick={() => onProjectClick && onProjectClick(proj)}
                                                     className="h-6 mt-[13px] rounded cursor-pointer shadow text-[10px] text-white flex items-center pl-2 font-bold whitespace-nowrap overflow-hidden relative z-[5] transition-all duration-200 hover:scale-y-110"

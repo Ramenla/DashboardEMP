@@ -80,10 +80,8 @@ const ProjectPosture = () => {
       <PageTitle marginTop={-25}>Project Posture</PageTitle>
 
       <Row gutter={[24, 24]}>
-        <Col xs={24} lg={6}>
-          <div className="h-full">
-            <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />
-          </div>
+        <Col span={24}>
+          <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />
         </Col>
       </Row>
 

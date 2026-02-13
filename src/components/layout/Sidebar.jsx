@@ -26,14 +26,14 @@ const Sidebar = ({ collapsed, onCollapse }) => {
   // daftar menu sidebar
   const items = [
     {
-      key: '/dashboard',
+      key: '/posture',
       icon: <DashboardOutlined />,
-      label: 'Dashboard',
+      label: 'Project Posture',
     },
     {
-      key: '/posture',
+      key: '/list',
       icon: <AppstoreOutlined />,
-      label: 'Project Posture',
+      label: 'Project List',
     },
     {
       key: '/progress',

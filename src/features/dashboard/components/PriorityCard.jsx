@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card } from 'antd';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 /**
  * komponen card untuk menampilkan distribusi priority project dalam donut chart
- * @param {Array} data - array project data yang sudah difilter
+ * @param {Object} props - props komponen
+ * @param {Array} props.data - array dengan count untuk tiap level priority (Rendah, Sedang, Tinggi)
  * @returns {JSX.Element} card dengan donut chart dan legend distribusi priority
  */
-const PriorityCard = ({ data = [] }) => {
+const PriorityCard = ({ data }) => {
   // mapping warna untuk setiap level priority
   const COLORS = {
     'Rendah': '#d9d9d9',
@@ -15,25 +16,12 @@ const PriorityCard = ({ data = [] }) => {
     'Tinggi': '#ff4d4f',
   };
 
-  const chartData = useMemo(() => {
-    const counts = {
-      'Rendah': 0,
-      'Sedang': 0,
-      'Tinggi': 0
-    };
-
-    data.forEach(p => {
-      if (counts[p.priority] !== undefined) {
-        counts[p.priority]++;
-      }
-    });
-
-    return [
-      { name: 'Rendah', value: counts['Rendah'] },
-      { name: 'Sedang', value: counts['Sedang'] },
-      { name: 'Tinggi', value: counts['Tinggi'] },
-    ];
-  }, [data]);
+  // data default jika tidak ada data yang diberikan
+  const chartData = data || [
+    { name: 'Rendah', value: 0 },
+    { name: 'Sedang', value: 0 },
+    { name: 'Tinggi', value: 0 },
+  ];
 
   // hitung total
   const total = chartData.reduce((acc, cur) => acc + cur.value, 0);

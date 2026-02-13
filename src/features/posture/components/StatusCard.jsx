@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card } from 'antd';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 
 /**
- * komponen card untuk menampilkan distribusi status project dalam donut chart
- * @param {Object} props - props komponen
- * @param {Array} props.data - array dengan count untuk tiap status (Kritis, Tertunda, Berjalan)
- * @returns {JSX.Element} card dengan donut chart dan legend distribusi status
+ * komponen card untuk menampilkan distribusi status project dalam horizontal bar chart
+ * @param {Array} data - array project data yang sudah difilter
+ * @returns {JSX.Element} card dengan horizontal bar chart distribusi status
  */
-const StatusCard = ({ data }) => {
+const StatusCard = ({ data = [] }) => {
   // mapping warna untuk setiap status
   const COLORS = {
     'Berjalan': '#52c41a',
@@ -16,62 +15,80 @@ const StatusCard = ({ data }) => {
     'Kritis': '#ff4d4f',
   };
 
-  // data default jika tidak ada data yang diberikan
-  const chartData = data || [
-    { name: 'Kritis', value: 0 },
-    { name: 'Tertunda', value: 0 },
-    { name: 'Berjalan', value: 0 },
-  ];
+  const chartData = useMemo(() => {
+    const counts = {
+      'Kritis': 0,
+      'Tertunda': 0,
+      'Berjalan': 0
+    };
+
+    data.forEach(p => {
+      if (counts[p.status] !== undefined) {
+        counts[p.status]++;
+      }
+    });
+
+    return [
+      { name: 'Kritis', value: counts['Kritis'] },
+      { name: 'Tertunda', value: counts['Tertunda'] },
+      { name: 'Berjalan', value: counts['Berjalan'] },
+    ];
+  }, [data]);
 
   // hitung total
   const total = chartData.reduce((acc, cur) => acc + cur.value, 0);
 
   return (
     <Card title="Status Project" bordered={false} className="h-full rounded-lg">
-      <div className="relative w-full h-[200px]">
-        
-        {/* angka total di tengah */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10">
-          <h2 className="m-0 text-[28px] font-bold text-gray-700">
-            {total}
-          </h2>
-        </div>
+      {/* total project */}
+      <div className="mb-3">
+        <span className="text-gray-400 text-xs">Total Project: </span>
+        <span className="font-bold text-gray-700 text-sm">{total}</span>
+      </div>
 
-        {/* grafik */}
+      {/* horizontal bar chart */}
+      <div className="w-full h-[200px]">
         <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={chartData}
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={2}
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 0, right: 40, left: 10, bottom: 0 }}
+          >
+            <XAxis
+              type="number"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: '#999' }}
+              allowDecimals={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: '#555', fontWeight: 500 }}
+              width={70}
+            />
+            <Tooltip
+              contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', fontSize: 12 }}
+              formatter={(value, name) => [`${value} Project`, 'Jumlah']}
+            />
+            <Bar
               dataKey="value"
-              startAngle={90}
-              endAngle={-270}
-              stroke="none"
+              radius={[0, 6, 6, 0]}
+              barSize={24}
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#ccc'} />
               ))}
-            </Pie>
-          </PieChart>
+              <LabelList
+                dataKey="value"
+                position="right"
+                style={{ fontSize: 12, fontWeight: 600, fill: '#555' }}
+              />
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
-      </div>
-
-       {/* custom legend */}
-       <div className="flex justify-center gap-4 mt-3">
-        {chartData.map((item) => (
-          <div key={item.name} className="flex items-center gap-1.5">
-            <span 
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: COLORS[item.name] || '#ccc' }}
-            />
-            <div className="flex flex-col leading-tight">
-                <span className="font-bold text-sm">{item.value}</span>
-                <span className="text-gray-400 text-[11px]">{item.name}</span>
-            </div>
-          </div>
-        ))}
       </div>
     </Card>
   );

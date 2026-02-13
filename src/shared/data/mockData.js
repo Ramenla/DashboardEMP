@@ -12,7 +12,7 @@ export const projectsData = [
       id: 'EXP-102', name: 'G&G Study Basin Jawa', category: 'Exploration', status: 'Berjalan', priority: 'Sedang', 
       progress: 80, target: 80, budgetUsed: 60, budgetTotal: 500000000, startMonth: 1, duration: 3, 
       sponsor: 'Internal EMP', manager: 'Andi Wijaya', strategy: 'In-house Study', startDate: '01 Feb 2026', endDate: '30 Apr 2026',
-      location: 'Kantor Pusat Jakarta', issues: [], timelineEvents: []
+      location: 'Kantor Pusat Jakarta', issues: ['Kendala perizinan'], timelineEvents: []
     },
     { 
       id: 'EXP-103', name: 'Exploration Well Wildcat-1', category: 'Exploration', status: 'Kritis', priority: 'Tinggi', 
@@ -32,13 +32,13 @@ export const projectsData = [
       id: 'EXP-105', name: 'Geological Field Mapping', category: 'Exploration', status: 'Berjalan', priority: 'Sedang', 
       progress: 60, target: 60, budgetUsed: 50, budgetTotal: 200000000, startMonth: 3, duration: 2, 
       sponsor: 'Exploration Div', manager: 'Dedi Kurniawan', strategy: 'Field Trip', startDate: '15 Mar 2026', endDate: '15 May 2026',
-      location: 'Blok Korinci Baru', issues: [], timelineEvents: []
+      location: 'Blok Korinci Baru', issues: ['Cuaca buruk menghambat akuisisi data'], timelineEvents: []
     },
     { 
       id: 'EXP-106', name: 'Seismic Processing Area X', category: 'Exploration', status: 'Berjalan', priority: 'Tinggi', 
       progress: 90, target: 85, budgetUsed: 80, budgetTotal: 1200000000, startMonth: 0, duration: 3, 
       sponsor: 'SKK Migas', manager: 'Fajar Nugraha', strategy: 'High Performance Computing', startDate: '01 Jan 2026', endDate: '30 Mar 2026',
-      location: 'Kantor Pusat Jakarta', issues: [], timelineEvents: []
+      location: 'Kantor Pusat Jakarta', issues: ['Cuaca buruk menghambat akuisisi data'], timelineEvents: []
     },
     { 
       id: 'EXP-107', name: 'Appraisal Well AP-2', category: 'Exploration', status: 'Kritis', priority: 'Tinggi', 
@@ -72,13 +72,13 @@ export const projectsData = [
       id: 'DRL-201', name: 'Dev Well D-1 Drilling', category: 'Drilling', status: 'Berjalan', priority: 'Tinggi', 
       progress: 70, target: 70, budgetUsed: 65, budgetTotal: 4000000000, startMonth: 0, duration: 2, 
       sponsor: 'Development', manager: 'Raihan P', strategy: 'Batch Drilling', startDate: '01 Jan 2026', endDate: '28 Feb 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'DRL-202', name: 'Dev Well D-2 Drilling', category: 'Drilling', status: 'Berjalan', priority: 'Tinggi', 
       progress: 40, target: 40, budgetUsed: 42, budgetTotal: 4000000000, startMonth: 2, duration: 2, 
       sponsor: 'Development', manager: 'Raihan P', strategy: 'Batch Drilling', startDate: '01 Mar 2026', endDate: '30 Apr 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
     { 
       id: 'DRL-203', name: 'Dev Well D-3 Drilling', category: 'Drilling', status: 'Tertunda', priority: 'Tinggi', 
@@ -91,7 +91,7 @@ export const projectsData = [
       id: 'DRL-204', name: 'Workover Well W-15', category: 'Drilling', status: 'Berjalan', priority: 'Sedang', 
       progress: 85, target: 80, budgetUsed: 90, budgetTotal: 1000000000, startMonth: 1, duration: 1, 
       sponsor: 'Production', manager: 'Agus T', strategy: 'ESP Replacement', startDate: '01 Feb 2026', endDate: '28 Feb 2026',
-      location: 'Blok Bentu', issues: [], timelineEvents: []
+      location: 'Blok Bentu', issues: ['Kendala perizinan'], timelineEvents: []
     },
     { 
       id: 'DRL-205', name: 'Workover Well W-18', category: 'Drilling', status: 'Kritis', priority: 'Sedang', 
@@ -104,7 +104,7 @@ export const projectsData = [
       id: 'DRL-206', name: 'Rig Mobilization Project', category: 'Drilling', status: 'Berjalan', priority: 'Tinggi', 
       progress: 50, target: 50, budgetUsed: 40, budgetTotal: 500000000, startMonth: 3, duration: 1, 
       sponsor: 'Drilling Support', manager: 'Doni K', strategy: 'Land Transport', startDate: '01 Apr 2026', endDate: '30 Apr 2026',
-      location: 'Blok Korinci Baru', issues: [], timelineEvents: []
+      location: 'Blok Korinci Baru', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
     { 
       id: 'DRL-207', name: 'Mud Logging Upgrade', category: 'Drilling', status: 'Berjalan', priority: 'Rendah', 
@@ -123,13 +123,13 @@ export const projectsData = [
       id: 'DRL-209', name: 'Directional Drilling Ops', category: 'Drilling', status: 'Berjalan', priority: 'Tinggi', 
       progress: 60, target: 60, budgetUsed: 55, budgetTotal: 1500000000, startMonth: 2, duration: 3, 
       sponsor: 'Drilling Ops', manager: 'Hendra G', strategy: 'Horizontal Well', startDate: '01 Mar 2026', endDate: '30 May 2026',
-      location: 'Blok Singa', issues: [], timelineEvents: []
+      location: 'Blok Singa', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'DRL-210', name: 'Well Stimulation Acid', category: 'Drilling', status: 'Berjalan', priority: 'Sedang', 
       progress: 30, target: 30, budgetUsed: 25, budgetTotal: 600000000, startMonth: 3, duration: 1, 
       sponsor: 'Production', manager: 'Tono R', strategy: 'Acidizing', startDate: '01 Apr 2026', endDate: '30 Apr 2026',
-      location: 'Blok Gebang', issues: [], timelineEvents: []
+      location: 'Blok Gebang', issues: ['Ketersediaan alat berat terbatas'], timelineEvents: []
     },
     { 
       id: 'DRL-211', name: 'Hydraulic Fracturing Pilot', category: 'Drilling', status: 'Kritis', priority: 'Tinggi', 
@@ -142,13 +142,13 @@ export const projectsData = [
       id: 'DRL-212', name: 'Well Testing Program', category: 'Drilling', status: 'Berjalan', priority: 'Rendah', 
       progress: 90, target: 90, budgetUsed: 85, budgetTotal: 300000000, startMonth: 0, duration: 3, 
       sponsor: 'Reservoir', manager: 'Dian S', strategy: 'Pressure Transient', startDate: '01 Jan 2026', endDate: '30 Mar 2026',
-      location: 'Blok Malacca Strait', issues: [], timelineEvents: []
+      location: 'Blok Malacca Strait', issues: ['Ketersediaan alat berat terbatas'], timelineEvents: []
     },
     { 
       id: 'DRL-213', name: 'Site Preparation Pad A', category: 'Drilling', status: 'Berjalan', priority: 'Sedang', 
       progress: 75, target: 75, budgetUsed: 70, budgetTotal: 800000000, startMonth: 1, duration: 2, 
       sponsor: 'Construction', manager: 'Eko P', strategy: 'Civil Works', startDate: '01 Feb 2026', endDate: '30 Mar 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Cuaca buruk menghambat akuisisi data'], timelineEvents: []
     },
     { 
       id: 'DRL-214', name: 'Drilling Waste Management', category: 'Drilling', status: 'Berjalan', priority: 'Rendah', 
@@ -169,7 +169,7 @@ export const projectsData = [
       id: 'FCL-301', name: 'Construction Gathering St.', category: 'Facility', status: 'Berjalan', priority: 'Tinggi', 
       progress: 60, target: 60, budgetUsed: 55, budgetTotal: 10000000000, startMonth: 0, duration: 8, 
       sponsor: 'Projects Div', manager: 'Ir. Soleh', strategy: 'EPC Contract', startDate: '01 Jan 2026', endDate: '30 Aug 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'FCL-302', name: 'Pipeline Replacement 12"', category: 'Facility', status: 'Kritis', priority: 'Tinggi', 
@@ -182,7 +182,7 @@ export const projectsData = [
       id: 'FCL-303', name: 'Storage Tank T-101 Repair', category: 'Facility', status: 'Berjalan', priority: 'Sedang', 
       progress: 80, target: 80, budgetUsed: 75, budgetTotal: 2000000000, startMonth: 1, duration: 3, 
       sponsor: 'Maintenance', manager: 'Bambang S', strategy: 'Plate Replacement', startDate: '01 Feb 2026', endDate: '30 Apr 2026',
-      location: 'Blok Bentu', issues: [], timelineEvents: []
+      location: 'Blok Bentu', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
     { 
       id: 'FCL-304', name: 'Gas Compressor Install', category: 'Facility', status: 'Tertunda', priority: 'Tinggi', 
@@ -195,7 +195,7 @@ export const projectsData = [
       id: 'FCL-305', name: 'Water Treatment Upgrade', category: 'Facility', status: 'Berjalan', priority: 'Sedang', 
       progress: 30, target: 30, budgetUsed: 25, budgetTotal: 1500000000, startMonth: 3, duration: 4, 
       sponsor: 'HSE', manager: 'Rina M', strategy: 'New Filtration', startDate: '01 Apr 2026', endDate: '30 Jul 2026',
-      location: 'Blok Korinci Baru', issues: [], timelineEvents: []
+      location: 'Blok Korinci Baru', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
     { 
       id: 'FCL-306', name: 'Flare Stack Replacement', category: 'Facility', status: 'Kritis', priority: 'Tinggi', 
@@ -214,7 +214,7 @@ export const projectsData = [
       id: 'FCL-308', name: 'SCADA System Upgrade', category: 'Facility', status: 'Berjalan', priority: 'Tinggi', 
       progress: 50, target: 50, budgetUsed: 45, budgetTotal: 4000000000, startMonth: 1, duration: 6, 
       sponsor: 'IT & Ops', manager: 'Rizky IT', strategy: 'Digitalization', startDate: '01 Feb 2026', endDate: '30 Jul 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'FCL-309', name: 'Road Access Improvement', category: 'Facility', status: 'Berjalan', priority: 'Sedang', 
@@ -252,13 +252,13 @@ export const projectsData = [
       id: 'FCL-314', name: 'HVAC Platform Offshore', category: 'Facility', status: 'Berjalan', priority: 'Sedang', 
       progress: 40, target: 40, budgetUsed: 40, budgetTotal: 500000000, startMonth: 2, duration: 2, 
       sponsor: 'Maintenance', manager: 'Cooling A', strategy: 'Replacement', startDate: '01 Mar 2026', endDate: '30 Apr 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
     { 
       id: 'FCL-315', name: 'Corrosion Painting', category: 'Facility', status: 'Berjalan', priority: 'Rendah', 
       progress: 30, target: 30, budgetUsed: 30, budgetTotal: 300000000, startMonth: 3, duration: 6, 
       sponsor: 'Maintenance', manager: 'Cat B', strategy: 'Coating', startDate: '01 Apr 2026', endDate: '30 Sep 2026',
-      location: 'Blok Korinci Baru', issues: [], timelineEvents: []
+      location: 'Blok Korinci Baru', issues: ['Kendala perizinan'], timelineEvents: []
     },
   
     // --- OPERATION (10 Projects) ---
@@ -279,7 +279,7 @@ export const projectsData = [
       id: 'OPS-403', name: 'Shutdown Turnaround 2026', category: 'Operation', status: 'Berjalan', priority: 'Tinggi', 
       progress: 10, target: 10, budgetUsed: 15, budgetTotal: 15000000000, startMonth: 6, duration: 1, 
       sponsor: 'Plant Manager', manager: 'TA Manager', strategy: 'Plant Shutdown', startDate: '01 Jul 2026', endDate: '30 Jul 2026',
-      location: 'Blok Kangean', issues: [], timelineEvents: []
+      location: 'Blok Kangean', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'OPS-404', name: 'HSE Training Program', category: 'Operation', status: 'Berjalan', priority: 'Rendah', 
@@ -291,7 +291,7 @@ export const projectsData = [
       id: 'OPS-405', name: 'Waste Management Ops', category: 'Operation', status: 'Berjalan', priority: 'Sedang', 
       progress: 40, target: 40, budgetUsed: 40, budgetTotal: 300000000, startMonth: 0, duration: 12, 
       sponsor: 'HSE', manager: 'Limbah B3', strategy: 'Vendor Disposal', startDate: '01 Jan 2026', endDate: '31 Dec 2026',
-      location: 'Blok Langsa', issues: [], timelineEvents: []
+      location: 'Blok Langsa', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'OPS-406', name: 'Chem Injection Optimization', category: 'Operation', status: 'Kritis', priority: 'Sedang', 
@@ -317,13 +317,13 @@ export const projectsData = [
       id: 'OPS-409', name: 'Digital Twin Pilot', category: 'Operation', status: 'Berjalan', priority: 'Tinggi', 
       progress: 20, target: 20, budgetUsed: 30, budgetTotal: 2000000000, startMonth: 3, duration: 6, 
       sponsor: 'IT', manager: 'Data Scientist', strategy: 'AI Implementation', startDate: '01 Apr 2026', endDate: '30 Sep 2026',
-      location: 'Kantor Pusat Jakarta', issues: [], timelineEvents: []
+      location: 'Kantor Pusat Jakarta', issues: ['Budget overrun'], timelineEvents: []
     },
     { 
       id: 'OPS-410', name: 'Supply Chain Optimization', category: 'Operation', status: 'Berjalan', priority: 'Sedang', 
       progress: 50, target: 50, budgetUsed: 40, budgetTotal: 100000000, startMonth: 2, duration: 4, 
       sponsor: 'SCM', manager: 'Logistics Mgr', strategy: 'Inventory Reduction', startDate: '01 Mar 2026', endDate: '30 Jun 2026',
-      location: 'Kantor Pusat Jakarta', issues: [], timelineEvents: []
+      location: 'Kantor Pusat Jakarta', issues: ['Keterlambatan pengiriman material'], timelineEvents: []
     },
   ].map(p => ({
 
@@ -338,30 +338,67 @@ export const projectsData = [
   }));
   
   // DATA BUDGET
-  export const budgetTrendData = [
-    { name: 'JAN', value: 4500 },
-    { name: 'FEB', value: 5200 },
-    { name: 'MAR', value: 4800 },
-    { name: 'APR', value: 6100 },
-    { name: 'MAY', value: 5500 },
-    { name: 'JUN', value: 6700 },
-    { name: 'JUL', value: 7200 },
-    { name: 'AUG', value: 6900 },
-    { name: 'SEP', value: 7800 },
-    { name: 'OCT', value: 7500 },
-    { name: 'NOV', value: 8200 },
-    { name: 'DEC', value: 9500 },
-  ];
+  // menghitung ringkasan budget seluruh project
+  export const budgetSummary = (() => {
+    let total = 0;
+    let used = 0;
+    const categoryMap = {};
+
+    projectsData.forEach(p => {
+      total += p.budgetTotal;
+      const projectUsed = (p.budgetUsed / 100) * p.budgetTotal;
+      used += projectUsed;
+
+      if (!categoryMap[p.category]) {
+        categoryMap[p.category] = { total: 0, used: 0 };
+      }
+      categoryMap[p.category].total += p.budgetTotal;
+      categoryMap[p.category].used += projectUsed;
+    });
+
+    const remaining = total - used;
+    const utilization = Math.round((used / total) * 100);
+
+    const categories = Object.entries(categoryMap).map(([name, data]) => ({
+      name,
+      total: data.total,
+      used: data.used,
+      utilization: Math.round((data.used / data.total) * 100),
+    }));
+
+    return { total, used, remaining, utilization, categories };
+  })();
+
+  // menghitung trend planned vs actual budget bulanan (dalam miliar)
+  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  export const budgetTrendData = (() => {
+    const planned = Array(12).fill(0);
+    const actual = Array(12).fill(0);
+    projectsData.forEach(p => {
+      planned[p.startMonth] += p.budgetTotal;
+      actual[p.startMonth] += (p.budgetUsed / 100) * p.budgetTotal;
+    });
+    return monthNames.map((name, i) => ({
+      name,
+      planned: parseFloat((planned[i] / 1_000_000_000).toFixed(1)),
+      actual: parseFloat((actual[i] / 1_000_000_000).toFixed(1)),
+    }));
+  })();
   
   //  DATA TOP ISSUES 
-  export const topIssuesData = projectsData
-  .filter(p => p.issues.length > 0)
-  .map((p, i) => ({
-    key: p.id,
-    issue: p.issues[0],
-    category: p.category,
-    total: p.issues.length + (p.budgetUsed % 5) + (p.progress % 3) + i
-  }))
-  .sort((a, b) => b.total - a.total)
-  .slice(0, 5)
-  .map((item, index) => ({ ...item, rank: index + 1 }));
+  // menghitung frekuensi kemunculan setiap issue di seluruh project
+  export const topIssuesData = (() => {
+    const issueMap = {};
+    projectsData.forEach(p => {
+      p.issues.forEach(issue => {
+        if (!issueMap[issue]) {
+          issueMap[issue] = { issue, category: p.category, total: 0 };
+        }
+        issueMap[issue].total += 1;
+      });
+    });
+    return Object.values(issueMap)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+      .map((item, index) => ({ ...item, key: index + 1, rank: index + 1 }));
+  })();

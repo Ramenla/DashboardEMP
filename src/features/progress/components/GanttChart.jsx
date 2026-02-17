@@ -268,7 +268,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-100 overflow-x-auto overflow-y-hidden relative">
+    <div className="bg-white rounded-lg overflow-x-auto overflow-y-hidden relative">
       
       <div className="flex flex-col min-w-full" style={{ width: timelineWidth }}>
         
@@ -276,7 +276,7 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
         <div className="flex border-b border-gray-100 h-16">
             {/* sidebar sticky: header */}
             <div style={stickyLeftStyle} className="bg-gray-50 border-r border-gray-200 z-[100] flex items-center px-4 text-sm shadow-[4px_0_8px_rgba(0,0,0,0.02)]">
-                Project Timeline
+                Timeline Proyek
             </div>
             
             {/* timeline scrollable: header */}
@@ -369,59 +369,60 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                                             {/* bar project dengan tooltip detail */}
                                             <Tooltip
                                                 title={
-                                                    <div className="min-w-[240px] p-1">
+                                                    <div className="min-w-[240px] p-2 text-gray-700">
                                                         {/* header: nama & id */}
-                                                        <div className="font-bold text-[13px] mb-0.5">{proj.name}</div>
-                                                        <div className="text-[11px] opacity-70 mb-2 font-mono">{proj.id}</div>
+                                                        <div className="font-bold text-[13px] mb-0.5 text-gray-900">{proj.name}</div>
+                                                        <div className="text-[11px] text-gray-500 mb-3 font-mono border-b border-gray-100 pb-2">{proj.id}</div>
 
                                                         {/* tags: status & priority */}
-                                                        <div className="flex gap-1.5 mb-2.5">
-                                                            <Tag color={colors.main} className="text-[10px] m-0 leading-[18px]">{proj.status}</Tag>
-                                                            <Tag color={proj.priority === 'Tinggi' ? 'red' : proj.priority === 'Sedang' ? 'orange' : 'blue'} className="text-[10px] m-0 leading-[18px]">{proj.priority}</Tag>
+                                                        <div className="flex gap-1.5 mb-3">
+                                                            <Tag color={colors.main} className="text-[10px] m-0 leading-[18px] font-semibold border-none">{proj.status}</Tag>
+                                                            <Tag color={proj.priority === 'Tinggi' ? 'red' : proj.priority === 'Sedang' ? 'orange' : 'blue'} className="text-[10px] m-0 leading-[18px] border-none">{proj.priority}</Tag>
                                                         </div>
 
                                                         {/* progress */}
-                                                        <div className="mb-1.5">
-                                                            <div className="flex justify-between text-[11px] mb-0.5">
-                                                                <span>Progress</span>
-                                                                <span className="font-semibold">{proj.progress}% / Target {proj.target}%</span>
+                                                        <div className="mb-2">
+                                                            <div className="flex justify-between text-[11px] mb-1 text-gray-500">
+                                                                <span>Progres</span>
+                                                                <span className="font-semibold text-gray-700">{proj.progress}% / Target {proj.target}%</span>
                                                             </div>
                                                             <Progress
                                                                 percent={proj.progress}
                                                                 success={{ percent: Math.min(proj.progress, proj.target), strokeColor: colors.main }}
                                                                 strokeColor={proj.progress > proj.target ? '#52c41a' : colors.main}
-                                                                trailColor="rgba(255,255,255,0.15)"
+                                                                trailColor="rgba(0,0,0,0.06)"
                                                                 size="small"
                                                                 showInfo={false}
                                                             />
                                                         </div>
 
                                                         {/* budget */}
-                                                        <div className="flex justify-between text-[11px] mb-1">
+                                                        <div className="flex justify-between text-[11px] mb-1 text-gray-500">
                                                             <span>Budget Terpakai</span>
-                                                            <span className="font-semibold">{proj.budgetUsed}%</span>
+                                                            <span className="font-semibold text-gray-700">{proj.budgetUsed}%</span>
                                                         </div>
 
                                                         {/* timeline */}
-                                                        <div className="flex justify-between text-[11px] mb-1">
+                                                        <div className="flex justify-between text-[11px] mb-1 text-gray-500">
                                                             <span>Periode</span>
-                                                            <span className="font-semibold">{proj.startDate} — {proj.endDate}</span>
+                                                            <span className="font-semibold text-gray-700">{proj.startDate} — {proj.endDate}</span>
                                                         </div>
 
                                                         {/* manager */}
-                                                        <div className={`flex justify-between text-[11px] ${proj.issues?.length > 0 ? 'mb-2' : 'mb-0'}`}>
-                                                            <span>Manager</span>
-                                                            <span className="font-semibold">{proj.manager}</span>
+                                                        <div className={`flex justify-between text-[11px] text-gray-500 ${proj.issues?.length > 0 ? 'mb-2' : 'mb-0'}`}>
+                                                            <span>Manajer</span>
+                                                            <span className="font-semibold text-gray-700">{proj.manager}</span>
                                                         </div>
 
                                                         {/* issues */}
                                                         {proj.issues?.length > 0 && (
-                                                            <div className="border-t border-white/15 pt-1.5">
-                                                                <div className="text-[11px] font-semibold mb-1 text-red-300">Issues ({proj.issues.length})</div>
+                                                            <div className="border-t border-gray-100 pt-2 mt-2">
+                                                                <div className="text-[11px] font-semibold mb-1 text-red-600 flex items-center gap-1">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span> Isu ({proj.issues.length})
+                                                                </div>
                                                                 {proj.issues.map((issue, i) => (
-                                                                    <div key={i} className="text-[10px] opacity-85 pl-2 relative mb-0.5">
-                                                                        <span className="absolute left-0">•</span>
-                                                                        {issue}
+                                                                    <div key={i} className="text-[10px] text-gray-600 pl-2 relative mb-0.5 leading-tight">
+                                                                        • {issue}
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -429,18 +430,25 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                                                     </div>
                                                 }
                                                 placement="top"
-                                                overlayInnerStyle={{ borderRadius: 8 }}
+                                                color="#ffffff"
+                                                overlayInnerStyle={{ 
+                                                    borderRadius: 8, 
+                                                    padding: 0,
+                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                                                    color: '#333'
+                                                }}
                                             >
                                                 <div 
                                                     onClick={() => onProjectClick && onProjectClick(proj)}
-                                                    className="h-6 mt-[13px] rounded cursor-pointer shadow text-[10px] text-white flex items-center pl-2 font-bold whitespace-nowrap overflow-hidden relative z-[5] transition-all duration-200 hover:scale-y-110"
+                                                    className="h-6 mt-[13px] rounded cursor-pointer shadow-sm text-[10px] text-white flex items-center pl-2 font-bold whitespace-nowrap overflow-hidden relative z-[5] transition-all duration-200 hover:scale-y-110 hover:shadow-md"
                                                     style={{
                                                         gridColumn: `${pos.col} / span ${pos.span}`,
                                                         background: `linear-gradient(to right, ${colors.main} ${proj.progress}%, ${colors.light} ${proj.progress}%)`,
-                                                        border: `1px solid ${colors.main}`
+                                                        border: `1px solid ${colors.main}`,
+                                                        textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                                                     }}
                                                 >
-                                                    {pos.span > 2 && proj.name}
+                                                    {(pos.span > 2 || viewMode === 'Monthly') && `${proj.id} : ${proj.name}`}
                                                 </div>
                                             </Tooltip>
                                         </div>

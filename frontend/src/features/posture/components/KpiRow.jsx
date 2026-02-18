@@ -1,0 +1,172 @@
+import React, { useMemo } from 'react';
+import { Row, Col, Card } from 'antd';
+import {
+  ProjectOutlined,
+  DashboardOutlined,
+  DollarOutlined,
+  AlertOutlined,
+} from '@ant-design/icons';
+
+/**
+ * mini radial gauge untuk menampilkan skor spi/cpi
+ * menggunakan svg circle untuk visualisasi progress circular
+ * @param {number} value - nilai 0-2 (1 = ideal)
+ * @param {string} color - warna stroke
+ * @param {number} size - ukuran svg
+ * @returns {JSX.Element} mini gauge svg
+ */
+const MiniGauge = ({ value, color, size = 44 }) => {
+  const radius = (size - 6) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = Math.min(value / 1.5, 1); // normalize ke max 1.5
+  const offset = circumference * (1 - pct);
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke="#f0f0f0" strokeWidth={4}
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={color} strokeWidth={4}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-500"
+        />
+      </svg>
+      <span
+        className="absolute inset-0 flex items-center justify-center text-[11px] font-bold"
+        style={{ color }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+};
+
+/**
+ * komponen kpi row menampilkan 4 metrik utama dashboard
+ * total project, spi gauge, cpi gauge, at risk count
+ * @param {Array} data - array project data yang sudah difilter
+ * @returns {JSX.Element} row berisi 4 kpi cards
+ */
+const KpiRow = ({ data = [] }) => {
+  const m = useMemo(() => {
+    if (data.length === 0) return { total: 0, spi: 0, cpi: 0, atRisk: 0, onTrack: 0 };
+
+    let spiSum = 0, cpiSum = 0, atRisk = 0, onTrack = 0;
+
+    data.forEach((p) => {
+      const spi = p.target > 0 ? p.progress / p.target : 1;
+      spiSum += spi;
+
+      const bFrac = p.budgetUsed / 100;
+      const pFrac = p.progress / 100;
+      const cpi = bFrac > 0 ? pFrac / bFrac : 1;
+      cpiSum += cpi;
+
+      if (spi >= 0.9 && p.status !== 'Kritis') onTrack++;
+      if (p.status === 'Kritis' || spi < 0.8 || p.budgetUsed >= 90) atRisk++;
+    });
+
+    return {
+      total: data.length,
+      spi: (spiSum / data.length).toFixed(2),
+      cpi: (cpiSum / data.length).toFixed(2),
+      atRisk,
+      onTrack,
+    };
+  }, [data]);
+
+  const spiColor = m.spi >= 1 ? '#52c41a' : m.spi >= 0.8 ? '#faad14' : '#ff4d4f';
+  const cpiColor = m.cpi >= 1 ? '#52c41a' : m.cpi >= 0.8 ? '#faad14' : '#ff4d4f';
+
+  const cards = [
+    {
+      label: 'Total Proyek',
+      content: (
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
+            <ProjectOutlined style={{ fontSize: 18, color: '#1890ff' }} />
+          </div>
+          <div>
+            <span className="text-2xl font-bold text-gray-800">{m.total}</span>
+            <p className="text-[10px] text-gray-400 m-0">{m.onTrack} sesuai target</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: 'Jadwal (SPI)',
+      content: (
+        <div className="flex items-center gap-3">
+          <MiniGauge value={m.spi} color={spiColor} />
+          <div>
+            <p className="text-[10px] m-0" style={{ color: spiColor }}>
+              {m.spi >= 1 ? 'Tepat Jadwal' : m.spi >= 0.8 ? 'Sedikit Terlambat' : 'Tertinggal'}
+            </p>
+            <p className="text-[10px] text-gray-400 m-0">target ≥ 1.00</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: 'Biaya (CPI)',
+      content: (
+        <div className="flex items-center gap-3">
+          <MiniGauge value={m.cpi} color={cpiColor} />
+          <div>
+            <p className="text-[10px] m-0" style={{ color: cpiColor }}>
+              {m.cpi >= 1 ? 'Efisien' : m.cpi >= 0.8 ? 'Sedikit Melebihi' : 'Melebihi Anggaran'}
+            </p>
+            <p className="text-[10px] text-gray-400 m-0">target ≥ 1.00</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      label: 'Berisiko',
+      content: (
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-lg"
+            style={{ backgroundColor: m.atRisk === 0 ? '#f6ffed' : m.atRisk <= 3 ? '#fffbe6' : '#fff2f0' }}
+          >
+            <AlertOutlined
+              style={{ fontSize: 18, color: m.atRisk === 0 ? '#52c41a' : m.atRisk <= 3 ? '#faad14' : '#ff4d4f' }}
+            />
+          </div>
+          <div>
+            <span
+              className="text-2xl font-bold"
+              style={{ color: m.atRisk === 0 ? '#52c41a' : m.atRisk <= 3 ? '#faad14' : '#ff4d4f' }}
+            >
+              {m.atRisk}
+            </span>
+            <p className="text-[10px] text-gray-400 m-0">dari {m.total} project</p>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Row gutter={[12, 12]}>
+      {cards.map((kpi) => (
+        <Col xs={12} lg={6} key={kpi.label}>
+          <Card bordered={false} className="rounded-lg h-full [&>.ant-card-body]:!py-3 [&>.ant-card-body]:!px-4">
+            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider m-0 mb-2">
+              {kpi.label}
+            </p>
+            {kpi.content}
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  );
+};
+
+export default KpiRow;

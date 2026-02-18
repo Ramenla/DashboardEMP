@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Card, Empty, Segmented } from 'antd';
+import { Card, Empty, Segmented, Modal, Tag, Progress } from 'antd';
+import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
@@ -25,12 +26,16 @@ const PRIORITY_COLORS = {
 
 /**
  * stacked horizontal bar chart dengan toggle status / prioritas
- * bisa menampilkan distribusi status atau prioritas per kategori
+ * klik bar segment untuk melihat daftar project terdampak
  * @param {Array} data - array project data yang sudah difilter
  * @returns {JSX.Element} card dengan stacked bar chart + toggle
  */
 const StatusCategoryBar = ({ data = [] }) => {
   const [mode, setMode] = useState('Status');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState({ category: null, key: null });
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const chartData = useMemo(() => {
     const map = {};
@@ -55,6 +60,28 @@ const StatusCategoryBar = ({ data = [] }) => {
   const isStatus = mode === 'Status';
   const colors = isStatus ? STATUS_COLORS : PRIORITY_COLORS;
   const keys = isStatus ? ['Berjalan', 'Kritis', 'Tertunda'] : ['Tinggi', 'Sedang', 'Rendah'];
+
+  // filter project berdasarkan kategori + status/prioritas yang diklik
+  const filteredProjects = useMemo(() => {
+    if (!selectedFilter.category || !selectedFilter.key) return [];
+    return data.filter((p) => {
+      const matchCategory = p.category === selectedFilter.category;
+      const matchKey = isStatus
+        ? p.status === selectedFilter.key
+        : p.priority === selectedFilter.key;
+      return matchCategory && matchKey;
+    });
+  }, [data, selectedFilter, isStatus]);
+
+  // handler klik pada bar segment
+  const handleBarClick = (chartEntry, dataKey) => {
+    if (chartEntry && dataKey) {
+      setSelectedFilter({ category: chartEntry.name, key: dataKey });
+      setModalOpen(true);
+    }
+  };
+
+  const selectedColor = colors[selectedFilter.key] || '#1890ff';
 
   return (
     <Card
@@ -104,12 +131,101 @@ const StatusCategoryBar = ({ data = [] }) => {
                   fill={colors[key]}
                   radius={i === keys.length - 1 ? [0, 4, 4, 0] : [0, 0, 0, 0]}
                   barSize={18}
+                  className="cursor-pointer"
+                  onClick={(entry) => handleBarClick(entry, key)}
                 />
               ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
+
+      {/* modal daftar project */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <span
+              className="w-3 h-3 rounded-full inline-block"
+              style={{ backgroundColor: selectedColor }}
+            />
+            <span>
+              {selectedFilter.category} — {isStatus ? 'Status' : 'Prioritas'}: <b>{selectedFilter.key}</b>
+            </span>
+            <Tag color={selectedColor} className="ml-1">
+              {filteredProjects.length} project
+            </Tag>
+          </div>
+        }
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        footer={null}
+        width={680}
+      >
+        <div className="flex flex-col gap-2 mt-3 max-h-[400px] overflow-y-auto pr-1">
+          {filteredProjects.length === 0 ? (
+            <div className="text-center text-gray-400 text-xs py-6">Tidak ada project</div>
+          ) : (
+            filteredProjects.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => { setSelectedProject(p); setDrawerOpen(true); }}
+              >
+                {/* id badge */}
+                <span className="text-[10px] font-mono font-bold text-gray-400 shrink-0 w-[70px]">
+                  {p.id}
+                </span>
+
+                {/* info utama */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <Tag
+                      color={
+                        p.status === 'Berjalan' ? 'green' :
+                        p.status === 'Kritis' ? 'red' : 'orange'
+                      }
+                      className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
+                    >
+                      {p.status}
+                    </Tag>
+                    <Tag
+                      className="text-[9px] m-0 leading-none px-1.5 py-0 rounded border-0 bg-gray-200 text-gray-600"
+                    >
+                      {p.priority}
+                    </Tag>
+                  </div>
+                </div>
+
+                {/* progress */}
+                <div className="shrink-0 w-[100px]">
+                  <Progress
+                    percent={p.progress}
+                    size="small"
+                    strokeColor={p.progress >= p.target ? '#52c41a' : '#faad14'}
+                    className="m-0"
+                  />
+                </div>
+
+                {/* budget */}
+                <div className="text-right shrink-0 w-[60px]">
+                  <p className="text-xs font-bold m-0" style={{ color: p.budgetUsed >= 90 ? '#ff4d4f' : '#555' }}>
+                    {p.budgetUsed}%
+                  </p>
+                  <p className="text-[9px] text-gray-400 m-0">budget</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </Modal>
+
+      {/* sidebar detail project */}
+      <ProjectDetailDrawer
+        project={selectedProject}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
     </Card>
   );
 };

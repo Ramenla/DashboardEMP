@@ -1,54 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Select, Button, Space } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Row, Col, Select, Button, Empty, Popover, Badge, Tag } from 'antd';
+import { ReloadOutlined, FilterOutlined } from '@ant-design/icons';
 
-// import data
+// data
 import { projectsData } from '../../shared/data/mockData';
 
-// import components
-import PageTitle from '../../components/layout/PageTitle';
-import BudgetCard from './components/BudgetCard';
-import StatusCard from './components/StatusCard';
-import IssueCard from './components/IssueCard';
-import PriorityCard from './components/PriorityCard';
+
+import KpiRow from './components/KpiRow';
+import StatusDonut from './components/StatusDonut';
+import PriorityDonut from './components/PriorityDonut';
+import StatusCategoryBar from './components/StatusCategoryBar';
+import BudgetMonitoring from './components/BudgetMonitoring';
+import TopIssuesTable from './components/TopIssuesTable';
 
 const { Option } = Select;
 
 /**
- * komponen dashboard utama yang menampilkan ringkasan project dengan filtering horizontal
- * hanya menampilkan widget statistic (tanpa tabel detail)
- * @returns {JSX.Element} dashboard dengan filter bar dan widget statistic
+ * halaman project posture - visual overview kesehatan project
+ * menampilkan kpi, chart analitik, dan top issues
+ * list project detail ada di halaman terpisah
+ * @returns {JSX.Element} dashboard posture
  */
 const ProjectPosture = () => {
-  // state untuk filter
   const [filters, setFilters] = useState({
     year: 2026,
-    month: null, // null means all months
+    month: null,
     categories: [],
     status: null,
   });
 
-  // state untuk data statistic
   const [filteredData, setFilteredData] = useState(projectsData);
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  // constants for filters
   const categories = ['Exploration', 'Drilling', 'Operation', 'Facility'];
   const statuses = ['Berjalan', 'Kritis', 'Tertunda'];
   const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
-  // filtering logic
   useEffect(() => {
     const result = projectsData.filter((item) => {
-      // 1. Filter Year (parse from startDate '01 Jan 2026')
       const itemYear = item.startDate ? parseInt(item.startDate.split(' ')[2]) : 2026;
       const matchYear = itemYear === filters.year;
 
-      // 2. Filter Month (Active in selected month)
-      // item.startMonth is 0-based index. item.duration is months count.
-      // Active if: startMonth <= selectedMonth < startMonth + duration
       let matchMonth = true;
       if (filters.month !== null) {
         const start = item.startMonth;
@@ -56,10 +51,7 @@ const ProjectPosture = () => {
         matchMonth = filters.month >= start && filters.month < end;
       }
 
-      // 3. Filter Category
       const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
-
-      // 4. Filter Status
       const matchStatus = filters.status === null || item.status === filters.status;
 
       return matchYear && matchMonth && matchCategory && matchStatus;
@@ -71,117 +63,104 @@ const ProjectPosture = () => {
     setFilters({ year: 2026, month: null, categories: [], status: null });
   };
 
+  const activeFilterCount =
+    (filters.year !== 2026 ? 1 : 0) +
+    (filters.month !== null ? 1 : 0) +
+    (filters.categories.length > 0 ? 1 : 0) +
+    (filters.status !== null ? 1 : 0);
+
+  const filterContent = (
+    <div style={{ width: 260 }}>
+      <div className="flex flex-col gap-3">
+        <div>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Tahun</span>
+          <Select value={filters.year} onChange={(val) => setFilters({ ...filters, year: val })} style={{ width: '100%' }} size="small">
+            <Option value={2025}>2025</Option>
+            <Option value={2026}>2026</Option>
+            <Option value={2027}>2027</Option>
+          </Select>
+        </div>
+        <div>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Bulan</span>
+          <Select value={filters.month} onChange={(val) => setFilters({ ...filters, month: val ?? null })} style={{ width: '100%' }} placeholder="Semua Bulan" allowClear size="small">
+            {months.map((m, i) => <Option key={i} value={i}>{m}</Option>)}
+          </Select>
+        </div>
+        <div>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Kategori</span>
+          <Select mode="multiple" value={filters.categories} onChange={(val) => setFilters({ ...filters, categories: val })} style={{ width: '100%' }} placeholder="Semua" allowClear maxTagCount={2} size="small">
+            {categories.map(c => <Option key={c} value={c}>{c}</Option>)}
+          </Select>
+        </div>
+        <div>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Status</span>
+          <Select value={filters.status} onChange={(val) => setFilters({ ...filters, status: val ?? null })} style={{ width: '100%' }} placeholder="Semua" allowClear size="small">
+            {statuses.map(s => <Option key={s} value={s}>{s}</Option>)}
+          </Select>
+        </div>
+        <Button icon={<ReloadOutlined />} onClick={handleReset} size="small" block className="mt-1">Reset Filter</Button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="pb-6 ">
-      <PageTitle marginTop={-30}>Project Posture</PageTitle>
+    <div className="pb-4 -mt-10">
+      {/* header — plain title + filter */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-bold text-[#001529] m-0">Postur Proyek</h2>
 
-      {/* HORIZONTAL FILTER BAR */}
-      <Card className="rounded-lg mb-0 shadow-none border-b border-gray-100" bodyStyle={{ padding: '16px 24px' }}>
-        <Space wrap size="large" className="w-full justify-between items-end">
-            <Space wrap size="middle" align="end">
-                {/* 1. Year Filter */}
-                <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Tahun</span>
-                    <Select
-                        value={filters.year}
-                        onChange={(val) => setFilters({ ...filters, year: val })}
-                        style={{ width: 100 }}
-                        size="large"
-                        className="font-semibold"
-                    >
-                        <Option value={2025}>2025</Option>
-                        <Option value={2026}>2026</Option>
-                        <Option value={2027}>2027</Option>
-                    </Select>
-                </div>
+        <div className="flex items-center gap-2">
+          {filters.month !== null && (
+            <Tag closable onClose={() => setFilters({ ...filters, month: null })} className="text-xs m-0">{months[filters.month]}</Tag>
+          )}
+          {filters.categories.map(c => (
+            <Tag key={c} closable onClose={() => setFilters({ ...filters, categories: filters.categories.filter(x => x !== c) })} className="text-xs m-0">{c}</Tag>
+          ))}
+          {filters.status && (
+            <Tag closable onClose={() => setFilters({ ...filters, status: null })} className="text-xs m-0">{filters.status}</Tag>
+          )}
+          <Popover content={filterContent} title={<span className="text-sm font-semibold">Filter Project</span>} trigger="click" open={filterOpen} onOpenChange={setFilterOpen} placement="bottomRight">
+            <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
+              <Button icon={<FilterOutlined />} type={activeFilterCount > 0 ? 'primary' : 'default'} ghost={activeFilterCount > 0}>Filter</Button>
+            </Badge>
+          </Popover>
+        </div>
+      </div>
 
-                {/* 2. Month Filter */}
-                <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Bulan</span>
-                    <Select
-                        value={filters.month}
-                        onChange={(val) => setFilters({ ...filters, month: val })}
-                        style={{ width: 140 }}
-                        placeholder="Semua Bulan"
-                        allowClear
-                        size="large"
-                    >
-                        {months.map((m, i) => (
-                            <Option key={i} value={i}>{m}</Option>
-                        ))}
-                    </Select>
-                </div>
+      {/* content */}
+      {filteredData.length === 0 ? (
+        <div className="mt-10 mb-10">
+          <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        </div>
+      ) : (
+        <>
+          {/* row 1: kpi */}
+          <KpiRow data={filteredData} />
 
-                {/* 3. Division/Category Filter */}
-                <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Divisi / Kategori</span>
-                    <Select
-                        mode="multiple"
-                        value={filters.categories}
-                        onChange={(val) => setFilters({ ...filters, categories: val })}
-                        style={{ minWidth: 220, maxWidth: 350 }}
-                        placeholder="Semua Kategori"
-                        allowClear
-                        maxTagCount="responsive"
-                        size="large"
-                    >
-                        {categories.map(c => <Option key={c} value={c}>{c}</Option>)}
-                    </Select>
-                </div>
+          {/* row 2: donuts + stacked bar */}
+          <Row gutter={[12, 12]} className="mt-3">
+            <Col xs={24} lg={6}>
+              <StatusDonut data={filteredData} />
+            </Col>
+            <Col xs={24} lg={6}>
+              <PriorityDonut data={filteredData} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <StatusCategoryBar data={filteredData} />
+            </Col>
+          </Row>
 
-                {/* 4. Status Filter */}
-                <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Status Project</span>
-                    <Select
-                        value={filters.status}
-                        onChange={(val) => setFilters({ ...filters, status: val })}
-                        style={{ width: 150 }}
-                        placeholder="Semua Status"
-                        allowClear
-                        size="large"
-                    >
-                        {statuses.map(s => <Option key={s} value={s}>{s}</Option>)}
-                    </Select>
-                </div>
-            </Space>
-
-            {/* Reset Button */}
-            <div className="pb-0.5">
-                <Button 
-                    icon={<ReloadOutlined />} 
-                    onClick={handleReset}
-                    size="middle"
-                    type="text"
-                    className="text-gray-500 hover:text-blue-600"
-                >
-                    Reset Filter
-                </Button>
-            </div>
-        </Space>
-      </Card>
-
-      {/* Explicit Spacer */}
-      <div className="h-8 w-full"></div>
-
-      {/* charts row 1: Metrics */}
-      <Row gutter={[24, 24]}>
-        <Col xs={24} md={12} lg={8}>
-            <BudgetCard data={filteredData} />
-        </Col>
-        <Col xs={24} md={12} lg={8}>
-            <StatusCard data={filteredData} />
-        </Col>
-        <Col xs={24} md={12} lg={8}>
-            <PriorityCard data={filteredData} />
-        </Col>
-      </Row>
-
-      {/* charts row 2: Issues */}
-      <Row gutter={[24, 24]} className="mt-6">
-        <Col span={24}>
-            <IssueCard data={filteredData} />
-        </Col>
-      </Row>
+          {/* row 3: budget + issues */}
+          <Row gutter={[12, 12]} className="mt-3">
+            <Col xs={24} lg={12}>
+              <BudgetMonitoring data={filteredData} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <TopIssuesTable data={filteredData} />
+            </Col>
+          </Row>
+        </>
+      )}
     </div>
   );
 };

@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
-import { Drawer, Tag, Typography, Progress, Divider, Steps, List, Card, Row, Col, Statistic } from 'antd';
-import { UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined, LineChartOutlined } from '@ant-design/icons';
+import { Drawer, Tag, Typography, Progress, Divider, Steps, List, Card, Row, Col, Statistic, Tabs, Avatar, Descriptions, Image, Button, Timeline } from 'antd';
+import { 
+  UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined, 
+  LineChartOutlined, TeamOutlined, SafetyCertificateOutlined, 
+  FileTextOutlined, PictureOutlined, DownloadOutlined, ClockCircleOutlined
+} from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const { Title, Text } = Typography;
-const { Step } = Steps;
 
 /**
  * helper function untuk mendapatkan warna tag berdasarkan status project
@@ -19,6 +22,13 @@ const getStatusColor = (status) => {
     default: return 'default';
   }
 };
+
+// Helper internal untuk state kosong
+const EmptyState = ({ text }) => (
+  <div className="text-center py-6 text-gray-400 italic bg-gray-50 rounded border border-gray-100 border-dashed">
+    {text}
+  </div>
+);
 
 /**
  * komponen drawer untuk menampilkan detail lengkap suatu project
@@ -67,306 +77,279 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     return data;
   }, [project]);
 
+  // Items untuk Tabs
+  const tabItems = [
+    {
+      key: '1',
+      label: <span className="flex items-center gap-2"><LineChartOutlined /> Ringkasan</span>,
+      children: (
+        <>
+           {/* 1. Informasi Umum */}
+           <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
+            <Descriptions column={2} size="small">
+              <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
+              <Descriptions.Item label="Prioritas">
+                <Tag color={project.priority === 'Tinggi' ? 'red' : 'gold'}>{project.priority}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Manajer Proyek">{project.manager || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Sponsor">{project.sponsor || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Lokasi">{project.location || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
+            </Descriptions>
+           </Card>
+
+          {/* 2. Performa & Grafik S-Curve */}
+          <div className="mb-6">
+            <Title level={5}>Performa Proyek</Title>
+            
+            {/* Progress Bar Utama */}
+            <div className="mb-4">
+              <div className="flex justify-between text-xs mb-1">
+                <span>Actual Progress (EV)</span>
+                <span className="font-bold">{project.progress}%</span>
+              </div>
+              <Progress percent={project.progress} strokeColor={getStatusColor(project.status) === 'error' ? '#ff4d4f' : '#52c41a'} />
+              
+              <div className="flex justify-between text-xs mt-2 text-gray-500">
+                <span>Target Plan (PV): {project.target}%</span>
+                <span className={isNegative ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'}>
+                  Deviasi: {currentDeviation > 0 ? '+' : ''}{currentDeviation}%
+                </span>
+              </div>
+            </div>
+
+            {/* Chart S-Curve */}
+            <Card size="small" className="bg-white rounded-lg border border-gray-100 mb-4">
+              <div className="w-full h-[250px] mt-2">
+                <ResponsiveContainer>
+                  <LineChart data={sCurveData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} domain={[0, 'auto']} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ fontSize: 12, fontWeight: 'bold' }}
+                      formatter={(value, name) => [`${value}%`, name]}
+                    />
+                    <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+                    <Line type="monotone" dataKey="pv" name="Planned Value (PV)" stroke="#1890ff" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="ev" name="Earned Value (EV)" stroke="#52c41a" strokeWidth={3} dot={{ r: 4, shape: 'square' }} />
+                    <Line type="monotone" dataKey="ac" name="Actual Cost (AC)" stroke="#ff4d4f" strokeWidth={3} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+
+            {/* Budget Stats */}
+            <Row gutter={[12, 12]}>
+               <Col span={8}>
+                 <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
+                   <Statistic 
+                      title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>} 
+                      value={project.target} 
+                      suffix="%" 
+                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }} 
+                   />
+                 </Card>
+               </Col>
+               <Col span={8}>
+                 <Card size="small" bordered={false} className="shadow-sm bg-green-50 text-center">
+                   <Statistic 
+                      title={<span className="text-xs font-semibold text-green-600">Earned (EV)</span>} 
+                      value={project.progress} 
+                      suffix="%" 
+                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#52c41a' }} 
+                   />
+                 </Card>
+               </Col>
+               <Col span={8}>
+                 <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
+                   <Statistic 
+                      title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>} 
+                      value={project.budgetUsed} 
+                      suffix="%" 
+                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }} 
+                   />
+                 </Card>
+               </Col>
+            </Row>
+          </div>
+
+          <Divider />
+
+          {/* 3. Issue List */}
+          <div className="mb-6">
+            <Title level={5} className={project.issues && project.issues.length > 0 ? "text-red-500" : ""}>
+              <WarningOutlined /> Kendala & Isu ({project.issues ? project.issues.length : 0})
+            </Title>
+            {project.issues && project.issues.length > 0 ? (
+              <List
+                size="small"
+                dataSource={project.issues}
+                renderItem={(item, index) => (
+                  <List.Item>
+                    <Text className="text-sm">• {item}</Text>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <EmptyState text="Tidak ada isu tercatat." />
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      key: '5',
+      label: <span className="flex items-center gap-2"><ClockCircleOutlined /> Timeline</span>,
+      children: (
+        <div className="mt-2">
+          <Title level={5} className="mb-6">Jadwal & Milestone</Title>
+          <Timeline
+            mode="left"
+            items={project.timelineEvents ? project.timelineEvents.map(event => ({
+              color: event.status === 'finish' ? 'green' : event.status === 'process' ? 'blue' : 'gray',
+              children: (
+                <>
+                  <Text strong>{event.title}</Text>
+                  <br />
+                  <Text type="secondary" className="text-xs">{event.date}</Text>
+                  <p className="text-xs text-gray-500 mt-1 m-0">{event.description || 'Tahapan proyek sesuai jadwal.'}</p>
+                </>
+              ),
+            })) : []}
+          />
+          {(!project.timelineEvents || project.timelineEvents.length === 0) && <EmptyState text="Timeline belum tersedia" />}
+        </div>
+      ),
+    },
+    {
+      key: '2',
+      label: <span className="flex items-center gap-2"><TeamOutlined /> Tim & HSE</span>,
+      children: (
+        <>
+          <div className="mb-6">
+            <Title level={5}><TeamOutlined /> Tim Proyek</Title>
+            <List
+              itemLayout="horizontal"
+              dataSource={project.team || []}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<Avatar style={{ backgroundColor: '#1890ff' }}>{item.name[0]}</Avatar>}
+                    title={<span className="font-medium">{item.name}</span>}
+                    description={item.role}
+                  />
+                </List.Item>
+              )}
+            />
+            {(!project.team || project.team.length === 0) && <EmptyState text="Data tim belum tersedia" />}
+          </div>
+
+          <Divider />
+
+          <div className="mb-6">
+            <Title level={5}><SafetyCertificateOutlined /> Statistik HSE (K3)</Title>
+            {project.hse ? (
+              <Row gutter={[16, 16]}>
+                <Col span={12}>
+                  <Statistic title="Total Man Hours" value={project.hse.manHours} groupSeparator="." />
+                </Col>
+                <Col span={12}>
+                  <Statistic 
+                    title="Safe Man Hours" 
+                    value={project.hse.safeHours} 
+                    groupSeparator="." 
+                    valueStyle={{ color: '#52c41a' }} 
+                  />
+                </Col>
+                <Col span={12}>
+                  <Statistic 
+                    title="Incidents" 
+                    value={project.hse.incidents} 
+                    valueStyle={{ color: project.hse.incidents > 0 ? '#ff4d4f' : '#52c41a' }} 
+                  />
+                </Col>
+                <Col span={12}>
+                  <Statistic title="Fatality" value={project.hse.fatality} />
+                </Col>
+              </Row>
+            ) : (
+              <EmptyState text="Data HSE belum tersedia" />
+            )}
+          </div>
+        </>
+      ),
+    },
+    {
+      key: '3',
+      label: <span className="flex items-center gap-2"><FileTextOutlined /> Dokumen</span>,
+      children: (
+        <div>
+          <Title level={5} className="mb-4">Dokumen Proyek</Title>
+          <List
+            dataSource={project.documents || []}
+            renderItem={(item) => (
+              <List.Item 
+                actions={[<Button type="link" size="small" icon={<DownloadOutlined />}>Unduh</Button>]}
+              >
+                <List.Item.Meta
+                  avatar={<div className="bg-blue-50 p-2 rounded text-blue-500"><FileTextOutlined /></div>}
+                  title={<span className="text-sm font-medium">{item.name}</span>}
+                  description={<span className="text-xs text-gray-400">{item.type} • {item.date} • {item.size}</span>}
+                />
+              </List.Item>
+            )}
+          />
+          {(!project.documents || project.documents.length === 0) && <EmptyState text="Tidak ada dokumen" />}
+        </div>
+      ),
+    },
+    {
+      key: '4',
+      label: <span className="flex items-center gap-2"><PictureOutlined /> Galeri</span>,
+      children: (
+        <div>
+          <Title level={5} className="mb-4">Foto Progres ({project.gallery ? project.gallery.length : 0})</Title>
+          <div className="grid grid-cols-2 gap-4">
+            {project.gallery && project.gallery.map((photo, idx) => (
+              <div key={idx} className="flex flex-col">
+                <Image
+                  src={photo.url}
+                  alt={photo.caption}
+                  className="rounded-lg object-cover w-full h-32"
+                  fallback="https://placehold.co/600x400/ececec/999999?text=No+Image"
+                />
+                <span className="text-[10px] text-gray-500 mt-1 truncate">{photo.caption}</span>
+                <span className="text-[9px] text-gray-400">{photo.date}</span>
+              </div>
+            ))}
+          </div>
+          {(!project.gallery || project.gallery.length === 0) && <EmptyState text="Belum ada foto progres" />}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Drawer
       title={
-        <div className="flex justify-between items-center pr-6">
-          <div className="ml-4">
-            <div className="text-xs text-gray-400">{project.id}</div>
-            <div className="text-base font-bold">{project.name}</div>
-          </div>
-          <Tag color={getStatusColor(project.status)}>{project.status}</Tag>
+        <div className="flex flex-col gap-1">
+           <div className="flex justify-between items-start pr-6">
+              <div>
+                <span className="text-xs text-gray-400 block mb-0.5">{project.id}</span>
+                <span className="text-lg font-bold leading-tight block">{project.name}</span>
+              </div>
+              <Tag color={getStatusColor(project.status)} className="mt-1">{project.status}</Tag>
+           </div>
         </div>
       }
       width={700}
       onClose={onClose}
       open={open}
-      styles={{ body: { paddingBottom: 80, paddingTop: 0 } }}
+      styles={{ body: { paddingBottom: 80, paddingTop: 10 } }}
     >
-      {/* 1. informasi umum */}
-      <div className="mb-6">
-        <Title level={5} className="mb-4 mt-4">Informasi Umum</Title>
-        <Row gutter={[16, 16]}>
-          <Col span={12}>
-            <Text type="secondary" className="text-xs">Kategori</Text>
-            <div><Tag color="blue">{project.category}</Tag></div>
-          </Col>
-          <Col span={12}>
-            <Text type="secondary" className="text-xs">Prioritas</Text>
-            <div><Tag color={project.priority === 'Tinggi' ? 'red' : 'gold'}>{project.priority}</Tag></div>
-          </Col>
-          <Col span={12}>
-            <Text type="secondary" className="text-xs">Project Manager</Text>
-            <div className="font-medium"><UserOutlined /> {project.manager || 'Manager Name'}</div>
-          </Col>
-          <Col span={12}>
-            <Text type="secondary" className="text-xs">Sponsor</Text>
-            <div className="font-medium">{project.sponsor || 'Sponsor Name'}</div>
-          </Col>
-          <Col span={24}>
-            <Text type="secondary" className="text-xs">Strategi Project</Text>
-            <div className="font-medium">{project.strategy || 'Standard Execution'}</div>
-          </Col>
-        </Row>
-      </div>
-
-      <Divider />
-
-      {/* 2. performa & grafik s-curve */}
-      <div className="mb-6">
-        <Title level={5}>Performa & Analisis S-Curve</Title>
-
-        {/* progress bars summary */}
-        <div className="mb-6">
-          <div className="flex justify-between text-xs">
-            <span>Actual Progress (EV)</span>
-            <strong>{project.progress}%</strong>
-          </div>
-          <Progress percent={project.progress} status="active" strokeColor="#52c41a" />
-
-          <div className="flex justify-between text-xs mt-2">
-            <span>Deviation (EV vs PV {project.target}%)</span>
-            <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
-              {currentDeviation > 0 ? '+' : ''}{currentDeviation}%
-            </span>
-          </div>
-          <Progress
-            percent={Math.abs(currentDeviation)}
-            status={isNegative ? 'exception' : 'success'}
-            showInfo={false}
-            size="small"
-          />
-        </div>
-
-        {/* multi-line chart (s-curve) */}
-        <Card size="small" className="bg-white rounded-lg border border-gray-100">
-          <div className="flex items-center mb-4 gap-2">
-            <LineChartOutlined className="text-blue-500" />
-            <span className="font-semibold text-[13px]">Grafik S-Curve (PV vs EV vs AC)</span>
-          </div>
-
-          <div className="w-full h-[250px]">
-            <ResponsiveContainer>
-              <LineChart data={sCurveData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} domain={[0, 'auto']} label={{ value: 'Nilai (%)', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                  itemStyle={{ fontSize: 12, fontWeight: 'bold' }}
-                  formatter={(value, name) => [`${value}%`, name]}
-                />
-                <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-
-                <Line
-                  type="monotone"
-                  dataKey="pv"
-                  name="Planned Value (PV)"
-                  stroke="#1890ff"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={{ r: 3, fill: '#1890ff', strokeWidth: 0 }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="ev"
-                  name="Earned Value (EV)"
-                  stroke="#52c41a"
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#52c41a', strokeWidth: 0, shape: 'square' }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="ac"
-                  name="Actual Cost (AC)"
-                  stroke="#ff4d4f"
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#ff4d4f', strokeWidth: 0 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* budget & cost stats */}
-        <Row gutter={16} className="mt-4">
-          <Col span={8}>
-            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
-              <Statistic
-                title="Planned (PV)"
-                value={project.target}
-                suffix="%"
-                valueStyle={{ color: '#1890ff', fontSize: 16 }}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
-              <Statistic
-                title="Earned (EV)"
-                value={project.progress}
-                suffix="%"
-                valueStyle={{ color: '#52c41a', fontSize: 16, fontWeight: 'bold' }}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card size="small" className="bg-gray-50 rounded-lg border-none text-center">
-              <Statistic
-                title="Actual Cost (AC)"
-                value={project.budgetUsed}
-                suffix="%"
-                valueStyle={{ color: project.budgetUsed > project.progress ? '#cf1322' : '#52c41a', fontSize: 16 }}
-                prefix={<DollarOutlined />}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </div>
-
-      <Divider />
-
-      {/* 3. issue list */}
-      <div className="mb-6">
-        <Title level={5} className="text-red-500"><WarningOutlined /> Kendala & Isu</Title>
-        {project.issues && project.issues.length > 0 ? (
-          <List
-            size="small"
-            dataSource={project.issues}
-            renderItem={(item, index) => (
-              <List.Item>
-                <Text className="text-[13px]">{index + 1}. {item}</Text>
-              </List.Item>
-            )}
-          />
-        ) : (
-          <Text type="secondary" italic>Tidak ada isu tercatat.</Text>
-        )}
-      </div>
-
-      <Divider />
-
-      {/* 4. timeline */}
-      <div>
-        <Title level={5} className="mb-3"><CalendarOutlined /> Timeline Project</Title>
-        
-        {/* timeline events - horizontal list */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          {/* calculate timeline events based on project dates */}
-          {(() => {
-            const today = new Date();
-            const startDate = new Date(project.startDate);
-            const endDate = new Date(project.endDate);
-            
-            // calculate milestone dates
-            const quarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.25);
-            const midDate = new Date(startDate.getTime() + (endDate - startDate) * 0.5);
-            const threeQuarterDate = new Date(startDate.getTime() + (endDate - startDate) * 0.75);
-            
-            const events = [
-              {
-                date: project.startDate,
-                time: '08:00',
-                title: 'Project Kick Off',
-                description: 'Project initiation meeting dan team mobilization telah dilakukan.',
-                status: 'completed',
-                completed: startDate < today
-              },
-              {
-                date: quarterDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-                time: '14:30',
-                title: 'Design Phase Completed',
-                description: 'Engineering design dan approval selesai. Dokumen siap untuk eksekusi.',
-                status: 'completed',
-                completed: quarterDate < today
-              },
-              {
-                date: midDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-                time: '10:15',
-                title: 'Construction in Progress',
-                description: 'Main construction dan installation sedang berlangsung.',
-                status: 'process',
-                completed: false
-              },
-              {
-                date: threeQuarterDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-                time: '16:00',
-                title: 'Testing & Commissioning',
-                description: 'System testing dan commissioning akan dilakukan.',
-                status: 'pending',
-                completed: false
-              },
-              {
-                date: project.endDate,
-                time: '18:00',
-                title: 'Project Handover',
-                description: 'Final inspection dan project handover ke client.',
-                status: 'pending',
-                completed: false
-              }
-            ];
-            
-            return (
-              <div className="relative">
-                {events.map((event, index) => (
-                  <div key={index} className="flex items-start gap-3 mb-4 last:mb-0">
-                    {/* left: icon & line */}
-                    <div className="flex flex-col items-center">
-                      {/* icon */}
-                      {event.completed ? (
-                        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0"></div>
-                      )}
-                      {/* vertical line to next item */}
-                      {index < events.length - 1 && (
-                        <div className="w-px h-12 bg-gray-300 my-1"></div>
-                      )}
-                    </div>
-                    
-                    {/* right: content */}
-                    <div className="flex-1 pb-2">
-                      <div className="flex items-baseline gap-2 mb-0.5">
-                        <span className="text-[10px] text-gray-500 font-mono">{event.date} {event.time}</span>
-                        <span className={`text-xs font-semibold ${event.completed ? 'text-green-600' : 'text-gray-700'}`}>
-                          {event.title}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-gray-600 leading-relaxed">
-                        {event.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* progress info */}
-        <div className="mt-3 p-2.5 bg-blue-50 rounded-lg border border-blue-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-[9px] text-gray-500 mb-0.5">Overall Progress</div>
-              <div className="text-lg font-bold text-blue-600">{project.progress}%</div>
-            </div>
-            <div className="text-right">
-              <div className="text-[9px] text-gray-500 mb-0.5">Status</div>
-              <Tag color={project.status === 'Berjalan' ? 'success' : project.status === 'Tertunda' ? 'warning' : 'error'}>
-                {project.status}
-              </Tag>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Tabs defaultActiveKey="1" items={tabItems} />
     </Drawer>
   );
 };

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Segmented, Badge } from 'antd';
-import PageTitle from '../../components/layout/PageTitle';
+import { Radio, Segmented, Badge, Card, Divider, Typography } from 'antd';
 import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 import { projectsData } from '../../shared/data/mockData';
 
 /**
- * komponen halaman project progress dengan gantt chart
- * menampilkan timeline project dengan filter priority dan view mode (Daily/Weekly/Monthly)
- * @returns {JSX.Element} halaman dengan gantt chart, filter, dan drawer detail project
+ * halaman progres proyek dengan gantt chart
+ * menampilkan timeline project dengan filter prioritas dan mode tampilan
+ * @returns {JSX.Element} halaman dengan gantt chart, filter, dan drawer detail
  */
 const ProjectProgress = () => {
   const [priorityFilter, setPriorityFilter] = useState('Semua');
@@ -17,10 +16,6 @@ const ProjectProgress = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  /**
-   * effect untuk memfilter dan mengelompokkan project berdasarkan priority dan category
-   * jalankan setiap kali priority filter berubah
-   */
   useEffect(() => {
     const filtered = projectsData.filter(p =>
       priorityFilter === 'Semua' ? true : p.priority === priorityFilter
@@ -35,26 +30,27 @@ const ProjectProgress = () => {
     setGroupedData(result);
   }, [priorityFilter]);
 
-  /**
-   * handler ketika project bar di gantt chart diklik
-   * @param {Object} project - data project yang diklik
-   */
   const handleProjectClick = (project) => {
     setSelectedProject(project);
     setIsDrawerOpen(true);
   };
 
+  const labelClass = 'text-[11px] text-gray-400 mb-1 block font-semibold';
+
   return (
-    <div>
-      <PageTitle marginTop={-25}>Project Progress</PageTitle>
+    <div className="pb-4 -mt-10">
+      {/* title */}
+      <h2 className="text-lg font-bold text-[#001529] m-0 mb-3">Progres Proyek</h2>
 
-      <div className="flex justify-between mb-6 flex-wrap gap-4">
-        <div className="flex gap-4 flex-wrap">
+      {/* filter card */}
+      <Card bordered={false} className="rounded-lg mb-4" bodyStyle={{ padding: '10px 16px' }}>
+        <div className="flex flex-row flex-wrap gap-x-5 gap-y-2 items-end">
 
-          {/* filter kalender */}
-          <div className="bg-white p-4 rounded-lg">
-            <div className="text-xs font-semibold mb-2">Mode Tampilan</div>
+          {/* 1. mode tampilan */}
+          <div>
+            <span className={labelClass}>Mode Tampilan</span>
             <Segmented
+              size="small"
               options={[
                 { label: 'Harian', value: 'Daily' },
                 { label: 'Mingguan', value: 'Weekly' },
@@ -65,29 +61,40 @@ const ProjectProgress = () => {
             />
           </div>
 
-          <div className="bg-white p-4 rounded-lg">
-            <div className="text-xs font-semibold mb-2">Filter Prioritas</div>
-            <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid">
-              <Radio.Button value="Semua">Semua</Radio.Button>
-              <Radio.Button value="Rendah">Rendah</Radio.Button>
-              <Radio.Button value="Sedang">Sedang</Radio.Button>
-              <Radio.Button value="Tinggi">Tinggi</Radio.Button>
+          <Divider type="vertical" className="h-8 mx-0 mb-1" />
+
+          {/* 2. filter prioritas */}
+          <div>
+            <span className={labelClass}>Prioritas</span>
+            <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid" size="small">
+              <Radio.Button value="Semua" className="text-[11px] px-2">Semua</Radio.Button>
+              <Radio.Button value="Rendah" className="text-[11px] px-2">Rendah</Radio.Button>
+              <Radio.Button value="Sedang" className="text-[11px] px-2">Sedang</Radio.Button>
+              <Radio.Button value="Tinggi" className="text-[11px] px-2">Tinggi</Radio.Button>
             </Radio.Group>
           </div>
-        </div>
 
-        <div className="flex gap-4 items-center bg-white py-2.5 px-5 rounded-lg">
-          <Badge color="#52c41a" text="Berjalan Lancar" />
-          <Badge color="#ff4d4f" text="Kritis/Berhenti" />
-          <Badge color="#faad14" text="Tertunda" />
+          <Divider type="vertical" className="h-8 mx-0 mb-1" />
+
+          {/* 3. keterangan warna */}
+          <div>
+            <span className={labelClass}>Keterangan Warna</span>
+            <div className="flex gap-3 items-center text-xs">
+              <Badge color="#52c41a" text="Berjalan" />
+              <Badge color="#ff4d4f" text="Kritis" />
+              <Badge color="#faad14" text="Tertunda" />
+            </div>
+          </div>
         </div>
+      </Card>
+
+      <div className="mt-6">
+        <GanttChart
+          data={groupedData}
+          viewMode={calendarView}
+          onProjectClick={handleProjectClick}
+        />
       </div>
-
-      <GanttChart
-        data={groupedData}
-        viewMode={calendarView}
-        onProjectClick={handleProjectClick}
-      />
 
       <ProjectDetailDrawer
         project={selectedProject}

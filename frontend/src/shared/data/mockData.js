@@ -330,10 +330,34 @@ export const projectsData = [
     ...p,
     // Default value untuk field yang mungkin kosong agar tidak error
     issues: p.issues || [],
-    timelineEvents: p.timelineEvents.length > 0 ? p.timelineEvents : [
+    timelineEvents: p.timelineEvents && p.timelineEvents.length > 0 ? p.timelineEvents : [
         { date: p.startDate, title: 'Project Start', status: 'finish' },
         { date: 'Mid Term', title: 'Execution', status: 'process' },
         { date: p.endDate, title: 'Project End', status: 'wait' }
+    ],
+    // Data tambahan untuk Project Detail Drawer
+    team: [
+      { name: p.manager, role: 'Project Manager' },
+      { name: 'Ahmad Supriyadi', role: 'Site Manager' },
+      { name: 'Sarah Wulandari', role: 'QHSE Officer' },
+      { name: 'Dr. Engineering', role: 'Lead Engineer' },
+    ],
+    hse: {
+      manHours: Math.floor(Math.random() * 50000) + 10000,
+      safeHours: Math.floor(Math.random() * 48000) + 10000,
+      incidents: p.status === 'Kritis' ? Math.floor(Math.random() * 3) : 0,
+      fatality: 0,
+    },
+    documents: [
+      { name: 'Project Charter.pdf', type: 'PDF', date: '01 Jan 2026', size: '2.4 MB' },
+      { name: 'HSE Plan.pdf', type: 'PDF', date: '05 Jan 2026', size: '1.8 MB' },
+      { name: 'S-Curve Baseline.xlsx', type: 'Excel', date: '10 Jan 2026', size: '4.2 MB' },
+      { name: 'Weekly Report W4.pdf', type: 'PDF', date: '28 Jan 2026', size: '3.1 MB' },
+    ],
+    gallery: [
+      { url: 'https://placehold.co/600x400/003a8c/ffffff?text=Site+Photo+1', caption: 'Mobilisasi Alat Berat', date: '12 Jan 2026' },
+      { url: 'https://placehold.co/600x400/003a8c/ffffff?text=Site+Photo+2', caption: 'Safety Briefing Pagi', date: '15 Jan 2026' },
+      { url: 'https://placehold.co/600x400/003a8c/ffffff?text=Progress+Construction', caption: 'Instalasi Pipa', date: '20 Feb 2026' },
     ]
   }));
   

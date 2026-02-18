@@ -35,7 +35,19 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
     <Card bordered={false} className="rounded-lg" bodyStyle={{ padding: '10px 16px' }}>
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-2 items-end">
 
-        {/* 1. kategori */}
+        {/* 1. lokasi */}
+        <div className="w-[180px]">
+          <Text className={labelClass}>Lokasi</Text>
+          <Select
+            placeholder="Semua Lokasi"
+            value={filters.location || undefined}
+            onChange={(val) => handleChange('location', val || '')}
+            allowClear size="small" className="w-full text-[11px]"
+            options={locations.map(loc => ({ label: loc, value: loc }))}
+          />
+        </div>
+
+        {/* 2. kategori */}
         <div className="shrink-0">
           <Text className={labelClass}>Kategori</Text>
           <Checkbox.Group
@@ -48,7 +60,7 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-        {/* 2. status */}
+        {/* 3. status */}
         <div>
           <Text className={labelClass}>Status</Text>
           <Radio.Group value={filters.status} onChange={(e) => handleChange('status', e.target.value)} buttonStyle="solid" size="small">
@@ -60,7 +72,7 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-        {/* 3. prioritas */}
+        {/* 4. prioritas */}
         <div>
           <Text className={labelClass}>Prioritas</Text>
           <Radio.Group value={filters.priority} onChange={(e) => handleChange('priority', e.target.value)} buttonStyle="solid" size="small">
@@ -71,18 +83,6 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         </div>
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
-
-        {/* 4. lokasi */}
-        <div className="w-[180px]">
-          <Text className={labelClass}>Lokasi</Text>
-          <Select
-            placeholder="Semua Lokasi"
-            value={filters.location || undefined}
-            onChange={(val) => handleChange('location', val || '')}
-            allowClear size="small" className="w-full text-[11px]"
-            options={locations.map(loc => ({ label: loc, value: loc }))}
-          />
-        </div>
 
         {/* reset */}
         {hasActive && (

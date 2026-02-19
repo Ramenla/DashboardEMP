@@ -15,10 +15,13 @@ const TopIssuesTable = ({ data = [] }) => {
     data.forEach((p) => {
       if (p.issues && Array.isArray(p.issues)) {
         p.issues.forEach((issue) => {
-          if (!map[issue]) map[issue] = { count: 0, categories: new Set(), projects: [] };
-          map[issue].count++;
-          map[issue].categories.add(p.category);
-          map[issue].projects.push({ name: p.name, category: p.category });
+          const issueName = (issue && typeof issue === 'object') ? issue.title : issue;
+          if (issueName) {
+            if (!map[issueName]) map[issueName] = { count: 0, categories: new Set(), projects: [] };
+            map[issueName].count++;
+            map[issueName].categories.add(p.category);
+            map[issueName].projects.push({ name: p.name, category: p.category });
+          }
         });
       }
     });

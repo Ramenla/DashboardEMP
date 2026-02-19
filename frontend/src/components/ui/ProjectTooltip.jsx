@@ -6,9 +6,10 @@ import { Tooltip, Tag, Progress } from 'antd';
  */
 const getStatusColor = (status) => {
     switch (status) {
-        case 'Berjalan': return 'success';
-        case 'Tertunda': return 'warning';
-        case 'Kritis': return 'error';
+        case 'ON_TRACK': return 'success';
+        case 'DELAYED': return 'warning';
+        case 'AT_RISK': return 'error';
+        case 'COMPLETED': return 'processing';
         default: return 'default';
     }
 };
@@ -18,10 +19,9 @@ const getStatusColor = (status) => {
  */
 const getPriorityColor = (priority) => {
     switch (priority) {
-        case 'Kritis': return 'red';
-        case 'Tinggi': return 'volcano';
-        case 'Sedang': return 'gold';
-        case 'Rendah': return 'default';
+        case 'HIGH': return 'red';
+        case 'MEDIUM': return 'gold';
+        case 'LOW': return 'green'; // changed from default to green for better visibility
         default: return 'default';
     }
 };
@@ -88,6 +88,12 @@ export const IssueTooltip = ({ issueName, projects = [], children, placement = '
  */
 export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
     if (!project) return children;
+    
+    // Formatting date
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' });
+    };
 
     const tooltipTitle = (
         <div className="min-w-[240px] p-2 text-gray-700">
@@ -95,19 +101,19 @@ export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
             <div className="text-[11px] text-gray-500 mb-3 font-mono border-b border-gray-100 pb-2">{project.id}</div>
 
             <div className="flex gap-1.5 mb-3">
-                <Tag color={getStatusColor(project.status)} className="text-[10px] m-0 leading-[18px] font-semibold border-none">{project.status}</Tag>
+                <Tag color={getStatusColor(project.status)} className="text-[10px] m-0 leading-[18px] font-semibold border-none">{project.status?.replace('_', ' ')}</Tag>
                 <Tag color={getPriorityColor(project.priority)} className="text-[10px] m-0 leading-[18px] border-none">{project.priority}</Tag>
             </div>
 
             <div className="mb-2">
                 <div className="flex justify-between text-[11px] mb-1 text-gray-500">
                     <span>Progres</span>
-                    <span className="font-semibold text-gray-700">{project.progress}% / Target {project.target}%</span>
+                    <span className="font-semibold text-gray-700">{project.progress}% / Target {project.target ? project.target.toFixed(0) : 0}%</span>
                 </div>
                 <Progress
                     percent={project.progress}
-                    success={{ percent: Math.min(project.progress, project.target), strokeColor: '#1890ff' }}
-                    strokeColor={project.progress > project.target ? '#52c41a' : '#1890ff'}
+                    success={{ percent: Math.min(project.progress, project.target || 0), strokeColor: '#1890ff' }}
+                    strokeColor={project.progress > (project.target || 0) ? '#52c41a' : '#1890ff'}
                     trailColor="rgba(0,0,0,0.06)"
                     size="small"
                     showInfo={false}
@@ -116,12 +122,12 @@ export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
 
             <div className="flex justify-between text-[11px] mb-1 text-gray-500">
                 <span>Budget Terpakai</span>
-                <span className="font-semibold text-gray-700">{project.budgetUsed}%</span>
+                <span className="font-semibold text-gray-700">{project.budgetUsed ? project.budgetUsed.toLocaleString() : 0}</span>
             </div>
 
             <div className="flex justify-between text-[11px] mb-1 text-gray-500">
                 <span>Periode</span>
-                <span className="font-semibold text-gray-700">{project.startDate} — {project.endDate}</span>
+                <span className="font-semibold text-gray-700">{formatDate(project.startDate)} — {formatDate(project.endDate)}</span>
             </div>
 
             <div className={`flex justify-between text-[11px] text-gray-500 ${project.issues?.length > 0 ? 'mb-2' : 'mb-0'}`}>
@@ -136,7 +142,7 @@ export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
                     </div>
                     {project.issues.map((issue, i) => (
                         <div key={i} className="text-[10px] text-gray-600 pl-2 relative mb-0.5 leading-tight">
-                            • {issue}
+                            • {(issue && typeof issue === 'object') ? issue.title : issue}
                         </div>
                     ))}
                 </div>

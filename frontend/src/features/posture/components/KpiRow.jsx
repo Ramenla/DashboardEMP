@@ -69,8 +69,8 @@ const KpiRow = ({ data = [] }) => {
       const cpi = bFrac > 0 ? pFrac / bFrac : 1;
       cpiSum += cpi;
 
-      if (spi >= 0.9 && p.status !== 'Kritis') onTrack++;
-      if (p.status === 'Kritis' || spi < 0.8 || p.budgetUsed >= 90) atRisk++;
+      if (spi >= 0.9 && p.status !== 'AT_RISK') onTrack++;
+      if (p.status === 'AT_RISK' || spi < 0.8 || p.budgetUsed >= 90) atRisk++;
     });
 
     return {

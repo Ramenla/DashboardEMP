@@ -10,18 +10,19 @@ import {
  * warna per status
  */
 const STATUS_COLORS = {
-  Berjalan: '#52c41a',
-  Kritis: '#ff4d4f',
-  Tertunda: '#faad14',
+  ON_TRACK: '#52c41a',
+  AT_RISK: '#ff4d4f',
+  DELAYED: '#faad14',
+  COMPLETED: '#1890ff',
 };
 
 /**
  * warna per prioritas
  */
 const PRIORITY_COLORS = {
-  Tinggi: '#ff4d4f',
-  Sedang: '#faad14',
-  Rendah: '#bfbfbf',
+  HIGH: '#ff4d4f',
+  MEDIUM: '#faad14',
+  LOW: '#bfbfbf',
 };
 
 /**
@@ -44,9 +45,9 @@ const StatusCategoryBar = ({ data = [] }) => {
         map[p.category] = {
           name: p.category,
           // status
-          Berjalan: 0, Kritis: 0, Tertunda: 0,
+          ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, COMPLETED: 0,
           // prioritas
-          Tinggi: 0, Sedang: 0, Rendah: 0,
+          HIGH: 0, MEDIUM: 0, LOW: 0,
           total: 0,
         };
       }
@@ -59,7 +60,7 @@ const StatusCategoryBar = ({ data = [] }) => {
 
   const isStatus = mode === 'Status';
   const colors = isStatus ? STATUS_COLORS : PRIORITY_COLORS;
-  const keys = isStatus ? ['Berjalan', 'Kritis', 'Tertunda'] : ['Tinggi', 'Sedang', 'Rendah'];
+  const keys = isStatus ? ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'] : ['HIGH', 'MEDIUM', 'LOW'];
 
   // filter project berdasarkan kategori + status/prioritas yang diklik
   const filteredProjects = useMemo(() => {
@@ -106,7 +107,7 @@ const StatusCategoryBar = ({ data = [] }) => {
             <BarChart
               data={chartData}
               layout="vertical"
-              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               barCategoryGap="25%"
             >
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f5f5f5" />
@@ -182,8 +183,8 @@ const StatusCategoryBar = ({ data = [] }) => {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Tag
                       color={
-                        p.status === 'Berjalan' ? 'green' :
-                        p.status === 'Kritis' ? 'red' : 'orange'
+                        p.status === 'ON_TRACK' || p.status === 'COMPLETED' ? 'green' :
+                        p.status === 'AT_RISK' ? 'red' : 'orange'
                       }
                       className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
                     >

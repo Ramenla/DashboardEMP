@@ -91,38 +91,46 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       title: 'Mulai Proyek',
       key: 'start',
       width: 130,
-      render: (record) => (
-        <PremiumTooltip title={`Proyek dimulai pada: ${record.startDate}`}>
-          <div>
-            <div className="flex justify-between text-[13px] text-black-400">
-              <span>{record.startDate}</span>
+      render: (record) => {
+        const dateStr = record.startDate ? new Date(record.startDate).toLocaleDateString('id-ID') : '-';
+        return (
+          <PremiumTooltip title={`Proyek dimulai pada: ${dateStr}`}>
+            <div>
+              <div className="flex justify-between text-[13px] text-black-400">
+                <span>{dateStr}</span>
+              </div>
             </div>
-          </div>
-        </PremiumTooltip>
-      ),
+          </PremiumTooltip>
+        );
+      },
     },
     {
       title: 'Estimasi Tanggal',
       key: 'estimasi',
       width: 120,
-      render: (record) => (
-        <PremiumTooltip title={`Target selesai proyek: ${record.endDate}`}>
-          <div>
-            <div className="flex justify-between text-[13px] text-black-400">
-              <span>{record.endDate}</span>
+      render: (record) => {
+        const dateStr = record.endDate ? new Date(record.endDate).toLocaleDateString('id-ID') : '-';
+        return (
+          <PremiumTooltip title={`Target selesai proyek: ${dateStr}`}>
+            <div>
+              <div className="flex justify-between text-[13px] text-black-400">
+                <span>{dateStr}</span>
+              </div>
             </div>
-          </div>
-        </PremiumTooltip>
-      ),
+          </PremiumTooltip>
+        );
+      },
     },
     {
       title: 'Deviasi',
       key: 'deviation',
       render: (_, record) => {
-        const dev = record.progress - record.target;
+        const progress = record.progress || 0;
+        const target = record.target || 0;
+        const dev = (progress - target).toFixed(1);
         const isNegative = dev < 0;
         return (
-          <PremiumTooltip title={`Selisih progress (${record.progress}%) dengan target (${record.target}%)`}>
+          <PremiumTooltip title={`Selisih progress (${progress.toFixed(1)}%) dengan target (${target.toFixed(1)}%)`}>
             <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
               {dev > 0 ? '+' : ''}{dev}%
             </span>
@@ -134,20 +142,29 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       title: 'Budget',
       dataIndex: 'budgetUsed',
       key: 'budget',
-      render: (val) => (
-        <PremiumTooltip title={`Budget terpakai: ${val}% dari total alokasi`}>
-          <div className="text-[13px] text-black-400">
-            <Progress type="circle" percent={val} width={34} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
-          </div>
-        </PremiumTooltip>
-      ),
+      render: (val, record) => {
+        // budgetUsed from backend is Actual Cost (amount)
+        // budgetTotal is Total Budget
+        const total = parseFloat(record.totalBudget) || 1;
+        const used = parseFloat(val) || 0;
+        const pct = Math.min(Math.round((used / total) * 100), 100);
+        
+        return (
+          <PremiumTooltip title={`Terpakai: Rp ${used.toLocaleString()} (${pct}%) dari Rp ${total.toLocaleString()}`}>
+            <div className="text-[13px] text-black-400">
+              <Progress type="circle" percent={pct} width={34} format={() => `${pct}%`} status={pct > 90 ? 'exception' : 'normal'} />
+            </div>
+          </PremiumTooltip>
+        );
+      },
     },
     {
       title: 'Total Isu',
       key: 'issue',
       render: (_, record) => {
         const issueCount = record.issues?.length || 0;
-        const issuesList = record.issues?.length > 0 ? record.issues.join(', ') : 'Tidak ada isu aktif';
+        const issueTitles = record.issues?.map(i => (typeof i === 'object' ? i.title : i)) || [];
+        const issuesList = issueTitles.length > 0 ? issueTitles.join(', ') : 'Tidak ada isu aktif';
         return (
           <PremiumTooltip title={`Daftar Isu: ${issuesList}`}>
             <div>

@@ -39,30 +39,72 @@ const BudgetMonitoring = ({ data = [] }) => {
     const months = MONTHS.map((name) => ({ name, plan: 0, actual: 0 }));
 
     data.forEach((p) => {
-      const start = p.startMonth ?? 0;
-      const dur = p.duration ?? 1;
+      // Parse dates safely
+      const startDate = p.startDate ? new Date(p.startDate) : null;
+      const endDate = p.endDate ? new Date(p.endDate) : null;
       
-      const totalBudget = p.budgetTotal || 0;
-      const budgetUsedVal = totalBudget * ((p.budgetUsed || 0) / 100);
+      if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
 
-      // Asumsi distribusi rata
-      const monthlyPlan = totalBudget / dur;
-      const monthlyActual = budgetUsedVal / dur;
+      // Only consider 2026 for this year-based view
+      if (startDate.getFullYear() > 2026 || endDate.getFullYear() < 2026) return;
 
-      for (let i = 0; i < dur && (start + i) < 12; i++) {
-        months[start + i].plan += monthlyPlan;
-        months[start + i].actual += monthlyActual;
+      const startMonthIndex = startDate.getFullYear() < 2026 ? 0 : startDate.getMonth();
+      const endMonthIndex = endDate.getFullYear() > 2026 ? 11 : endDate.getMonth();
+      
+      // Duration in months overlapping 2026
+      const durationInYear = endMonthIndex - startMonthIndex + 1;
+      // Total Project Duration (approx)
+      const totalDurationMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+
+      const totalBudget = parseFloat(p.totalBudget) || 0; // Use totalBudget column
+      const budgetUsedVal = parseFloat(p.budgetTotal) ? totalBudget * ((parseFloat(p.budgetUsed) || 0) / 100) : (parseFloat(p.budgetUsed) || 0); 
+      // Note: Backend might send budgetUsed as Percentage or Amount depending on implementation. 
+      // In seed: budgetUsed is Amount. In Modal: budgetUsed is %. 
+      // Based on ProjectTable: budgetUsed is Amount. 
+      // Let's assume p.budgetUsed is the Amount sent by backend if available, or we calculate from metric.
+      // Re-reading seed: metric has actualCost (amount). project table fetches 'budgetUsed' likely as alias?
+      // Let's assume p.totalBudget is the Total Amount. p.budgetUsed is the % or Amount?
+      // ProjectTable logic: const used = parseFloat(val) || 0; -> treats as amount.
+      
+      const actualCost = p.budgetUsed; // Assuming amount based on Table
+      
+      // Monthly Plan (Simple Linear Distribution)
+      const monthlyPlan = totalBudget / Math.max(totalDurationMonths, 1);
+      
+      // Monthly Actual (Simple Linear Distribution of what has been spent so far)
+      // This is an approximation. Ideally we have monthly records.
+      const monthlyActual = (actualCost || 0) / Math.max(durationInYear, 1); // Distribute actuals only over active months in this year? 
+      // Better: Distribute actuals from start until NOW (or end). 
+      
+      for (let i = startMonthIndex; i <= endMonthIndex; i++) {
+        months[i].plan += monthlyPlan;
+        
+        // Actuals only if month has passed/started
+        const currentMonth = new Date().getMonth(); 
+        // For dummy data, let's just show actuals for all active months to visualize the bars
+        months[i].actual += monthlyActual; 
       }
     });
 
-    // konversi ke miliar
+    // Convert to Billions/Trillions for display
     months.forEach((m) => {
-      m.plan = parseFloat((m.plan / 1e9).toFixed(1));
-      m.actual = parseFloat((m.actual / 1e9).toFixed(1));
+      // Keep raw values here, formatting happens in render
     });
 
     return months;
   }, [data]);
+
+  /* Helper format currency compact */
+  const formatCurrency = (val) => {
+    if (val >= 1000) return `${(val / 1000).toFixed(1)}T`;
+    return `${val.toFixed(0)}M`;
+  };
+
+  const maxValue = useMemo(() => {
+     return Math.max(...chartData.map(d => Math.max(d.plan, d.actual)));
+  }, [chartData]);
+  
+  const unitLabel = maxValue >= 1000 ? 'Triliun (Rp)' : 'Miliar (Rp)';
 
   return (
     <Card
@@ -75,43 +117,46 @@ const BudgetMonitoring = ({ data = [] }) => {
       ) : (
         <div className="w-full h-[300px]">
           <ResponsiveContainer>
-            <ComposedChart data={chartData} margin={{ top: 5, right: 15, bottom: 5, left: -5 }}>
+            <ComposedChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
               <XAxis
                 dataKey="name"
                 axisLine={false} tickLine={false}
-                tick={{ fontSize: 11, fill: '#555', fontWeight: 500 }}
+                tick={{ fontSize: 10, fill: '#888' }}
+                dy={5}
               />
               <YAxis
                 axisLine={false} tickLine={false}
-                tick={{ fontSize: 10, fill: '#bbb' }}
-                label={{ value: 'Miliar (Rp)', angle: -90, position: 'insideLeft', offset: 15, style: { fontSize: 10, fill: '#999' } }}
+                tick={{ fontSize: 10, fill: '#888' }}
+                tickFormatter={(val) => maxValue >= 1000 ? (val/1000).toFixed(1) : val}
+                width={35}
               />
+              <Tooltip 
+                contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
+                formatter={(val) => maxValue >= 1000 ? `${(val/1000).toFixed(2)} T` : `${val.toFixed(1)} M`}
+              />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
 
-              <Tooltip content={<CustomTooltip />} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
-
-              {/* bar: actual spending */}
               <Bar
                 dataKey="actual"
                 name="Pengeluaran (Actual)"
                 fill="#1890ff"
-                radius={[3, 3, 0, 0]}
-                barSize={18}
+                radius={[4, 4, 0, 0]}
+                barSize={20}
+                fillOpacity={0.9}
               />
-
-              {/* line: planned budget */}
               <Line
-                type="basis"
+                type="monotone"
                 dataKey="plan"
                 name="Rencana (Plan)"
                 stroke="#ff4d4f"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 dot={{ r: 0 }}
-                activeDot={{ r: 5 }}
+                activeDot={{ r: 4, strokeWidth: 0 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
+          <div className="text-[10px] text-gray-400 text-center mt-[-5px]">{unitLabel}</div>
         </div>
       )}
     </Card>

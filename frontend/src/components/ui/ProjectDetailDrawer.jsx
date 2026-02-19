@@ -188,7 +188,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                 dataSource={project.issues}
                 renderItem={(item, index) => (
                   <List.Item>
-                    <Text className="text-sm">• {item}</Text>
+                    <Text className="text-sm">• {typeof item === 'object' ? item.title : item}</Text>
                   </List.Item>
                 )}
               />
@@ -208,12 +208,16 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           <Timeline
             mode="left"
             items={project.timelineEvents ? project.timelineEvents.map(event => ({
-              color: event.status === 'finish' ? 'green' : event.status === 'process' ? 'blue' : 'gray',
+              color: 'blue', // Simplified color logic as status might not be in event
               children: (
                 <>
-                  <Text strong>{event.title}</Text>
+                  <Text strong>{event.eventName || event.title}</Text>
                   <br />
-                  <Text type="secondary" className="text-xs">{event.date}</Text>
+                  <Text type="secondary" className="text-xs">
+                    {event.startDate ? new Date(event.startDate).toLocaleDateString('id-ID') : event.date}
+                     - 
+                    {event.endDate ? new Date(event.endDate).toLocaleDateString('id-ID') : ''}
+                  </Text>
                   <p className="text-xs text-gray-500 mt-1 m-0">{event.description || 'Tahapan proyek sesuai jadwal.'}</p>
                 </>
               ),

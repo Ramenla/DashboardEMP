@@ -125,8 +125,6 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
           <PremiumTooltip title={`Selisih progress (${record.progress}%) dengan target (${record.target}%)`}>
             <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
               {dev > 0 ? '+' : ''}{dev}%
-              <br />
-              <span className="text-[10px] font-normal text-gray-400">progress vs target</span>
             </span>
           </PremiumTooltip>
         );
@@ -145,7 +143,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       ),
     },
     {
-      title: 'Isu',
+      title: 'Total Isu',
       key: 'issue',
       render: (_, record) => {
         const issueCount = record.issues?.length || 0;
@@ -156,8 +154,6 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
               <span className={`font-bold ${issueCount > 0 ? 'text-red-500' : 'text-gray-400'}`}>
                 {issueCount}
               </span>
-              <br />
-              <span className="text-[10px] font-normal text-gray-400">total isu aktif</span>
             </div>
           </PremiumTooltip>
         );

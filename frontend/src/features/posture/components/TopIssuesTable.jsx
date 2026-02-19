@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Card, Tag } from 'antd';
+import { IssueTooltip } from '../../../components/ui/ProjectTooltip';
 
 /**
  * komponen tabel top 5 issues yang paling sering muncul
@@ -17,7 +18,7 @@ const TopIssuesTable = ({ data = [] }) => {
           if (!map[issue]) map[issue] = { count: 0, categories: new Set(), projects: [] };
           map[issue].count++;
           map[issue].categories.add(p.category);
-          map[issue].projects.push(p.name);
+          map[issue].projects.push({ name: p.name, category: p.category });
         });
       }
     });
@@ -42,36 +43,41 @@ const TopIssuesTable = ({ data = [] }) => {
       ) : (
         <div className="flex flex-col gap-2.5">
           {issues.map((issue, idx) => (
-            <div
+            <IssueTooltip
               key={idx}
-              className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+              issueName={issue.name}
+              projects={issue.projects}
             >
-              {/* rank badge */}
               <div
-                className="flex items-center justify-center w-6 h-6 rounded-full shrink-0 text-white text-[10px] font-bold"
-                style={{ backgroundColor: rankColors[idx] || '#8c8c8c' }}
+                className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                {idx + 1}
-              </div>
+                {/* rank badge */}
+                <div
+                  className="flex items-center justify-center w-6 h-6 rounded-full shrink-0 text-white text-[10px] font-bold"
+                  style={{ backgroundColor: rankColors[idx] || '#8c8c8c' }}
+                >
+                  {idx + 1}
+                </div>
 
-              {/* content */}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-800 m-0 leading-snug">{issue.name}</p>
-                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  {issue.categories.map((cat) => (
-                    <Tag key={cat} className="text-[9px] m-0 leading-none border-0 bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
-                      {cat}
-                    </Tag>
-                  ))}
+                {/* content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-800 m-0 leading-snug">{issue.name}</p>
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    {issue.categories.map((cat) => (
+                      <Tag key={cat} className="text-[9px] m-0 leading-none border-0 bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                        {cat}
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+
+                {/* count */}
+                <div className="text-right shrink-0">
+                  <span className="text-sm font-bold text-gray-700">{issue.count}</span>
+                  <p className="text-[9px] text-gray-400 m-0">project</p>
                 </div>
               </div>
-
-              {/* count */}
-              <div className="text-right shrink-0">
-                <span className="text-sm font-bold text-gray-700">{issue.count}</span>
-                <p className="text-[9px] text-gray-400 m-0">project</p>
-              </div>
-            </div>
+            </IssueTooltip>
           ))}
         </div>
       )}

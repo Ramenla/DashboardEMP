@@ -6,6 +6,7 @@ import {
   DollarOutlined,
   AlertOutlined,
 } from '@ant-design/icons';
+import PremiumTooltip from '../../../components/ui/ProjectTooltip';
 
 /**
  * mini radial gauge untuk menampilkan skor spi/cpi
@@ -87,6 +88,7 @@ const KpiRow = ({ data = [] }) => {
   const cards = [
     {
       label: 'Total Proyek',
+      tooltip: 'Jumlah seluruh proyek yang terdaftar di sistem',
       content: (
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
@@ -101,6 +103,7 @@ const KpiRow = ({ data = [] }) => {
     },
     {
       label: 'Jadwal (SPI)',
+      tooltip: 'Schedule Performance Index: Perbandingan progres aktual vs target (≥ 1.00 berarti tepat waktu)',
       content: (
         <div className="flex items-center gap-3">
           <MiniGauge value={m.spi} color={spiColor} />
@@ -115,6 +118,7 @@ const KpiRow = ({ data = [] }) => {
     },
     {
       label: 'Biaya (CPI)',
+      tooltip: 'Cost Performance Index: Perbandingan progres vs budget (≥ 1.00 berarti efisien)',
       content: (
         <div className="flex items-center gap-3">
           <MiniGauge value={m.cpi} color={cpiColor} />
@@ -129,6 +133,7 @@ const KpiRow = ({ data = [] }) => {
     },
     {
       label: 'Berisiko',
+      tooltip: 'Proyek dengan status Kritis, SPI < 0.8, atau budget terpakai > 90%',
       content: (
         <div className="flex items-center gap-3">
           <div
@@ -157,12 +162,14 @@ const KpiRow = ({ data = [] }) => {
     <Row gutter={[12, 12]}>
       {cards.map((kpi) => (
         <Col xs={12} lg={6} key={kpi.label}>
-          <Card bordered={false} className="rounded-lg h-full [&>.ant-card-body]:!py-3 [&>.ant-card-body]:!px-4">
-            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider m-0 mb-2">
-              {kpi.label}
-            </p>
-            {kpi.content}
-          </Card>
+          <PremiumTooltip title={kpi.tooltip}>
+            <Card bordered={false} className="rounded-lg h-full [&>.ant-card-body]:!py-3 [&>.ant-card-body]:!px-4">
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider m-0 mb-2">
+                {kpi.label}
+              </p>
+              {kpi.content}
+            </Card>
+          </PremiumTooltip>
         </Col>
       ))}
     </Row>

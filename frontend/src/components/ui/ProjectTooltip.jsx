@@ -48,6 +48,42 @@ const PremiumTooltip = ({ title, children, placement = 'top' }) => {
 };
 
 /**
+ * Specialized tooltip for issues, listing projects and their categories
+ */
+export const IssueTooltip = ({ issueName, projects = [], children, placement = 'top' }) => {
+    if (!projects || projects.length === 0) return children;
+
+    const tooltipTitle = (
+        <div className="min-w-[200px] p-1.5 text-gray-700">
+            <div className="font-bold text-[12px] mb-2 text-gray-900 border-b border-gray-100 pb-1.5">
+                Ditemukan di {projects.length} Proyek
+            </div>
+            <div className="flex flex-col gap-2">
+                {projects.map((proj, i) => (
+                    <div key={i} className="text-[11px] leading-tight">
+                        <div className="flex items-start gap-1.5 mb-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
+                            <span className="font-medium text-gray-800">{proj.name}</span>
+                        </div>
+                        <div className="pl-3">
+                            <span className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded uppercase tracking-wider font-semibold">
+                                {proj.category}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    return (
+        <PremiumTooltip title={tooltipTitle} placement={placement}>
+            {children}
+        </PremiumTooltip>
+    );
+};
+
+/**
  * Specialized project tooltip that uses the premium style
  */
 export const ProjectTooltip = ({ project, children, placement = 'top' }) => {

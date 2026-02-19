@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Checkbox, Radio, Typography, Button, Divider, Select } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { Card, Checkbox, Radio, Typography, Button, Divider, Select, AutoComplete, Input } from 'antd';
+import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -35,16 +35,35 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
     <Card bordered={false} className="rounded-lg" bodyStyle={{ padding: '10px 16px' }}>
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-2 items-end">
 
-        {/* 1. lokasi */}
         <div className="w-[180px]">
           <Text className={labelClass}>Lokasi</Text>
-          <Select
-            placeholder="Semua Lokasi"
-            value={filters.location || undefined}
-            onChange={(val) => handleChange('location', val || '')}
-            allowClear size="small" className="w-full text-[11px]"
+          <AutoComplete
+            placeholder="Ketik atau pilih lokasi"
+            value={filters.location}
+            onChange={(val) => handleChange('location', val)}
+            size="small"
+            className="w-full text-[11px]"
             options={locations.map(loc => ({ label: loc, value: loc }))}
-          />
+            filterOption={(inputValue, option) =>
+              option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+          >
+            <Input
+              allowClear
+              suffix={
+                !filters.location && (
+                  <div
+                    className="flex items-center h-full px-1.5 cursor-pointer border-l border-gray-100 ml-1 bg-gray-50/50 hover:bg-gray-100 transition-colors rounded-r"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <DownOutlined className="text-gray-400 text-[9px]" />
+                  </div>
+                )
+              }
+            />
+          </AutoComplete>
         </div>
 
         {/* 2. kategori */}

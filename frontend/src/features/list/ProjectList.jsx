@@ -60,7 +60,8 @@ const ProjectList = () => {
       const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
       const matchStatus = !filters.status || item.status === filters.status;
       const matchPriority = !filters.priority || item.priority === filters.priority;
-      const matchLocation = !filters.location || item.location === filters.location;
+      const matchLocation = !filters.location ||
+        (item.location || '').toLowerCase().includes(filters.location.toLowerCase());
 
       return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation;
     });

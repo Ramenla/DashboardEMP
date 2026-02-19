@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Table, Tag, Progress, Typography, Button, Space, Popconfirm } from 'antd';
+import { Card, Table, Tag, Progress, Typography, Button, Space, Popconfirm, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import PremiumTooltip, { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
 
 const { Text } = Typography;
 
@@ -54,9 +55,13 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
         <div>
           <div className="font-bold text-[13px]">{text}</div>
           <div className="text-[11px] text-gray-500 mb-1">{record.name}</div>
-          <Tag color={getStatusColor(record.status)} className="rounded-[10px] text-[10px]">
-            {record.status}
-          </Tag>
+
+          {/* project dengan tooltip detail */}
+          <ProjectTooltip project={record}>
+            <Tag color={getStatusColor(record.status)} className="rounded-[10px] text-[10px]">
+              {record.status}
+            </Tag>
+          </ProjectTooltip>
         </div>
       ),
     },
@@ -65,27 +70,35 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       dataIndex: 'priority',
       key: 'priority',
       render: (priority) => (
-        <Tag color={getPriorityColor(priority)} className="w-[53px] text-center">
-          {priority}
-        </Tag>
+        <PremiumTooltip title={`Tingkat prioritas proyek: ${priority}`}>
+          <Tag color={getPriorityColor(priority)} className="w-[53px] text-center">
+            {priority}
+          </Tag>
+        </PremiumTooltip>
       ),
     },
     {
       title: 'Kategori',
       dataIndex: 'category',
       key: 'category',
-      render: (cat) => <Tag color="blue">{cat}</Tag>,
+      render: (cat) => (
+        <PremiumTooltip title={`Kategori proyek: ${cat}`}>
+          <Tag color="blue">{cat}</Tag>
+        </PremiumTooltip>
+      ),
     },
     {
       title: 'Mulai Proyek',
       key: 'start',
       width: 130,
       render: (record) => (
-        <div>
-          <div className="flex justify-between text-[13px] text-black-400">
-            <span>{record.startDate}</span>
+        <PremiumTooltip title={`Proyek dimulai pada: ${record.startDate}`}>
+          <div>
+            <div className="flex justify-between text-[13px] text-black-400">
+              <span>{record.startDate}</span>
+            </div>
           </div>
-        </div>
+        </PremiumTooltip>
       ),
     },
     {
@@ -93,11 +106,13 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       key: 'estimasi',
       width: 120,
       render: (record) => (
-        <div>
-          <div className="flex justify-between text-[13px] text-black-400">
-            <span>{record.endDate}</span>
+        <PremiumTooltip title={`Target selesai proyek: ${record.endDate}`}>
+          <div>
+            <div className="flex justify-between text-[13px] text-black-400">
+              <span>{record.endDate}</span>
+            </div>
           </div>
-        </div>
+        </PremiumTooltip>
       ),
     },
     {
@@ -107,11 +122,13 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
         const dev = record.progress - record.target;
         const isNegative = dev < 0;
         return (
-          <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
-            {dev > 0 ? '+' : ''}{dev}%
-            <br />
-            <span className="text-[10px] font-normal text-gray-400">progress vs target</span>
-          </span>
+          <PremiumTooltip title={`Selisih progress (${record.progress}%) dengan target (${record.target}%)`}>
+            <span className={`font-bold ${isNegative ? 'text-red-500' : 'text-green-500'}`}>
+              {dev > 0 ? '+' : ''}{dev}%
+              <br />
+              <span className="text-[10px] font-normal text-gray-400">progress vs target</span>
+            </span>
+          </PremiumTooltip>
         );
       },
     },
@@ -120,9 +137,11 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       dataIndex: 'budgetUsed',
       key: 'budget',
       render: (val) => (
-        <div className="text-[13px] text-black-400">
-          <Progress type="circle" percent={val} width={34} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
-        </div>
+        <PremiumTooltip title={`Budget terpakai: ${val}% dari total alokasi`}>
+          <div className="text-[13px] text-black-400">
+            <Progress type="circle" percent={val} width={34} format={() => `${val}%`} status={val > 90 ? 'exception' : 'normal'} />
+          </div>
+        </PremiumTooltip>
       ),
     },
     {
@@ -130,14 +149,17 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       key: 'issue',
       render: (_, record) => {
         const issueCount = record.issues?.length || 0;
+        const issuesList = record.issues?.length > 0 ? record.issues.join(', ') : 'Tidak ada isu aktif';
         return (
-          <div>
-            <span className={`font-bold ${issueCount > 0 ? 'text-red-500' : 'text-gray-400'}`}>
-              {issueCount}
-            </span>
-            <br />
-            <span className="text-[10px] font-normal text-gray-400">total isu aktif</span>
-          </div>
+          <PremiumTooltip title={`Daftar Isu: ${issuesList}`}>
+            <div>
+              <span className={`font-bold ${issueCount > 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                {issueCount}
+              </span>
+              <br />
+              <span className="text-[10px] font-normal text-gray-400">total isu aktif</span>
+            </div>
+          </PremiumTooltip>
         );
       },
     },
@@ -146,34 +168,38 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined className="text-blue-500" />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(record);
-            }}
-          />
-          <Popconfirm
-            title="Hapus proyek?"
-            description="Tindakan ini tidak bisa dibatalkan."
-            onConfirm={(e) => {
-              e.stopPropagation();
-              onDelete(record.id);
-            }}
-            onCancel={(e) => e.stopPropagation()}
-            okText="Ya"
-            cancelText="Tidak"
-          >
+          <PremiumTooltip title="Edit Proyek">
             <Button
               type="text"
               size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={(e) => e.stopPropagation()}
+              icon={<EditOutlined className="text-blue-500" />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(record);
+              }}
             />
-          </Popconfirm>
+          </PremiumTooltip>
+          <PremiumTooltip title="Hapus Proyek">
+            <Popconfirm
+              title="Hapus proyek?"
+              description="Tindakan ini tidak bisa dibatalkan."
+              onConfirm={(e) => {
+                e.stopPropagation();
+                onDelete(record.id);
+              }}
+              onCancel={(e) => e.stopPropagation()}
+              okText="Ya"
+              cancelText="Tidak"
+            >
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Popconfirm>
+          </PremiumTooltip>
         </Space>
       ),
     },

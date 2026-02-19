@@ -28,3 +28,16 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
+
+/* hapus outline hitam pada semua chart saat diklik/select */
+.recharts-surface,
+.recharts-wrapper,
+.recharts-sector,
+.recharts-bar-rectangle,
+.recharts-cell,
+.recharts-layer,
+.recharts-responsive-container,
+.recharts-wrapper svg,
+.recharts-wrapper svg *  {
+  outline: none !important;
+}

@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Input, Button, message, Space } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Input, Button, message, Space, Spin } from 'antd';
 import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 
 import FilterCard from './components/FilterCard';
 import ProjectTable from './components/ProjectTable';
 import ProjectModal from './components/ProjectModal';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
-import * as projectService from '../../shared/services/projectService';
+
+const API_URL = 'http://localhost:5000/api/projects';
 
 /**
  * halaman project list - daftar semua project dengan filtering
- * search bar + 4 filter (kategori, status, prioritas, lokasi) + tabel
+ * data diambil dari backend API (MySQL)
  * @returns {JSX.Element} halaman project list
  */
 const ProjectList = () => {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [allData, setAllData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
     categories: [],
@@ -28,36 +29,31 @@ const ProjectList = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
+  const [editProject, setEditProject] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  const fetchProjects = async () => {
+  // fetch data dari backend
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await projectService.getProjects();
-      setProjects(data);
-    } catch (error) {
-      message.error('Gagal mengambil data proyek');
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Gagal mengambil data');
+      const data = await res.json();
+      setAllData(data);
+    } catch (err) {
+      message.error(err.message || 'Gagal mengambil data dari server');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
-  const handleProjectClick = (project) => {
-    setSelectedProject(project);
-    setIsDrawerOpen(true);
-  };
-
-  const closeDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedProject(null);
-  };
-
+  // filter data
   useEffect(() => {
-    const result = projects.filter((item) => {
+    const result = allData.filter((item) => {
       const matchSearch = (item.id || '').toLowerCase().includes(filters.search.toLowerCase()) ||
         (item.name || '').toLowerCase().includes(filters.search.toLowerCase()) ||
         (item.manager || '').toLowerCase().includes(filters.search.toLowerCase());
@@ -69,48 +65,73 @@ const ProjectList = () => {
       return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation;
     });
     setFilteredData(result);
-  }, [filters, projects]);
+  }, [filters, allData]);
+
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setIsDrawerOpen(true);
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedProject(null);
+  };
 
   const handleReset = () => {
     setFilters({ search: filters.search, categories: [], status: '', priority: '', location: '' });
   };
 
+  // buka modal tambah
   const handleAdd = () => {
-    setEditingProject(null);
+    setEditProject(null);
     setIsModalOpen(true);
   };
 
+  // buka modal edit
   const handleEdit = (project) => {
-    setEditingProject(project);
+    setEditProject(project);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  // simpan project (tambah / edit)
+  const handleSave = async (values) => {
+    setSaving(true);
     try {
-      await projectService.deleteProject(id);
-      message.success('Proyek berhasil dihapus');
+      const isEdit = !!editProject;
+      const url = isEdit ? `${API_URL}/${editProject.id}` : API_URL;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Gagal menyimpan');
+      }
+
+      message.success(isEdit ? 'Project berhasil diperbarui' : 'Project berhasil ditambahkan');
+      setIsModalOpen(false);
+      setEditProject(null);
       fetchProjects();
-    } catch (error) {
-      message.error('Gagal menghapus proyek');
+    } catch (err) {
+      message.error(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSave = async (values) => {
-    setLoading(true);
+  // hapus project
+  const handleDelete = async (id) => {
     try {
-      if (editingProject) {
-        await projectService.updateProject(editingProject.id, values);
-        message.success('Proyek berhasil diperbarui');
-      } else {
-        await projectService.createProject(values);
-        message.success('Proyek berhasil ditambahkan');
-      }
-      setIsModalOpen(false);
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus');
+      message.success('Project berhasil dihapus');
       fetchProjects();
-    } catch (error) {
-      message.error('Gagal menyimpan proyek');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      message.error(err.message);
     }
   };
 
@@ -154,13 +175,13 @@ const ProjectList = () => {
         />
       </div>
 
-      {/* modal crud */}
+      {/* modal tambah/edit */}
       <ProjectModal
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => { setIsModalOpen(false); setEditProject(null); }}
         onSave={handleSave}
-        project={editingProject}
-        loading={loading}
+        project={editProject}
+        loading={saving}
       />
 
       {/* drawer detail */}

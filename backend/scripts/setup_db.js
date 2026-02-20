@@ -43,26 +43,40 @@ async function setupDatabase() {
         console.log(`📖 Reading schema from ${initDbPath}...`);
         
         // Note: init_db.sql is known to be UTF-16LE encoded
-        const sql = fs.readFileSync(initDbPath, { encoding: 'utf16le' });
+        let sql = fs.readFileSync(initDbPath, { encoding: 'utf16le' });
 
         if (!sql) {
             throw new Error('init_db.sql is empty or could not be read.');
         }
 
+        // 🛠️ FIX: Strip Byte Order Mark (BOM) if present (\ufeff)
+        if (sql.charCodeAt(0) === 0xFEFF) {
+            console.log('🧹 Stripping BOM from SQL file...');
+            sql = sql.substring(1);
+        }
+
         console.log('🚀 Executing schema initialization...');
         
-        // cleanup some BOM or weird characters if present (UTF-16LE sometimes has BOM)
-        // cleanSql invalid characters if any, but mysql2 usually handles standard SQL strings
         await connection.query(sql);
 
         console.log('✅ Database setup completed successfully!');
 
     } catch (error) {
         console.error('❌ Error creating database:', error);
-        process.exit(1);
+        // Don't exit process if called from server.js
+        if (process.argv[1] === fileURLToPath(import.meta.url)) {
+            process.exit(1);
+        }
+        throw error;
     } finally {
         if (connection) await connection.end();
     }
 }
 
-setupDatabase();
+// Export for use in server.js
+export { setupDatabase };
+
+// Auto-run if executed directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    setupDatabase();
+}

@@ -87,7 +87,7 @@ const ProjectPosture = () => {
   };
 
   const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
-  const statuses = ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'];
+  const statuses = ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
   const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'

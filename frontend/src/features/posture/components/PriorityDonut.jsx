@@ -4,9 +4,9 @@ import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const PRIORITY_CONFIG = {
-  HIGH: { color: '#ff4d4f', label: 'High' },
-  MEDIUM: { color: '#faad14', label: 'Medium' },
-  LOW: { color: '#bfbfbf', label: 'Low' },
+  Tinggi: { color: '#ff4d4f', label: 'Tinggi' },
+  Sedang: { color: '#faad14', label: 'Sedang' },
+  Rendah: { color: '#bfbfbf', label: 'Rendah' },
 };
 
 const CustomTooltip = ({ active, payload }) => {
@@ -36,7 +36,7 @@ const PriorityDonut = ({ data = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   const chartData = useMemo(() => {
-    const counts = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+    const counts = { Tinggi: 0, Sedang: 0, Rendah: 0 };
     data.forEach((p) => { if (counts[p.priority] !== undefined) counts[p.priority]++; });
     const total = data.length || 1;
     return Object.entries(counts)
@@ -48,7 +48,7 @@ const PriorityDonut = ({ data = [] }) => {
       }));
   }, [data]);
 
-  const highCount = chartData.find(d => d.name === 'HIGH')?.value || 0;
+  const highCount = chartData.find(d => d.name === 'Tinggi')?.value || 0;
 
   // filter project berdasarkan prioritas yang diklik
   const filteredProjects = useMemo(() => {
@@ -77,7 +77,7 @@ const PriorityDonut = ({ data = [] }) => {
               <p className="text-2xl font-bold m-0 leading-none" style={{ color: highCount > 0 ? '#ff4d4f' : '#52c41a' }}>
                 {highCount}
               </p>
-              <p className="text-[10px] text-gray-400 m-0">High</p>
+              <p className="text-[10px] text-gray-400 m-0">Tinggi</p>
             </div>
 
             <ResponsiveContainer>
@@ -104,7 +104,7 @@ const PriorityDonut = ({ data = [] }) => {
           </div>
 
           {/* legend – klikable */}
-          <div className="flex justify-center gap-5 mt-1">
+          <div className="flex flex-wrap justify-center gap-4 mt-2 px-2">
             {chartData.map((d) => (
               <div
                 key={d.name}
@@ -160,8 +160,8 @@ const PriorityDonut = ({ data = [] }) => {
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <Tag
                       color={
-                        p.status === 'ON_TRACK' || p.status === 'COMPLETED' ? 'green' :
-                        p.status === 'AT_RISK' ? 'red' : 'orange'
+                        p.status === 'Berjalan' || p.status === 'Selesai' ? 'green' :
+                        p.status === 'Beresiko' ? 'red' : 'orange'
                       }
                     className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
                   >
@@ -183,8 +183,8 @@ const PriorityDonut = ({ data = [] }) => {
 
               {/* budget */}
               <div className="text-right shrink-0 w-[60px]">
-                <p className="text-xs font-bold m-0" style={{ color: p.budgetUsed >= 90 ? '#ff4d4f' : '#555' }}>
-                  {p.budgetUsed}%
+                <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
+                  {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
                 </p>
                 <p className="text-[9px] text-gray-400 m-0">budget</p>
               </div>

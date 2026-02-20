@@ -7,10 +7,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
  * warna dan label per status project
  */
 const STATUS_CONFIG = {
-  ON_TRACK: { color: '#52c41a', label: 'On Track' },
-  AT_RISK: { color: '#ff4d4f', label: 'At Risk' },
-  DELAYED: { color: '#faad14', label: 'Delayed' },
-  COMPLETED: { color: '#1890ff', label: 'Completed' },
+  Berjalan: { color: '#52c41a', label: 'Berjalan' },
+  Beresiko: { color: '#ff4d4f', label: 'Beresiko' },
+  Tertunda: { color: '#faad14', label: 'Tertunda' },
+  Selesai: { color: '#1890ff', label: 'Selesai' },
 };
 
 /**
@@ -44,7 +44,7 @@ const StatusDonut = ({ data = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   const chartData = useMemo(() => {
-    const counts = { ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, COMPLETED: 0 };
+    const counts = { Berjalan: 0, Beresiko: 0, Tertunda: 0, Selesai: 0 };
     data.forEach((p) => { if (counts[p.status] !== undefined) counts[p.status]++; });
     const total = data.length || 1;
     return Object.entries(counts)
@@ -110,19 +110,21 @@ const StatusDonut = ({ data = [] }) => {
             </ResponsiveContainer>
           </div>
 
-          {/* legend – klikable */}
-          <div className="flex justify-center gap-5 mt-1">
+          {/* legend – grid 2x2 */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4 px-4">
             {chartData.map((d) => (
               <div
                 key={d.name}
-                className="flex items-center gap-1.5 cursor-pointer hover:opacity-70 transition-opacity"
+                className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
                 onClick={() => handlePieClick(d)}
               >
-                <span
-                  className="w-2.5 h-2.5 rounded-full inline-block"
-                  style={{ backgroundColor: STATUS_CONFIG[d.name]?.color }}
-                />
-                <span className="text-[11px] text-gray-600">{d.name}</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                    style={{ backgroundColor: STATUS_CONFIG[d.name]?.color }}
+                  />
+                  <span className="text-[11px] text-gray-600 truncate max-w-[70px]" title={d.name}>{d.name}</span>
+                </div>
                 <span className="text-[11px] font-bold text-gray-800">{d.value}</span>
               </div>
             ))}
@@ -184,8 +186,8 @@ const StatusDonut = ({ data = [] }) => {
 
               {/* budget */}
               <div className="text-right shrink-0 w-[60px]">
-                <p className="text-xs font-bold m-0" style={{ color: p.budgetUsed >= 90 ? '#ff4d4f' : '#555' }}>
-                  {p.budgetUsed ? p.budgetUsed.toLocaleString() : 0}%
+                <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
+                  {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
                 </p>
                 <p className="text-[9px] text-gray-400 m-0">budget</p>
               </div>

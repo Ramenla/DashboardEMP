@@ -18,7 +18,8 @@ const getStatusColor = (status) => {
   switch (status) {
     case 'Berjalan': return 'success';
     case 'Tertunda': return 'warning';
-    case 'Kritis': return 'error';
+    case 'Beresiko': return 'error';
+    case 'Selesai': return 'processing';
     default: return 'default';
   }
 };
@@ -46,6 +47,11 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
   const currentDeviation = project.progress - project.target;
   const isNegative = currentDeviation < 0;
 
+  // Calculate budget used percentage
+  const totalBudget = parseFloat(project.totalBudget) || 1; // avoid division by zero
+  const budgetUsedVal = parseFloat(project.budgetUsed) || 0;
+  const budgetUsedPct = (budgetUsedVal / totalBudget) * 100;
+
   /**
    * generate dummy s-curve data untuk chart PV (planned value), EV (earned value), AC (actual cost)
    * data di-generate berdasarkan target, progress, dan budget project
@@ -58,13 +64,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
     const finalPV = project.target;
     const finalEV = project.progress;
-    const finalAC = project.budgetUsed;
+    const finalAC = (budgetUsedVal / totalBudget) * 100; // Use calculated percentage
 
     for (let i = 0; i < numPeriods; i++) {
       const progressRatio = (i + 1) / numPeriods;
 
       const pvFactor = Math.pow(progressRatio, 1.2);
-      const evFactor = Math.pow(progressRatio, project.status === 'Kritis' || project.status === 'Tertunda' ? 1.5 : 1.2);
+      const evFactor = Math.pow(progressRatio, project.status === 'Beresiko' || project.status === 'Tertunda' ? 1.5 : 1.2);
       const acFactor = Math.pow(progressRatio, finalAC > finalEV ? 1.1 : 1.3);
 
       data.push({
@@ -75,7 +81,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       });
     }
     return data;
-  }, [project]);
+  }, [project, budgetUsedVal, totalBudget]);
 
   // Items untuk Tabs
   const tabItems = [
@@ -89,10 +95,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
             <Descriptions column={2} size="small">
               <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
               <Descriptions.Item label="Prioritas">
-                <Tag color={project.priority === 'Tinggi' ? 'red' : 'gold'}>{project.priority}</Tag>
+                <Tag color={project.priority === 'Tinggi' ? 'red' : project.priority === 'Sedang' ? 'gold' : 'default'}>{project.priority}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Manajer Proyek">{project.manager || '-'}</Descriptions.Item>
-              <Descriptions.Item label="Sponsor">{project.sponsor || '-'}</Descriptions.Item>
               <Descriptions.Item label="Lokasi">{project.location || '-'}</Descriptions.Item>
               <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
             </Descriptions>
@@ -113,7 +118,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <div className="flex justify-between text-xs mt-2 text-gray-500">
                 <span>Target Plan (PV): {project.target}%</span>
                 <span className={isNegative ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'}>
-                  Deviasi: {currentDeviation > 0 ? '+' : ''}{currentDeviation}%
+                  Deviasi: {currentDeviation > 0 ? '+' : ''}{currentDeviation.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -125,11 +130,20 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                   <LineChart data={sCurveData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} domain={[0, 'auto']} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} domain={[0, 100]} />
                     <Tooltip
                       contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                       itemStyle={{ fontSize: 12, fontWeight: 'bold' }}
-                      formatter={(value, name) => [`${value}%`, name]}
+                      formatter={(value, name, props) => {
+                        if (name === 'Planned Value (PV)') return [`${value}%`, name];
+                        if (name === 'Earned Value (EV)') {
+                           const pv = props.payload.pv;
+                           const dev = (value - pv).toFixed(1);
+                           return [`${value}% (Dev: ${dev > 0 ? '+' : ''}${dev}%)`, name];
+                        }
+                        if (name === 'Actual Cost (AC)') return [`${value}%`, name];
+                        return [`${value}%`, name];
+                      }}
                     />
                     <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                     <Line type="monotone" dataKey="pv" name="Planned Value (PV)" stroke="#1890ff" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3 }} />
@@ -166,7 +180,8 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                  <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
                    <Statistic 
                       title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>} 
-                      value={project.budgetUsed} 
+                      value={budgetUsedPct} 
+                      precision={1}
                       suffix="%" 
                       valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }} 
                    />
@@ -229,7 +244,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     },
     {
       key: '2',
-      label: <span className="flex items-center gap-2"><TeamOutlined /> Tim & HSE</span>,
+      label: <span className="flex items-center gap-2"><TeamOutlined /> Tim Proyek</span>,
       children: (
         <>
           <div className="mb-6">
@@ -248,39 +263,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               )}
             />
             {(!project.team || project.team.length === 0) && <EmptyState text="Data tim belum tersedia" />}
-          </div>
-
-          <Divider />
-
-          <div className="mb-6">
-            <Title level={5}><SafetyCertificateOutlined /> Statistik HSE (K3)</Title>
-            {project.hse ? (
-              <Row gutter={[16, 16]}>
-                <Col span={12}>
-                  <Statistic title="Total Man Hours" value={project.hse.manHours} groupSeparator="." />
-                </Col>
-                <Col span={12}>
-                  <Statistic 
-                    title="Safe Man Hours" 
-                    value={project.hse.safeHours} 
-                    groupSeparator="." 
-                    valueStyle={{ color: '#52c41a' }} 
-                  />
-                </Col>
-                <Col span={12}>
-                  <Statistic 
-                    title="Incidents" 
-                    value={project.hse.incidents} 
-                    valueStyle={{ color: project.hse.incidents > 0 ? '#ff4d4f' : '#52c41a' }} 
-                  />
-                </Col>
-                <Col span={12}>
-                  <Statistic title="Fatality" value={project.hse.fatality} />
-                </Col>
-              </Row>
-            ) : (
-              <EmptyState text="Data HSE belum tersedia" />
-            )}
           </div>
         </>
       ),

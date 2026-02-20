@@ -10,10 +10,10 @@ import { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
  */
 const getColors = (status) => {
     switch (status) {
-        case 'ON_TRACK': return { main: '#00b96b', light: '#d9f7be' };
-        case 'AT_RISK': return { main: '#ff4d4f', light: '#ffccc7' };
-        case 'DELAYED': return { main: '#faad14', light: '#ffe58f' };
-        case 'COMPLETED': return { main: '#1890ff', light: '#bae7ff' };
+        case 'Berjalan': return { main: '#00b96b', light: '#d9f7be' };
+        case 'Beresiko': return { main: '#ff4d4f', light: '#ffccc7' };
+        case 'Tertunda': return { main: '#faad14', light: '#ffe58f' };
+        case 'Selesai': return { main: '#1890ff', light: '#bae7ff' };
         default: return { main: '#d9d9d9', light: '#f5f5f5' };
     }
 };

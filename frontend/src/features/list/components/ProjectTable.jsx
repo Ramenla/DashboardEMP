@@ -12,8 +12,7 @@ const { Text } = Typography;
  */
 const getPriorityColor = (priority) => {
   switch (priority) {
-    case 'Kritis': return 'red';
-    case 'Tinggi': return 'volcano';
+    case 'Tinggi': return 'red';
     case 'Sedang': return 'gold';
     case 'Rendah': return 'default';
     default: return 'default';
@@ -29,7 +28,8 @@ const getStatusColor = (status) => {
   switch (status) {
     case 'Berjalan': return 'success';
     case 'Tertunda': return 'warning';
-    case 'Kritis': return 'error';
+    case 'Beresiko': return 'error';
+    case 'Selesai': return 'processing';
     default: return 'default';
   }
 };
@@ -139,6 +139,28 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       },
     },
     {
+      title: 'SPI',
+      dataIndex: 'spi',
+      key: 'spi',
+      width: 80,
+      render: (val) => (
+        <PremiumTooltip title="Schedule Performance Index (Target >= 1.0)">
+          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{val}</Tag>
+        </PremiumTooltip>
+      ),
+    },
+    {
+      title: 'CPI',
+      dataIndex: 'cpi',
+      key: 'cpi',
+      width: 80,
+      render: (val) => (
+        <PremiumTooltip title="Cost Performance Index (Target >= 1.0)">
+          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{val}</Tag>
+        </PremiumTooltip>
+      ),
+    },
+    {
       title: 'Budget',
       dataIndex: 'budgetUsed',
       key: 'budget',
@@ -159,7 +181,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       },
     },
     {
-      title: 'Total Isu',
+      title: 'Total Kendala',
       key: 'issue',
       render: (_, record) => {
         const issueCount = record.issues?.length || 0;

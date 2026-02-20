@@ -334,14 +334,11 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                     startMonth: 0,
                     duration: 1,
                     category: 'EXPLORATION',
-                    status: 'ON_TRACK',
-                    priority: 'MEDIUM',
+                    status: 'Berjalan',
+                    priority: 'Sedang',
                     issues: [],
                     timelineEvents: [],
                     team: [],
-                    hse: { manHours: 0, safeHours: 0, incidents: 0, fatality: 0 },
-                    documents: [],
-                    gallery: [],
                 }}
                 onValuesChange={handleDateChange}
                 size="small"
@@ -364,7 +361,7 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                 </Row>
 
                 <Row gutter={10}>
-                    <Col span={6}>
+                    <Col span={8}>
                         <Form.Item name="category" label="Kategori" rules={[{ required: true, message: 'Wajib' }]}>
                             <Select placeholder="Pilih" options={[
                                 { label: 'Exploration', value: 'EXPLORATION' },
@@ -374,26 +371,16 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                             ]} />
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
-                        <Form.Item name="status" label="Status">
-                            <Select options={[
-                                { label: 'On Track', value: 'ON_TRACK' },
-                                { label: 'Delayed', value: 'DELAYED' },
-                                { label: 'At Risk', value: 'AT_RISK' },
-                                { label: 'Completed', value: 'COMPLETED' },
-                            ]} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
+                    <Col span={8}>
                         <Form.Item name="priority" label="Prioritas">
                             <Select options={[
-                                { label: 'Low', value: 'LOW' },
-                                { label: 'Medium', value: 'MEDIUM' },
-                                { label: 'High', value: 'HIGH' },
+                                { label: 'Tinggi', value: 'Tinggi' },
+                                { label: 'Sedang', value: 'Sedang' },
+                                { label: 'Rendah', value: 'Rendah' },
                             ]} />
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
+                    <Col span={8}>
                         <Form.Item name="location" label="Lokasi">
                             <Select placeholder="Pilih" options={[
                                 { label: "Sumatra - 'B' Block", value: "'B' Block (Sumatra)" },
@@ -414,15 +401,7 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                     </Col>
                 </Row>
 
-                {/* ===== PENANGGUNG JAWAB ===== */}
-                <Divider orientation="left" className="!text-[11px] !text-gray-400 !font-semibold !mt-0 !mb-2">PENANGGUNG JAWAB</Divider>
-
                 <Row gutter={10}>
-                    <Col span={12}>
-                        <Form.Item name="sponsor" label="Sponsor">
-                            <Input placeholder="Contoh: SKK Migas" />
-                        </Form.Item>
-                    </Col>
                     <Col span={12}>
                         <Form.Item name="manager" label="Manajer Proyek">
                             <Input placeholder="Nama manager" />
@@ -434,51 +413,48 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                 <Divider orientation="left" className="!text-[11px] !text-gray-400 !font-semibold !mt-0 !mb-2">TIMELINE</Divider>
 
                 <Row gutter={10}>
-                    <Col span={6}>
+                    <Col span={12}>
                         <Form.Item name="startDate" label="Tgl Mulai">
                             <DatePicker className="w-full" format="DD MMM YYYY" placeholder="Pilih" />
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
+                    <Col span={12}>
                         <Form.Item name="endDate" label="Tgl Selesai">
                             <DatePicker className="w-full" format="DD MMM YYYY" placeholder="Pilih" />
                         </Form.Item>
                     </Col>
-                    <Col span={6}>
-                        <Form.Item name="startMonth" label="Bulan Mulai">
-                            <Select disabled options={[
-                                'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'
-                            ].map((m, i) => ({ label: m, value: i }))} />
-                        </Form.Item>
-                    </Col>
-                    <Col span={6}>
-                        <Form.Item name="duration" label="Durasi (bln)">
-                            <InputNumber min={1} max={60} className="w-full" disabled />
-                        </Form.Item>
-                    </Col>
+                    {/* Hidden fields for backend calculation */}
+                    <Form.Item name="startMonth" hidden><Input /></Form.Item>
+                    <Form.Item name="duration" hidden><Input /></Form.Item>
                 </Row>
 
                 {/* ===== PROGRESS & BUDGET ===== */}
                 <Divider orientation="left" className="!text-[11px] !text-gray-400 !font-semibold !mt-0 !mb-2">PROGRESS & BUDGET</Divider>
 
                 <Row gutter={10}>
-                    <Col span={4}>
-                        <Form.Item name="progress" label="Progress">
-                            <InputNumber min={0} max={100} className="w-full" addonAfter="%" />
+                    <Col span={8}>
+                        <Form.Item name="progress" label="Progress (%)">
+                            <InputNumber min={0} max={100} className="w-full" />
                         </Form.Item>
                     </Col>
-                    <Col span={4}>
-                        <Form.Item name="target" label="Target">
-                            <InputNumber min={0} max={100} className="w-full" addonAfter="%" />
+                    <Col span={8}>
+                        <Form.Item name="target" label="Plan / Target (%)">
+                            <InputNumber min={0} max={100} className="w-full" />
                         </Form.Item>
                     </Col>
-                    <Col span={4}>
-                        <Form.Item name="budgetUsed" label="Bgt Used">
-                            <InputNumber min={0} max={100} className="w-full" addonAfter="%" />
+                </Row>
+                <Row gutter={10}>
+                    <Col span={12}>
+                        <Form.Item name="budgetTotal" label="Total Budget (IDR)">
+                            <InputNumber
+                                className="w-full"
+                                formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                parser={value => value.replace(/Rp\s?|(,*)/g, '')}
+                            />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item name="budgetTotal" label="Total Budget (IDR)">
+                        <Form.Item name="budgetUsed" label="Actual Cost (IDR)">
                             <InputNumber
                                 className="w-full"
                                 formatter={value => `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
@@ -494,7 +470,7 @@ const ProjectModal = ({ open, onCancel, onSave, project, loading }) => {
                 <Collapse
                     size="small"
                     ghost
-                    items={collapseItems}
+                    items={collapseItems.filter(item => ['issues', 'timeline', 'team'].includes(item.key))}
                     className="project-modal-collapse"
                 />
             </Form>

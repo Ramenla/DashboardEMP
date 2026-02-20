@@ -6,10 +6,10 @@ import { Tooltip, Tag, Progress } from 'antd';
  */
 const getStatusColor = (status) => {
     switch (status) {
-        case 'ON_TRACK': return 'success';
-        case 'DELAYED': return 'warning';
-        case 'AT_RISK': return 'error';
-        case 'COMPLETED': return 'processing';
+        case 'Berjalan': return 'success';
+        case 'Tertunda': return 'warning';
+        case 'Beresiko': return 'error';
+        case 'Selesai': return 'processing';
         default: return 'default';
     }
 };

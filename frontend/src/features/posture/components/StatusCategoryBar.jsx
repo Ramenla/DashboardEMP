@@ -10,19 +10,19 @@ import {
  * warna per status
  */
 const STATUS_COLORS = {
-  ON_TRACK: '#52c41a',
-  AT_RISK: '#ff4d4f',
-  DELAYED: '#faad14',
-  COMPLETED: '#1890ff',
+  Berjalan: '#52c41a',
+  Beresiko: '#ff4d4f',
+  Tertunda: '#faad14',
+  Selesai: '#1890ff',
 };
 
 /**
  * warna per prioritas
  */
 const PRIORITY_COLORS = {
-  HIGH: '#ff4d4f',
-  MEDIUM: '#faad14',
-  LOW: '#bfbfbf',
+  Tinggi: '#ff4d4f',
+  Sedang: '#faad14',
+  Rendah: '#bfbfbf',
 };
 
 /**
@@ -45,9 +45,9 @@ const StatusCategoryBar = ({ data = [] }) => {
         map[p.category] = {
           name: p.category,
           // status
-          ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, COMPLETED: 0,
+          Berjalan: 0, Beresiko: 0, Tertunda: 0, Selesai: 0,
           // prioritas
-          HIGH: 0, MEDIUM: 0, LOW: 0,
+          Tinggi: 0, Sedang: 0, Rendah: 0,
           total: 0,
         };
       }
@@ -60,7 +60,7 @@ const StatusCategoryBar = ({ data = [] }) => {
 
   const isStatus = mode === 'Status';
   const colors = isStatus ? STATUS_COLORS : PRIORITY_COLORS;
-  const keys = isStatus ? ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'] : ['HIGH', 'MEDIUM', 'LOW'];
+  const keys = isStatus ? ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'] : ['Tinggi', 'Sedang', 'Rendah'];
 
   // filter project berdasarkan kategori + status/prioritas yang diklik
   const filteredProjects = useMemo(() => {
@@ -183,8 +183,8 @@ const StatusCategoryBar = ({ data = [] }) => {
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Tag
                       color={
-                        p.status === 'ON_TRACK' || p.status === 'COMPLETED' ? 'green' :
-                        p.status === 'AT_RISK' ? 'red' : 'orange'
+                        p.status === 'Berjalan' || p.status === 'Selesai' ? 'green' :
+                        p.status === 'Beresiko' ? 'red' : 'orange'
                       }
                       className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
                     >
@@ -210,8 +210,8 @@ const StatusCategoryBar = ({ data = [] }) => {
 
                 {/* budget */}
                 <div className="text-right shrink-0 w-[60px]">
-                  <p className="text-xs font-bold m-0" style={{ color: p.budgetUsed >= 90 ? '#ff4d4f' : '#555' }}>
-                    {p.budgetUsed}%
+                  <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
+                    {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
                   </p>
                   <p className="text-[9px] text-gray-400 m-0">budget</p>
                 </div>

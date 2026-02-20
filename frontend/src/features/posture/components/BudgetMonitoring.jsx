@@ -86,12 +86,14 @@ const BudgetMonitoring = ({ data = [] }) => {
       }
     });
 
-    // Convert to Billions/Trillions for display
-    months.forEach((m) => {
-      // Keep raw values here, formatting happens in render
-    });
+    // Convert to Billions for display (1 Miliar = 1,000,000,000)
+    const displayData = months.map(m => ({
+      ...m,
+      plan: m.plan / 1000000000,
+      actual: m.actual / 1000000000
+    }));
 
-    return months;
+    return displayData;
   }, [data]);
 
   /* Helper format currency compact */
@@ -128,12 +130,18 @@ const BudgetMonitoring = ({ data = [] }) => {
               <YAxis
                 axisLine={false} tickLine={false}
                 tick={{ fontSize: 10, fill: '#888' }}
-                tickFormatter={(val) => maxValue >= 1000 ? (val/1000).toFixed(1) : val}
+                tickFormatter={(val) => {
+                  if (val >= 1000) return `${(val / 1000).toFixed(1)}T`;
+                  return `${val}M`;
+                }}
                 width={35}
               />
               <Tooltip 
                 contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
-                formatter={(val) => maxValue >= 1000 ? `${(val/1000).toFixed(2)} T` : `${val.toFixed(1)} M`}
+                formatter={(val) => {
+                   if (val >= 1000) return [`Rp ${(val/1000).toFixed(2)} Triliun`, undefined];
+                   return [`Rp ${val.toFixed(2)} Miliar`, undefined];
+                }}
               />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
 

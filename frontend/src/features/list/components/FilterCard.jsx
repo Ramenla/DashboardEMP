@@ -84,10 +84,10 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         <div>
           <Text className={labelClass}>Status</Text>
           <Radio.Group value={filters.status} onChange={(e) => handleChange('status', e.target.value)} buttonStyle="solid" size="small">
-            <Radio.Button value="AT_RISK" onClick={() => handleRadioClick('status', 'AT_RISK')} className="text-[11px] px-2">At Risk</Radio.Button>
-            <Radio.Button value="DELAYED" onClick={() => handleRadioClick('status', 'DELAYED')} className="text-[11px] px-2">Delayed</Radio.Button>
-            <Radio.Button value="ON_TRACK" onClick={() => handleRadioClick('status', 'ON_TRACK')} className="text-[11px] px-2">On Track</Radio.Button>
-            <Radio.Button value="COMPLETED" onClick={() => handleRadioClick('status', 'COMPLETED')} className="text-[11px] px-2">Completed</Radio.Button>
+            <Radio.Button value="Beresiko" onClick={() => handleRadioClick('status', 'Beresiko')} className="text-[11px] px-2">Beresiko</Radio.Button>
+            <Radio.Button value="Tertunda" onClick={() => handleRadioClick('status', 'Tertunda')} className="text-[11px] px-2">Tertunda</Radio.Button>
+            <Radio.Button value="Berjalan" onClick={() => handleRadioClick('status', 'Berjalan')} className="text-[11px] px-2">Berjalan</Radio.Button>
+            <Radio.Button value="Selesai" onClick={() => handleRadioClick('status', 'Selesai')} className="text-[11px] px-2">Selesai</Radio.Button>
           </Radio.Group>
         </div>
 

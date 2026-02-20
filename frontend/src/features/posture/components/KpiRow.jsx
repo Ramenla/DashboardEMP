@@ -61,16 +61,26 @@ const KpiRow = ({ data = [] }) => {
     let spiSum = 0, cpiSum = 0, atRisk = 0, onTrack = 0;
 
     data.forEach((p) => {
-      const spi = p.target > 0 ? p.progress / p.target : 1;
+      const valProgress = p.progress || 0;
+      const valTarget = p.target || 1; // avoid div by zero
+      const spi = valProgress / valTarget;
       spiSum += spi;
 
-      const bFrac = p.budgetUsed / 100;
-      const pFrac = p.progress / 100;
-      const cpi = bFrac > 0 ? pFrac / bFrac : 1;
+      // CPI = EV% / AC%
+      // AC% = (Actual Cost / Total Budget) * 100
+      const totalBudget = parseFloat(p.totalBudget) || 1;
+      const actualCost = parseFloat(p.budgetUsed) || 0;
+      const acPct = (actualCost / totalBudget) * 100;
+      
+      // EV% = progress
+      const cpi = acPct > 0 ? valProgress / acPct : 1;
       cpiSum += cpi;
 
-      if (spi >= 0.9 && p.status !== 'AT_RISK') onTrack++;
-      if (p.status === 'AT_RISK' || spi < 0.8 || p.budgetUsed >= 90) atRisk++;
+      if (spi >= 0.9 && p.status !== 'Beresiko') onTrack++;
+      
+      // Check if budget usage > 90%
+      const budgetPct = (actualCost / totalBudget) * 100;
+      if (p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90) atRisk++;
     });
 
     return {

@@ -25,6 +25,16 @@ const getStatusColor = (status) => {
   }
 };
 
+// Helper untuk format currency IDR
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 // Helper internal untuk state kosong
 const EmptyState = ({ text }) => (
   <div className="text-center py-6 text-gray-400 italic bg-gray-50 rounded border border-gray-100 border-dashed">
@@ -49,9 +59,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
   const isNegative = currentDeviation < 0;
 
   // Calculate budget used percentage
-  const totalBudget = parseFloat(project.totalBudget) || 1; // avoid division by zero
+  const totalBudget = parseFloat(project.totalBudget) || 0; 
   const budgetUsedVal = parseFloat(project.budgetUsed) || 0;
-  const budgetUsedPct = (budgetUsedVal / totalBudget) * 100;
+  const budgetUsedPct = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
   /**
    * generate dummy s-curve data untuk chart PV (planned value), EV (earned value), AC (actual cost)
@@ -65,9 +75,12 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
     const finalPV = project.target;
     const finalEV = project.progress;
-    const finalAC = (budgetUsedVal / totalBudget) * 100; // Use calculated percentage
+    const finalAC = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
     for (let i = 0; i < numPeriods; i++) {
+        // ... (existing loop logic is fine, but noticed finalAC usage above. 
+        // Need to be careful not to break sCurveData generation if I change variable definitions above)
+        // I changed `totalBudget` default from 1 to 0, so I need to handle division safely.
       const progressRatio = (i + 1) / numPeriods;
 
       const pvFactor = Math.pow(progressRatio, 1.2);
@@ -93,7 +106,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
         <>
           {/* 1. Informasi Umum */}
           <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
-            <Descriptions column={2} size="small">
+            <Descriptions column={2} size="small" labelStyle={{ color: '#8c8c8c' }} contentStyle={{ fontWeight: 500 }}>
               <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
               <Descriptions.Item label="Prioritas">
                 <Tag color={project.priority === 'Tinggi' ? 'red' : project.priority === 'Sedang' ? 'gold' : 'default'}>{project.priority}</Tag>
@@ -101,6 +114,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <Descriptions.Item label="Manajer Proyek">{project.manager || '-'}</Descriptions.Item>
               <Descriptions.Item label="Lokasi">{project.location || '-'}</Descriptions.Item>
               <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
+              <Descriptions.Item label="Status"><Tag color={getStatusColor(project.status)}>{project.status}</Tag></Descriptions.Item>
+              <Descriptions.Item label="Total Anggaran" span={2}>
+                 <span className="text-blue-600">{formatCurrency(totalBudget)}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label="Realisasi Biaya" span={2}>
+                 <span className={budgetUsedPct > 90 ? "text-red-500" : "text-green-600"}>{formatCurrency(budgetUsedVal)} ({budgetUsedPct.toFixed(1)}%)</span>
+              </Descriptions.Item>
             </Descriptions>
           </Card>
 

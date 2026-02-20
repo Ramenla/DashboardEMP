@@ -46,20 +46,20 @@ const ProjectProgress = () => {
 
     // Apply sorting
     filtered.sort((a, b) => {
-        switch (sortBy) {
-            case 'START_DATE_ASC':
-                return parseProjectDate(a.startDate) - parseProjectDate(b.startDate);
-            case 'START_DATE_DESC':
-                return parseProjectDate(b.startDate) - parseProjectDate(a.startDate);
-            case 'NAME_ASC':
-                return a.name.localeCompare(b.name);
-            case 'PROGRESS_DESC':
-                return b.progress - a.progress;
-            case 'PROGRESS_ASC':
-                return a.progress - b.progress;
-            default:
-                return 0;
-        }
+      switch (sortBy) {
+        case 'START_DATE_ASC':
+          return parseProjectDate(a.startDate) - parseProjectDate(b.startDate);
+        case 'START_DATE_DESC':
+          return parseProjectDate(b.startDate) - parseProjectDate(a.startDate);
+        case 'NAME_ASC':
+          return a.name.localeCompare(b.name);
+        case 'PROGRESS_DESC':
+          return b.progress - a.progress;
+        case 'PROGRESS_ASC':
+          return a.progress - b.progress;
+        default:
+          return 0;
+      }
     });
 
     const categories = ['EXPLORATION', 'DRILLING', 'FACILITY', 'OPERATION'];
@@ -109,33 +109,33 @@ const ProjectProgress = () => {
             <span className={labelClass}>Prioritas</span>
             <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid" size="small">
               <Radio.Button value="ALL" className="text-[11px] px-2">Semua</Radio.Button>
-              <Radio.Button value="LOW" className="text-[11px] px-2">Low</Radio.Button>
-              <Radio.Button value="MEDIUM" className="text-[11px] px-2">Medium</Radio.Button>
-              <Radio.Button value="HIGH" className="text-[11px] px-2">High</Radio.Button>
+              <Radio.Button value="Rendah" className="text-[11px] px-2">Rendah</Radio.Button>
+              <Radio.Button value="Sedang" className="text-[11px] px-2">Sedang</Radio.Button>
+              <Radio.Button value="Tinggi" className="text-[11px] px-2">Tinggi</Radio.Button>
             </Radio.Group>
           </div>
 
           <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
           {/* 3. Sort Order */}
-           <div>
-             <span className={labelClass}>Urutkan</span>
-             <Select
-                size="small"
-                value={sortBy}
-                onChange={setSortBy}
-                style={{ width: 140 }}
-                options={[
-                  { label: 'Mulai Terawal', value: 'START_DATE_ASC' },
-                  { label: 'Mulai Terakhir', value: 'START_DATE_DESC' },
-                  { label: 'Nama (A-Z)', value: 'NAME_ASC' },
-                  { label: 'Progress Tertinggi', value: 'PROGRESS_DESC' },
-                  { label: 'Progress Terendah', value: 'PROGRESS_ASC' },
-                ]}
-             />
-           </div>
+          <div>
+            <span className={labelClass}>Urutkan</span>
+            <Select
+              size="small"
+              value={sortBy}
+              onChange={setSortBy}
+              style={{ width: 140 }}
+              options={[
+                { label: 'Mulai Terawal', value: 'START_DATE_ASC' },
+                { label: 'Mulai Terakhir', value: 'START_DATE_DESC' },
+                { label: 'Nama (A-Z)', value: 'NAME_ASC' },
+                { label: 'Progress Tertinggi', value: 'PROGRESS_DESC' },
+                { label: 'Progress Terendah', value: 'PROGRESS_ASC' },
+              ]}
+            />
+          </div>
 
-           <Divider type="vertical" className="h-8 mx-0 mb-1" />
+          <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
           {/* 4. keterangan warna */}
           <div>

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, Table, Tag, Progress, Typography, Button, Space, Popconfirm, Tooltip } from 'antd';
+import { Card, Table, Tag, Progress, Typography, Button, Space, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import PremiumTooltip, { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
+import { formatProjectDate } from '../../../utils/dateUtils';
 
 const { Text } = Typography;
 
@@ -36,14 +37,6 @@ const getStatusColor = (status) => {
 
 /**
  * komponen tabel untuk menampilkan daftar project dengan informasi lengkap
- * menampilkan kode, prioritas, kategori, progress, budget, dan tanggal
- * mendukung klik row untuk membuka detail project
- * @param {Object} props - props komponen
- * @param {Array} props.dataSource - array of project objects untuk ditampilkan di tabel
- * @param {Function} props.onRowClick - callback ketika row diklik, menerima object project
- * @param {Function} props.onEdit - callback ketika tombol edit diklik
- * @param {Function} props.onDelete - callback ketika tombol delete diklik
- * @returns {JSX.Element} card dengan table project yang dapat diklik
  */
 const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
   const columns = [
@@ -55,8 +48,6 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
         <div>
           <div className="font-bold text-[13px]">{text}</div>
           <div className="text-[11px] text-gray-500 mb-1">{record.name}</div>
-
-          {/* project dengan tooltip detail */}
           <ProjectTooltip project={record}>
             <Tag color={getStatusColor(record.status)} className="rounded-[10px] text-[10px]">
               {record.status}
@@ -92,7 +83,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       key: 'start',
       width: 130,
       render: (record) => {
-        const dateStr = record.startDate ? new Date(record.startDate).toLocaleDateString('id-ID') : '-';
+        const dateStr = formatProjectDate(record.startDate);
         return (
           <PremiumTooltip title={`Proyek dimulai pada: ${dateStr}`}>
             <div>
@@ -109,7 +100,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       key: 'estimasi',
       width: 120,
       render: (record) => {
-        const dateStr = record.endDate ? new Date(record.endDate).toLocaleDateString('id-ID') : '-';
+        const dateStr = formatProjectDate(record.endDate);
         return (
           <PremiumTooltip title={`Target selesai proyek: ${dateStr}`}>
             <div>
@@ -143,12 +134,9 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       dataIndex: 'budgetUsed',
       key: 'budget',
       render: (val, record) => {
-        // budgetUsed from backend is Actual Cost (amount)
-        // budgetTotal is Total Budget
         const total = parseFloat(record.totalBudget) || 1;
         const used = parseFloat(val) || 0;
         const pct = Math.min(Math.round((used / total) * 100), 100);
-        
         return (
           <PremiumTooltip title={`Terpakai: Rp ${used.toLocaleString()} (${pct}%) dari Rp ${total.toLocaleString()}`}>
             <div className="text-[13px] text-black-400">
@@ -192,27 +180,24 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
               }}
             />
           </PremiumTooltip>
-          <PremiumTooltip title="Hapus Proyek">
-            <Popconfirm
-              title="Hapus proyek?"
-              description="Tindakan ini tidak bisa dibatalkan."
-              onConfirm={(e) => {
-                e.stopPropagation();
-                onDelete(record.id);
-              }}
-              onCancel={(e) => e.stopPropagation()}
-              okText="Ya"
-              cancelText="Tidak"
-            >
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </Popconfirm>
-          </PremiumTooltip>
+          <Popconfirm
+            title="Hapus proyek?"
+            onConfirm={(e) => {
+              e.stopPropagation();
+              onDelete(record.id);
+            }}
+            onCancel={(e) => e.stopPropagation()}
+            okText="Ya"
+            cancelText="Tidak"
+          >
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Popconfirm>
         </Space>
       ),
     },
@@ -223,19 +208,9 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       <Table
         dataSource={dataSource}
         columns={columns}
-        pagination={{
-          pageSize: 5,
-          showSizeChanger: false,
-          showTotal: (total, range) => (
-            <Text type="secondary" className="text-xs px-4 pb-2 block">
-              Menampilkan {range[0]}-{range[1]} dari {total} project
-            </Text>
-          ),
-        }}
-        rowClassName="cursor-pointer hover:bg-gray-50 transition"
-        onRow={(record) => ({
-          onClick: () => onRowClick(record),
-        })}
+        pagination={{ pageSize: 5 }}
+        rowClassName="cursor-pointer"
+        onRow={(record) => ({ onClick: () => onRowClick(record) })}
         size="small"
       />
     </Card>

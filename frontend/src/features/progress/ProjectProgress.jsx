@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Radio, Segmented, Badge, Card, Divider, Typography, Spin, message } from 'antd';
 import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
+import { normalizeProjectData } from '../../utils/dateUtils';
 
 const API_URL = 'http://localhost:5000/api/projects';
 
@@ -30,7 +31,8 @@ const ProjectProgress = () => {
       const res = await fetch(API_URL);
       if (!res.ok) throw new Error('Gagal mengambil data');
       const data = await res.json();
-      setProjects(data);
+      const normalized = data.map(normalizeProjectData);
+      setProjects(normalized);
     } catch (error) {
       console.error(error);
       message.error('Gagal mengambil data proyek');
@@ -114,13 +116,13 @@ const ProjectProgress = () => {
 
       <div className="mt-6">
         {loading ? (
-             <div className="flex justify-center py-10"><Spin size="large" /></div>
+          <div className="flex justify-center py-10"><Spin size="large" /></div>
         ) : (
-            <GanttChart
-              data={groupedData}
-              viewMode={calendarView}
-              onProjectClick={handleProjectClick}
-            />
+          <GanttChart
+            data={groupedData}
+            viewMode={calendarView}
+            onProjectClick={handleProjectClick}
+          />
         )}
       </div>
 

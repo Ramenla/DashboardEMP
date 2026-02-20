@@ -10,6 +10,8 @@ import StatusCategoryBar from './components/StatusCategoryBar';
 import BudgetMonitoring from './components/BudgetMonitoring';
 import TopIssuesTable from './components/TopIssuesTable';
 
+import { parseProjectDate, normalizeProjectData } from '../../utils/dateUtils';
+
 const { Option } = Select;
 const API_URL = 'http://localhost:5000/api/projects';
 
@@ -47,16 +49,17 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+
 /**
- * halaman project posture - visual overview kesehatan project
- * menampilkan kpi, chart analitik, dan top issues
- * list project detail ada di halaman terpisah
- * @returns {JSX.Element} dashboard posture
+ * halaman utama project posture (dashboard status proyek)
+ * menampilkan KPI utama, donut chart status & prioritas, dan bar chart per kategori
+ * @returns {JSX.Element} dashboard page
  */
 const ProjectPosture = () => {
   const [filters, setFilters] = useState({
     year: 2026,
     month: null,
+    location: null,
     categories: [],
     status: null,
   });
@@ -66,25 +69,26 @@ const ProjectPosture = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch Data
+  // Fetch data projects dari backend
   useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        const normalized = data.map(normalizeProjectData);
+        setProjectsData(normalized);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        message.error('Gagal mengambil data proyek dari server');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProjects();
   }, []);
-
-  const fetchProjects = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Gagal mengambil data');
-      const data = await res.json();
-      setProjectsData(data);
-    } catch (error) {
-      console.error(error);
-      message.error('Gagal mengambil data proyek');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
   const statuses = ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'];
@@ -95,44 +99,25 @@ const ProjectPosture = () => {
 
   useEffect(() => {
     const result = projectsData.filter((item) => {
-      // Safe Year Extraction
-      let itemYear = 2026;
-      if (item.startDate) {
-          if (item.startDate instanceof Date) {
-              itemYear = item.startDate.getFullYear();
-          } else if (typeof item.startDate === 'string') {
-               // Handle ISO string or YYYY-MM-DD
-               const d = new Date(item.startDate);
-               if (!isNaN(d.getTime())) {
-                   itemYear = d.getFullYear();
-               } else {
-                   // Fallback for simple string if Date parse fails (unlikely)
-                   itemYear = parseInt(item.startDate.split('-')[0]) || 2026;
-               }
-          }
-      }
+      // Use central date parsing utility
+      const startDate = parseProjectDate(item.startDate);
+      const endDate = parseProjectDate(item.endDate);
+
+      let itemYear = isNaN(startDate.getTime()) ? 2026 : startDate.getFullYear();
       const matchYear = itemYear === filters.year;
 
       let matchMonth = true;
       if (filters.month !== null) {
-        // Simple month overlap check
-        if(item.startDate && item.endDate) {
-           const s = new Date(item.startDate);
-           const e = new Date(item.endDate);
-           if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
-                const filterDateStart = new Date(filters.year, filters.month, 1);
-                const filterDateEnd = new Date(filters.year, filters.month + 1, 0);
-                // Check overlap
-                matchMonth = s <= filterDateEnd && e >= filterDateStart;
-           } else {
-                // Fallback if dates invalid
-                matchMonth = false;
-           }
+        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+          const filterDateStart = new Date(filters.year, filters.month, 1);
+          const filterDateEnd = new Date(filters.year, filters.month + 1, 0);
+          // Check overlap: proyek jalan jika start <= akhir_bulan AND end >= awal_bulan
+          matchMonth = startDate <= filterDateEnd && endDate >= filterDateStart;
         } else {
-             // Fallback to old logic if needed, or just true if no dates
-             const start = item.startMonth || 0;
-             const end = start + (item.duration || 1);
-             matchMonth = filters.month >= start && filters.month < end;
+          // Fallback to old month index logic if dates missing/invalid
+          const start = item.startMonth || 0;
+          const end = start + (item.duration || 1);
+          matchMonth = filters.month >= start && filters.month < end;
         }
       }
 
@@ -190,66 +175,66 @@ const ProjectPosture = () => {
 
   return (
     <ErrorBoundary>
-    <div className="pb-4 -mt-10">
-      {/* header — plain title + filter */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold text-[#001529] m-0">Postur Proyek</h2>
+      <div className="pb-4 -mt-10">
+        {/* header — plain title + filter */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-[#001529] m-0">Postur Proyek</h2>
 
-        <div className="flex items-center gap-2">
-          {filters.month !== null && (
-            <Tag closable onClose={() => setFilters({ ...filters, month: null })} className="text-xs m-0">{months[filters.month]}</Tag>
-          )}
-          {filters.categories.map(c => (
-            <Tag key={c} closable onClose={() => setFilters({ ...filters, categories: filters.categories.filter(x => x !== c) })} className="text-xs m-0">{c}</Tag>
-          ))}
-          {filters.status && (
-            <Tag closable onClose={() => setFilters({ ...filters, status: null })} className="text-xs m-0">{filters.status}</Tag>
-          )}
-          <Popover content={filterContent} title={<span className="text-sm font-semibold">Filter Project</span>} trigger="click" open={filterOpen} onOpenChange={setFilterOpen} placement="bottomRight">
-            <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
-              <Button icon={<FilterOutlined />} type={activeFilterCount > 0 ? 'primary' : 'default'} ghost={activeFilterCount > 0}>Filter</Button>
-            </Badge>
-          </Popover>
+          <div className="flex items-center gap-2">
+            {filters.month !== null && (
+              <Tag closable onClose={() => setFilters({ ...filters, month: null })} className="text-xs m-0">{months[filters.month]}</Tag>
+            )}
+            {filters.categories.map(c => (
+              <Tag key={c} closable onClose={() => setFilters({ ...filters, categories: filters.categories.filter(x => x !== c) })} className="text-xs m-0">{c}</Tag>
+            ))}
+            {filters.status && (
+              <Tag closable onClose={() => setFilters({ ...filters, status: null })} className="text-xs m-0">{filters.status}</Tag>
+            )}
+            <Popover content={filterContent} title={<span className="text-sm font-semibold">Filter Project</span>} trigger="click" open={filterOpen} onOpenChange={setFilterOpen} placement="bottomRight">
+              <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
+                <Button icon={<FilterOutlined />} type={activeFilterCount > 0 ? 'primary' : 'default'} ghost={activeFilterCount > 0}>Filter</Button>
+              </Badge>
+            </Popover>
+          </div>
         </div>
+
+        {/* content */}
+        {loading ? (
+          <div className="flex justify-center py-10"><Spin size="large" /></div>
+        ) : filteredData.length === 0 ? (
+          <div className="mt-10 mb-10">
+            <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          </div>
+        ) : (
+          <>
+            {/* row 1: kpi */}
+            <KpiRow data={filteredData} />
+
+            {/* row 2: donuts + stacked bar */}
+            <Row gutter={[12, 12]} className="mt-3">
+              <Col xs={24} lg={6}>
+                <StatusDonut data={filteredData} />
+              </Col>
+              <Col xs={24} lg={6}>
+                <PriorityDonut data={filteredData} />
+              </Col>
+              <Col xs={24} lg={12}>
+                <StatusCategoryBar data={filteredData} />
+              </Col>
+            </Row>
+
+            {/* row 3: budget + issues */}
+            <Row gutter={[12, 12]} className="mt-3">
+              <Col xs={24} lg={12}>
+                <BudgetMonitoring data={filteredData} />
+              </Col>
+              <Col xs={24} lg={12}>
+                <TopIssuesTable data={filteredData} />
+              </Col>
+            </Row>
+          </>
+        )}
       </div>
-
-      {/* content */}
-      {loading ? (
-        <div className="flex justify-center py-10"><Spin size="large" /></div>
-      ) : filteredData.length === 0 ? (
-        <div className="mt-10 mb-10">
-          <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        </div>
-      ) : (
-        <>
-          {/* row 1: kpi */}
-          <KpiRow data={filteredData} />
-
-          {/* row 2: donuts + stacked bar */}
-          <Row gutter={[12, 12]} className="mt-3">
-            <Col xs={24} lg={6}>
-              <StatusDonut data={filteredData} />
-            </Col>
-            <Col xs={24} lg={6}>
-              <PriorityDonut data={filteredData} />
-            </Col>
-            <Col xs={24} lg={12}>
-              <StatusCategoryBar data={filteredData} />
-            </Col>
-          </Row>
-
-          {/* row 3: budget + issues */}
-          <Row gutter={[12, 12]} className="mt-3">
-            <Col xs={24} lg={12}>
-              <BudgetMonitoring data={filteredData} />
-            </Col>
-            <Col xs={24} lg={12}>
-              <TopIssuesTable data={filteredData} />
-            </Col>
-          </Row>
-        </>
-      )}
-    </div>
     </ErrorBoundary>
   );
 };

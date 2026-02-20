@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Drawer, Tag, Typography, Progress, Divider, Steps, List, Card, Row, Col, Statistic, Tabs, Avatar, Descriptions, Image, Button, Timeline } from 'antd';
-import { 
-  UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined, 
-  LineChartOutlined, TeamOutlined, SafetyCertificateOutlined, 
+import {
+  UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined,
+  LineChartOutlined, TeamOutlined, SafetyCertificateOutlined,
   FileTextOutlined, PictureOutlined, DownloadOutlined, ClockCircleOutlined
 } from '@ant-design/icons';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -84,8 +84,8 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       label: <span className="flex items-center gap-2"><LineChartOutlined /> Ringkasan</span>,
       children: (
         <>
-           {/* 1. Informasi Umum */}
-           <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
+          {/* 1. Informasi Umum */}
+          <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
             <Descriptions column={2} size="small">
               <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
               <Descriptions.Item label="Prioritas">
@@ -96,12 +96,12 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <Descriptions.Item label="Lokasi">{project.location || '-'}</Descriptions.Item>
               <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
             </Descriptions>
-           </Card>
+          </Card>
 
           {/* 2. Performa & Grafik S-Curve */}
           <div className="mb-6">
             <Title level={5}>Performa Proyek</Title>
-            
+
             {/* Progress Bar Utama */}
             <div className="mb-4">
               <div className="flex justify-between text-xs mb-1">
@@ -109,7 +109,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                 <span className="font-bold">{project.progress}%</span>
               </div>
               <Progress percent={project.progress} strokeColor={getStatusColor(project.status) === 'error' ? '#ff4d4f' : '#52c41a'} />
-              
+
               <div className="flex justify-between text-xs mt-2 text-gray-500">
                 <span>Target Plan (PV): {project.target}%</span>
                 <span className={isNegative ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'}>
@@ -142,36 +142,36 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
             {/* Budget Stats */}
             <Row gutter={[12, 12]}>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>} 
-                      value={project.target} 
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }} 
-                   />
-                 </Card>
-               </Col>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-green-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-green-600">Earned (EV)</span>} 
-                      value={project.progress} 
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#52c41a' }} 
-                   />
-                 </Card>
-               </Col>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>} 
-                      value={project.budgetUsed} 
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }} 
-                   />
-                 </Card>
-               </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>}
+                    value={project.target}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-green-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-green-600">Earned (EV)</span>}
+                    value={project.progress}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#52c41a' }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>}
+                    value={project.budgetUsed}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }}
+                  />
+                </Card>
+              </Col>
             </Row>
           </div>
 
@@ -214,9 +214,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                   <Text strong>{event.eventName || event.title}</Text>
                   <br />
                   <Text type="secondary" className="text-xs">
-                    {event.startDate ? new Date(event.startDate).toLocaleDateString('id-ID') : event.date}
-                     - 
-                    {event.endDate ? new Date(event.endDate).toLocaleDateString('id-ID') : ''}
+                    {event.startDate ? formatProjectDate(event.startDate) : event.date}
+                    -
+                    {event.endDate ? formatProjectDate(event.endDate) : ''}
                   </Text>
                   <p className="text-xs text-gray-500 mt-1 m-0">{event.description || 'Tahapan proyek sesuai jadwal.'}</p>
                 </>
@@ -260,18 +260,18 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                   <Statistic title="Total Man Hours" value={project.hse.manHours} groupSeparator="." />
                 </Col>
                 <Col span={12}>
-                  <Statistic 
-                    title="Safe Man Hours" 
-                    value={project.hse.safeHours} 
-                    groupSeparator="." 
-                    valueStyle={{ color: '#52c41a' }} 
+                  <Statistic
+                    title="Safe Man Hours"
+                    value={project.hse.safeHours}
+                    groupSeparator="."
+                    valueStyle={{ color: '#52c41a' }}
                   />
                 </Col>
                 <Col span={12}>
-                  <Statistic 
-                    title="Incidents" 
-                    value={project.hse.incidents} 
-                    valueStyle={{ color: project.hse.incidents > 0 ? '#ff4d4f' : '#52c41a' }} 
+                  <Statistic
+                    title="Incidents"
+                    value={project.hse.incidents}
+                    valueStyle={{ color: project.hse.incidents > 0 ? '#ff4d4f' : '#52c41a' }}
                   />
                 </Col>
                 <Col span={12}>
@@ -294,7 +294,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           <List
             dataSource={project.documents || []}
             renderItem={(item) => (
-              <List.Item 
+              <List.Item
                 actions={[<Button type="link" size="small" icon={<DownloadOutlined />}>Unduh</Button>]}
               >
                 <List.Item.Meta
@@ -339,13 +339,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     <Drawer
       title={
         <div className="flex flex-col gap-1">
-           <div className="flex justify-between items-start pr-6">
-              <div>
-                <span className="text-xs text-gray-400 block mb-0.5">{project.id}</span>
-                <span className="text-lg font-bold leading-tight block">{project.name}</span>
-              </div>
-              <Tag color={getStatusColor(project.status)} className="mt-1">{project.status}</Tag>
-           </div>
+          <div className="flex justify-between items-start pr-6">
+            <div>
+              <span className="text-xs text-gray-400 block mb-0.5">{project.id}</span>
+              <span className="text-lg font-bold leading-tight block">{project.name}</span>
+            </div>
+            <Tag color={getStatusColor(project.status)} className="mt-1">{project.status}</Tag>
+          </div>
         </div>
       }
       width={700}

@@ -1,6 +1,9 @@
-import React, { useMemo } from 'react';
-import { Card, Tag } from 'antd';
+import React, { useMemo, useState } from 'react';
+import { Card, Tag, Modal, List, Typography } from 'antd';
 import { IssueTooltip } from '../../../components/ui/ProjectTooltip';
+import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
+
+const { Text } = Typography;
 
 /**
  * komponen tabel top 5 issues yang paling sering muncul
@@ -10,6 +13,11 @@ import { IssueTooltip } from '../../../components/ui/ProjectTooltip';
  * @returns {JSX.Element} card dengan tabel top 5 issues
  */
 const TopIssuesTable = ({ data = [] }) => {
+  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const issues = useMemo(() => {
     const map = {};
     data.forEach((p) => {
@@ -18,7 +26,8 @@ const TopIssuesTable = ({ data = [] }) => {
           if (!map[issue]) map[issue] = { count: 0, categories: new Set(), projects: [] };
           map[issue].count++;
           map[issue].categories.add(p.category);
-          map[issue].projects.push({ name: p.name, category: p.category });
+          // Simpan full object project untuk kebutuhan detail drawer
+          map[issue].projects.push(p);
         });
       }
     });
@@ -31,6 +40,16 @@ const TopIssuesTable = ({ data = [] }) => {
 
   // warna untuk ranking badge
   const rankColors = ['#ff4d4f', '#fa8c16', '#faad14', '#1890ff', '#8c8c8c'];
+
+  const handleIssueClick = (issue) => {
+    setSelectedIssue(issue);
+    setIsModalOpen(true);
+  };
+
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setIsDrawerOpen(true);
+  };
 
   return (
     <Card
@@ -46,10 +65,11 @@ const TopIssuesTable = ({ data = [] }) => {
             <IssueTooltip
               key={idx}
               issueName={issue.name}
-              projects={issue.projects}
+              projects={issue.projects.map(p => ({ name: p.name, category: p.category }))} // mapping untuk tooltip format
             >
               <div
-                className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => handleIssueClick(issue)}
               >
                 {/* rank badge */}
                 <div
@@ -81,6 +101,52 @@ const TopIssuesTable = ({ data = [] }) => {
           ))}
         </div>
       )}
+
+      {/* Modal Daftar Project */}
+      <Modal
+        title={
+          <div className="border-b border-gray-100 pb-2 mb-0">
+            <div className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Projek dengan Isu</div>
+            <div className="text-[14px] text-red-500 font-bold">{selectedIssue?.name}</div>
+          </div>
+        }
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        width={400}
+        centered
+        className="premium-modal"
+      >
+        <List
+          dataSource={selectedIssue?.projects || []}
+          className="mt-2"
+          renderItem={(project) => (
+            <List.Item
+              className="cursor-pointer hover:bg-blue-50 transition-colors rounded-md px-3 py-2 border-none group"
+              onClick={() => handleProjectClick(project)}
+            >
+              <div className="flex flex-col w-full">
+                <div className="flex justify-between items-center">
+                  <Text strong className="text-[13px] group-hover:text-blue-600">{project.name}</Text>
+                  <Tag color="blue" className="text-[10px] m-0 border-none">{project.category}</Tag>
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <Text type="secondary" className="text-[11px] font-mono">{project.id}</Text>
+                  <Text type="secondary" className="text-[11px]">•</Text>
+                  <Text type="secondary" className="text-[11px]">{project.manager}</Text>
+                </div>
+              </div>
+            </List.Item>
+          )}
+        />
+      </Modal>
+
+      {/* Detail Project Drawer */}
+      <ProjectDetailDrawer
+        project={selectedProject}
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </Card>
   );
 };

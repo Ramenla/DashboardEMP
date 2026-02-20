@@ -3,8 +3,7 @@ import { Radio, Segmented, Badge, Card, Divider, Typography, Spin, message, Sele
 import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 import { normalizeProjectData, parseProjectDate } from '../../utils/dateUtils';
-
-const API_URL = 'http://localhost:5000/api/projects';
+import { MOCK_PROJECTS } from '../../data/mockData';
 
 /**
  * halaman progres proyek dengan gantt chart
@@ -29,10 +28,8 @@ const ProjectProgress = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Gagal mengambil data');
-      const data = await res.json();
-      const normalized = data.map(normalizeProjectData);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const normalized = MOCK_PROJECTS.map(normalizeProjectData);
       setProjects(normalized);
     } catch (error) {
       console.error(error);

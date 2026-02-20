@@ -1,92 +1,111 @@
-import db from '../config/db.js';
+import { MOCK_PROJECTS } from '../data/mockData.js';
+// import db from '../config/db.js'; // Database disabled for mock mode
 
-// Get all projects
+// In-memory storage for the session
+let projects = [...MOCK_PROJECTS];
+
+// Helper: Format Date to YYYY-MM-DD
+const formatDate = (date) => {
+    if (!date) return null;
+    return new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+};
+
+// Helper: Get Month Index (0-11)
+const getMonthIndex = (date) => {
+    if (!date) return 0;
+    return new Date(date).getMonth();
+};
+
+// Helper: Calculate duration in months
+const getDuration = (start, end) => {
+    if (!start || !end) return 0;
+    const d1 = new Date(start);
+    const d2 = new Date(end);
+    return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+};
+
+// Get all projects with relations (MOCK VERSION)
 export const getProjects = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM projects ORDER BY created_at DESC');
-        // Parse JSON fields if necessary (some MySQL drivers do this automatically)
-        const projects = rows.map(p => ({
-            ...p,
-            issues: typeof p.issues === 'string' ? JSON.parse(p.issues) : p.issues,
-            timelineEvents: typeof p.timelineEvents === 'string' ? JSON.parse(p.timelineEvents) : p.timelineEvents,
-            team: typeof p.team === 'string' ? JSON.parse(p.team) : p.team,
-            hse: typeof p.hse === 'string' ? JSON.parse(p.hse) : p.hse,
-            documents: typeof p.documents === 'string' ? JSON.parse(p.documents) : p.documents,
-            gallery: typeof p.gallery === 'string' ? JSON.parse(p.gallery) : p.gallery,
-        }));
-        res.json(projects);
+        // Return in-memory projects directly
+        // The mock data is already in the "Frontend Structure" heavily, 
+        // but let's ensure we map it if needed. 
+        // Our MOCK_PROJECTS generator already creates the structure the frontend expects 
+        // (including issues, timelineEvents, team, etc.)
+        
+        // Just sort by created date (simulated or just return as is)
+        // MOCK_PROJECTS array order.
+        
+        // We might need to ensure numeric fields are numbers if they were strings.
+        
+        // Recalculate duration/startMonth dynamic fields just in case
+        const result = projects.map(p => {
+             const startMonth = getMonthIndex(p.startDate);
+             const duration = getDuration(p.startDate, p.endDate) || 1;
+             
+             return {
+                 ...p,
+                 startMonth,
+                 duration,
+                 // Ensure nested arrays exist
+                 issues: p.issues || [],
+                 timelineEvents: p.timelineEvents || [],
+                 team: p.team || [],
+                 gallery: p.gallery || [],
+                 documents: p.documents || []
+             };
+        });
+
+        res.json(result);
     } catch (error) {
+        console.error("Get Projects Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
 
-// Create new project
+// Create new project (MOCK VERSION)
 export const createProject = async (req, res) => {
     const p = req.body;
     try {
-        const query = `
-      INSERT INTO projects 
-      (id, name, category, status, priority, progress, target, budgetUsed, budgetTotal, 
-       startMonth, duration, sponsor, manager, strategy, startDate, endDate, location, 
-       issues, timelineEvents, team, hse, documents, gallery) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-        await db.query(query, [
-            p.id, p.name, p.category, p.status, p.priority, p.progress || 0, p.target || 0,
-            p.budgetUsed || 0, p.budgetTotal || 0, p.startMonth || 0, p.duration || 0,
-            p.sponsor, p.manager, p.strategy, p.startDate, p.endDate, p.location,
-            JSON.stringify(p.issues || []),
-            JSON.stringify(p.timelineEvents || []),
-            JSON.stringify(p.team || []),
-            JSON.stringify(p.hse || {}),
-            JSON.stringify(p.documents || []),
-            JSON.stringify(p.gallery || [])
-        ]);
-
-        res.status(201).json({ message: 'Project created successfully', id: p.id });
+        const newProject = {
+            ...p,
+            id: p.id || `EMP-NEW-${Date.now()}`,
+            issues: p.issues || [],
+            timelineEvents: p.timelineEvents || [],
+            team: p.team || [],
+            gallery: [],
+            documents: []
+        };
+        projects.unshift(newProject); // Add to beginning
+        res.status(201).json({ message: 'Project created successfully (MOCK)', id: newProject.id });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Update project
+// Update project (MOCK VERSION)
 export const updateProject = async (req, res) => {
     const { id } = req.params;
     const p = req.body;
     try {
-        const query = `
-      UPDATE projects SET 
-      name=?, category=?, status=?, priority=?, progress=?, target=?, budgetUsed=?, budgetTotal=?, 
-      startMonth=?, duration=?, sponsor=?, manager=?, strategy=?, startDate=?, endDate=?, location=?, 
-      issues=?, timelineEvents=?, team=?, hse=?, documents=?, gallery=?
-      WHERE id=?
-    `;
-
-        await db.query(query, [
-            p.name, p.category, p.status, p.priority, p.progress, p.target, p.budgetUsed, p.budgetTotal,
-            p.startMonth, p.duration, p.sponsor, p.manager, p.strategy, p.startDate, p.endDate, p.location,
-            JSON.stringify(p.issues || []),
-            JSON.stringify(p.timelineEvents || []),
-            JSON.stringify(p.team || []),
-            JSON.stringify(p.hse || {}),
-            JSON.stringify(p.documents || []),
-            JSON.stringify(p.gallery || []),
-            id
-        ]);
-
-        res.json({ message: 'Project updated successfully' });
+        const index = projects.findIndex(proj => proj.id === id);
+        if (index !== -1) {
+            projects[index] = { ...projects[index], ...p };
+            res.json({ message: 'Project updated successfully (MOCK)' });
+        } else {
+            res.status(404).json({ message: 'Project not found' });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Delete project
+// Delete project (MOCK VERSION)
 export const deleteProject = async (req, res) => {
     const { id } = req.params;
     try {
-        await db.query('DELETE FROM projects WHERE id = ?', [id]);
-        res.json({ message: 'Project deleted successfully' });
+        projects = projects.filter(p => p.id !== id);
+        res.json({ message: 'Project deleted successfully (MOCK)' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

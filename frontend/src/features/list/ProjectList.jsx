@@ -6,8 +6,7 @@ import FilterCard from './components/FilterCard';
 import ProjectTable from './components/ProjectTable';
 import ProjectModal from './components/ProjectModal';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
-
-const API_URL = 'http://localhost:5000/api/projects';
+import { MOCK_PROJECTS } from '../../data/mockData';
 
 /**
  * halaman project list - daftar semua project dengan filtering
@@ -33,15 +32,15 @@ const ProjectList = () => {
   const [saving, setSaving] = useState(false);
 
   // fetch data dari backend
+  // fetch data dari local mock
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Gagal mengambil data');
-      const data = await res.json();
-      setAllData(data);
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setAllData([...MOCK_PROJECTS]); // Use spread to create new reference
     } catch (err) {
-      message.error(err.message || 'Gagal mengambil data dari server');
+      message.error(err.message || 'Gagal mengambil data');
     } finally {
       setLoading(false);
     }
@@ -94,26 +93,33 @@ const ProjectList = () => {
     setIsModalOpen(true);
   };
 
-  // simpan project (tambah / edit)
+  // simpan project (tambah / edit) - MOCK VERSION
   const handleSave = async (values) => {
     setSaving(true);
     try {
-      const isEdit = !!editProject;
-      const url = isEdit ? `${API_URL}/${editProject.id}` : API_URL;
-      const method = isEdit ? 'PUT' : 'POST';
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Gagal menyimpan');
+      if (editProject) {
+        // Update mock data
+        const index = MOCK_PROJECTS.findIndex(p => p.id === editProject.id);
+        if (index !== -1) {
+             MOCK_PROJECTS[index] = { ...MOCK_PROJECTS[index], ...values };
+        }
+        message.success('Project berhasil diperbarui (Simulasi)');
+      } else {
+        // Add new to mock data
+        const newProject = {
+             ...values, 
+             id: values.id || `EMP-NEW-${Date.now()}`,
+             issues: [],
+             timelineEvents: [],
+             team: []
+        };
+        MOCK_PROJECTS.unshift(newProject);
+        message.success('Project berhasil ditambahkan (Simulasi)');
       }
 
-      message.success(isEdit ? 'Project berhasil diperbarui' : 'Project berhasil ditambahkan');
       setIsModalOpen(false);
       setEditProject(null);
       fetchProjects();
@@ -124,12 +130,15 @@ const ProjectList = () => {
     }
   };
 
-  // hapus project
+  // hapus project - MOCK VERSION
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Gagal menghapus');
-      message.success('Project berhasil dihapus');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const index = MOCK_PROJECTS.findIndex(p => p.id === id);
+      if (index !== -1) {
+        MOCK_PROJECTS.splice(index, 1);
+      }
+      message.success('Project berhasil dihapus (Simulasi)');
       fetchProjects();
     } catch (err) {
       message.error(err.message);

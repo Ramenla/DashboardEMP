@@ -10,10 +10,10 @@ import StatusCategoryBar from './components/StatusCategoryBar';
 import BudgetMonitoring from './components/BudgetMonitoring';
 import TopIssuesTable from './components/TopIssuesTable';
 
+import { MOCK_PROJECTS } from '../../data/mockData';
 import { parseProjectDate, normalizeProjectData } from '../../utils/dateUtils';
 
 const { Option } = Select;
-const API_URL = 'http://localhost:5000/api/projects';
 
 // Simple Error Boundary Component for debugging
 class ErrorBoundary extends React.Component {
@@ -70,18 +70,18 @@ const ProjectPosture = () => {
   const [loading, setLoading] = useState(false);
 
   // Fetch data projects dari backend
+  // Fetch data projects dari local mock
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        const normalized = data.map(normalizeProjectData);
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const normalized = MOCK_PROJECTS.map(normalizeProjectData);
         setProjectsData(normalized);
       } catch (error) {
         console.error('Error fetching projects:', error);
-        message.error('Gagal mengambil data proyek dari server');
+        message.error('Gagal mengambil data proyek');
       } finally {
         setLoading(false);
       }

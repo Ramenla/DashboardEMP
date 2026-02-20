@@ -163,7 +163,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <Progress percent={project.progress} strokeColor={getStatusColor(project.status) === 'error' ? '#ff4d4f' : '#52c41a'} />
 
               <div className="flex justify-between text-xs mt-2 text-gray-500">
-                <span>Target Plan (PV): {project.target}%</span>
+                <span>Target Plan (PV): {project.target.toFixed(1)}%</span>
                 <span className={isNegative ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'}>
                   Deviasi: {currentDeviation > 0 ? '+' : ''}{currentDeviation.toFixed(1)}%
                 </span>
@@ -208,6 +208,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                    <Statistic 
                       title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>} 
                       value={project.target} 
+                      precision={1}
                       suffix="%" 
                       valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }} 
                    />

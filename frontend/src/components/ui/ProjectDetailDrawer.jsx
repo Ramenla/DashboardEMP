@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { Drawer, Tag, Typography, Progress, Divider, Steps, List, Card, Row, Col, Statistic, Tabs, Avatar, Descriptions, Image, Button, Timeline } from 'antd';
-import { 
-  UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined, 
-  LineChartOutlined, TeamOutlined, SafetyCertificateOutlined, 
+import {
+  UserOutlined, CalendarOutlined, DollarOutlined, WarningOutlined,
+  LineChartOutlined, TeamOutlined, SafetyCertificateOutlined,
   FileTextOutlined, PictureOutlined, DownloadOutlined, ClockCircleOutlined
 } from '@ant-design/icons';
+import { formatProjectDate } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const { Title, Text } = Typography;
@@ -90,8 +91,8 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
       label: <span className="flex items-center gap-2"><LineChartOutlined /> Ringkasan</span>,
       children: (
         <>
-           {/* 1. Informasi Umum */}
-           <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
+          {/* 1. Informasi Umum */}
+          <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
             <Descriptions column={2} size="small">
               <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
               <Descriptions.Item label="Prioritas">
@@ -101,12 +102,38 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <Descriptions.Item label="Lokasi">{project.location || '-'}</Descriptions.Item>
               <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
             </Descriptions>
-           </Card>
+          </Card>
 
           {/* 2. Performa & Grafik S-Curve */}
           <div className="mb-6">
             <Title level={5}>Performa Proyek</Title>
-            
+
+            {/* SPI & CPI Metrics */}
+            <Row gutter={16} className="mb-4">
+              <Col span={12}>
+                <Card size="small" className="bg-blue-50 border-blue-100">
+                  <Statistic
+                    title={<span className="text-xs text-blue-600 font-semibold">Jadwal (SPI)</span>}
+                    value={project.spi || 1.15}
+                    precision={2}
+                    valueStyle={{ color: (project.spi || 1.15) >= 1 ? '#3f8600' : '#cf1322', fontSize: 20, fontWeight: 'bold' }}
+                    suffix={<span className="text-xs text-gray-500 font-normal">Target ≥ 1.0</span>}
+                  />
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card size="small" className="bg-green-50 border-green-100">
+                  <Statistic
+                    title={<span className="text-xs text-green-600 font-semibold">Biaya (CPI)</span>}
+                    value={project.cpi || 0.98}
+                    precision={2}
+                    valueStyle={{ color: (project.cpi || 0.98) >= 1 ? '#3f8600' : '#cf1322', fontSize: 20, fontWeight: 'bold' }}
+                    suffix={<span className="text-xs text-gray-500 font-normal">Target ≥ 1.0</span>}
+                  />
+                </Card>
+              </Col>
+            </Row>
+
             {/* Progress Bar Utama */}
             <div className="mb-4">
               <div className="flex justify-between text-xs mb-1">
@@ -114,7 +141,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                 <span className="font-bold">{project.progress}%</span>
               </div>
               <Progress percent={project.progress} strokeColor={getStatusColor(project.status) === 'error' ? '#ff4d4f' : '#52c41a'} />
-              
+
               <div className="flex justify-between text-xs mt-2 text-gray-500">
                 <span>Target Plan (PV): {project.target}%</span>
                 <span className={isNegative ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'}>
@@ -229,9 +256,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                   <Text strong>{event.eventName || event.title}</Text>
                   <br />
                   <Text type="secondary" className="text-xs">
-                    {event.startDate ? new Date(event.startDate).toLocaleDateString('id-ID') : event.date}
-                     - 
-                    {event.endDate ? new Date(event.endDate).toLocaleDateString('id-ID') : ''}
+                    {event.startDate ? formatProjectDate(event.startDate) : event.date}
+                    -
+                    {event.endDate ? formatProjectDate(event.endDate) : ''}
                   </Text>
                   <p className="text-xs text-gray-500 mt-1 m-0">{event.description || 'Tahapan proyek sesuai jadwal.'}</p>
                 </>
@@ -264,6 +291,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
             />
             {(!project.team || project.team.length === 0) && <EmptyState text="Data tim belum tersedia" />}
           </div>
+
         </>
       ),
     },
@@ -276,7 +304,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           <List
             dataSource={project.documents || []}
             renderItem={(item) => (
-              <List.Item 
+              <List.Item
                 actions={[<Button type="link" size="small" icon={<DownloadOutlined />}>Unduh</Button>]}
               >
                 <List.Item.Meta
@@ -321,13 +349,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     <Drawer
       title={
         <div className="flex flex-col gap-1">
-           <div className="flex justify-between items-start pr-6">
-              <div>
-                <span className="text-xs text-gray-400 block mb-0.5">{project.id}</span>
-                <span className="text-lg font-bold leading-tight block">{project.name}</span>
-              </div>
-              <Tag color={getStatusColor(project.status)} className="mt-1">{project.status}</Tag>
-           </div>
+          <div className="flex justify-between items-start pr-6">
+            <div>
+              <span className="text-xs text-gray-400 block mb-0.5">{project.id}</span>
+              <span className="text-lg font-bold leading-tight block">{project.name}</span>
+            </div>
+            <Tag color={getStatusColor(project.status)} className="mt-1">{project.status}</Tag>
+          </div>
         </div>
       }
       width={700}

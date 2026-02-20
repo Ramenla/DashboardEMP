@@ -4,9 +4,9 @@ import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const PRIORITY_CONFIG = {
-  Tinggi: { color: '#ff4d4f', label: 'Tinggi' },
-  Sedang: { color: '#faad14', label: 'Sedang' },
-  Rendah: { color: '#bfbfbf', label: 'Rendah' },
+  HIGH: { color: '#ff4d4f', label: 'High' },
+  MEDIUM: { color: '#faad14', label: 'Medium' },
+  LOW: { color: '#bfbfbf', label: 'Low' },
 };
 
 const CustomTooltip = ({ active, payload }) => {
@@ -36,7 +36,7 @@ const PriorityDonut = ({ data = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   const chartData = useMemo(() => {
-    const counts = { Tinggi: 0, Sedang: 0, Rendah: 0 };
+    const counts = { HIGH: 0, MEDIUM: 0, LOW: 0 };
     data.forEach((p) => { if (counts[p.priority] !== undefined) counts[p.priority]++; });
     const total = data.length || 1;
     return Object.entries(counts)
@@ -48,7 +48,7 @@ const PriorityDonut = ({ data = [] }) => {
       }));
   }, [data]);
 
-  const highCount = chartData.find(d => d.name === 'Tinggi')?.value || 0;
+  const highCount = chartData.find(d => d.name === 'HIGH')?.value || 0;
 
   // filter project berdasarkan prioritas yang diklik
   const filteredProjects = useMemo(() => {
@@ -77,7 +77,7 @@ const PriorityDonut = ({ data = [] }) => {
               <p className="text-2xl font-bold m-0 leading-none" style={{ color: highCount > 0 ? '#ff4d4f' : '#52c41a' }}>
                 {highCount}
               </p>
-              <p className="text-[10px] text-gray-400 m-0">Tinggi</p>
+              <p className="text-[10px] text-gray-400 m-0">High</p>
             </div>
 
             <ResponsiveContainer>
@@ -159,10 +159,10 @@ const PriorityDonut = ({ data = [] }) => {
                 <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <Tag
-                    color={
-                      p.status === 'Berjalan' ? 'green' :
-                      p.status === 'Kritis' ? 'red' : 'orange'
-                    }
+                      color={
+                        p.status === 'ON_TRACK' || p.status === 'COMPLETED' ? 'green' :
+                        p.status === 'AT_RISK' ? 'red' : 'orange'
+                      }
                     className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
                   >
                     {p.status}

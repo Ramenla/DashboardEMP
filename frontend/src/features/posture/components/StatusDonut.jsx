@@ -7,9 +7,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
  * warna dan label per status project
  */
 const STATUS_CONFIG = {
-  Berjalan: { color: '#52c41a', label: 'Berjalan' },
-  Kritis: { color: '#ff4d4f', label: 'Kritis' },
-  Tertunda: { color: '#faad14', label: 'Tertunda' },
+  ON_TRACK: { color: '#52c41a', label: 'On Track' },
+  AT_RISK: { color: '#ff4d4f', label: 'At Risk' },
+  DELAYED: { color: '#faad14', label: 'Delayed' },
+  COMPLETED: { color: '#1890ff', label: 'Completed' },
 };
 
 /**
@@ -43,7 +44,7 @@ const StatusDonut = ({ data = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   const chartData = useMemo(() => {
-    const counts = { Berjalan: 0, Kritis: 0, Tertunda: 0 };
+    const counts = { ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, COMPLETED: 0 };
     data.forEach((p) => { if (counts[p.status] !== undefined) counts[p.status]++; });
     const total = data.length || 1;
     return Object.entries(counts)
@@ -163,7 +164,12 @@ const StatusDonut = ({ data = [] }) => {
               {/* info utama */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
-                <p className="text-[10px] text-gray-400 m-0">{p.category} · {p.location}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                   <Tag color={STATUS_CONFIG[p.status]?.color} className="text-[9px] m-0 leading-none px-1.5 py-0 rounded border-none">
+                      {STATUS_CONFIG[p.status]?.label}
+                   </Tag>
+                   <span className="text-[10px] text-gray-400">{p.category} · {p.location}</span>
+                </div>
               </div>
 
               {/* progress */}
@@ -179,7 +185,7 @@ const StatusDonut = ({ data = [] }) => {
               {/* budget */}
               <div className="text-right shrink-0 w-[60px]">
                 <p className="text-xs font-bold m-0" style={{ color: p.budgetUsed >= 90 ? '#ff4d4f' : '#555' }}>
-                  {p.budgetUsed}%
+                  {p.budgetUsed ? p.budgetUsed.toLocaleString() : 0}%
                 </p>
                 <p className="text-[9px] text-gray-400 m-0">budget</p>
               </div>

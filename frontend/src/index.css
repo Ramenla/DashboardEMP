@@ -29,7 +29,6 @@ body {
   background: #999;
 }
 
-/* hapus outline hitam pada semua chart saat diklik/select */
 .recharts-surface,
 .recharts-wrapper,
 .recharts-sector,
@@ -41,3 +40,26 @@ body {
 .recharts-wrapper svg *  {
   outline: none !important;
 }
+
+/* form modal project - spacing yang lebih rapat */
+.project-modal-form .ant-form-item {
+  margin-bottom: 8px;
+}
+.project-modal-form .ant-form-item-label {
+  padding-bottom: 2px !important;
+}
+.project-modal-form .ant-form-item-label > label {
+  font-size: 12px !important;
+  color: #595959 !important;
+}
+
+/* collapse panel di dalam modal */
+.project-modal-collapse .ant-collapse-header {
+  padding: 6px 0 !important;
+  font-size: 12px !important;
+  color: #595959 !important;
+}
+.project-modal-collapse .ant-collapse-content-box {
+  padding: 8px 0 !important;
+}
+

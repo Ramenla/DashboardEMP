@@ -23,11 +23,14 @@ const TopIssuesTable = ({ data = [] }) => {
     data.forEach((p) => {
       if (p.issues && Array.isArray(p.issues)) {
         p.issues.forEach((issue) => {
-          if (!map[issue]) map[issue] = { count: 0, categories: new Set(), projects: [] };
-          map[issue].count++;
-          map[issue].categories.add(p.category);
-          // Simpan full object project untuk kebutuhan detail drawer
-          map[issue].projects.push(p);
+          const issueName = (issue && typeof issue === 'object') ? issue.title : issue;
+          if (issueName) {
+            if (!map[issueName]) map[issueName] = { count: 0, categories: new Set(), projects: [] };
+            map[issueName].count++;
+            map[issueName].categories.add(p.category);
+            // Simpan full object project untuk kebutuhan detail drawer
+            map[issueName].projects.push(p);
+          }
         });
       }
     });

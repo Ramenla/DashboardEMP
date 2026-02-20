@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Segmented, Badge, Card, Divider, Typography } from 'antd';
+import { Radio, Segmented, Badge, Card, Divider, Typography, Spin, message } from 'antd';
 import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
-import { projectsData } from '../../shared/data/mockData';
+
+const API_URL = 'http://localhost:5000/api/projects';
 
 /**
  * halaman progres proyek dengan gantt chart
@@ -10,25 +11,47 @@ import { projectsData } from '../../shared/data/mockData';
  * @returns {JSX.Element} halaman dengan gantt chart, filter, dan drawer detail
  */
 const ProjectProgress = () => {
-  const [priorityFilter, setPriorityFilter] = useState('Semua');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [calendarView, setCalendarView] = useState('Monthly');
   const [groupedData, setGroupedData] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  // Fetch data
   useEffect(() => {
-    const filtered = projectsData.filter(p =>
-      priorityFilter === 'Semua' ? true : p.priority === priorityFilter
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Gagal mengambil data');
+      const data = await res.json();
+      setProjects(data);
+    } catch (error) {
+      console.error(error);
+      message.error('Gagal mengambil data proyek');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const filtered = projects.filter(p =>
+      priorityFilter === 'ALL' ? true : p.priority === priorityFilter
     );
 
-    const categories = ['Exploration', 'Drilling', 'Facility', 'Operation'];
+    const categories = ['EXPLORATION', 'DRILLING', 'FACILITY', 'OPERATION'];
     const result = categories.map(catName => ({
       title: catName,
       projects: filtered.filter(p => p.category === catName)
     })).filter(group => group.projects.length > 0);
 
     setGroupedData(result);
-  }, [priorityFilter]);
+  }, [priorityFilter, projects]);
 
   const handleProjectClick = (project) => {
     setSelectedProject(project);
@@ -67,10 +90,10 @@ const ProjectProgress = () => {
           <div>
             <span className={labelClass}>Prioritas</span>
             <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid" size="small">
-              <Radio.Button value="Semua" className="text-[11px] px-2">Semua</Radio.Button>
-              <Radio.Button value="Rendah" className="text-[11px] px-2">Rendah</Radio.Button>
-              <Radio.Button value="Sedang" className="text-[11px] px-2">Sedang</Radio.Button>
-              <Radio.Button value="Tinggi" className="text-[11px] px-2">Tinggi</Radio.Button>
+              <Radio.Button value="ALL" className="text-[11px] px-2">Semua</Radio.Button>
+              <Radio.Button value="LOW" className="text-[11px] px-2">Low</Radio.Button>
+              <Radio.Button value="MEDIUM" className="text-[11px] px-2">Medium</Radio.Button>
+              <Radio.Button value="HIGH" className="text-[11px] px-2">High</Radio.Button>
             </Radio.Group>
           </div>
 
@@ -80,20 +103,25 @@ const ProjectProgress = () => {
           <div>
             <span className={labelClass}>Keterangan Warna</span>
             <div className="flex gap-3 items-center text-xs">
-              <Badge color="#52c41a" text="Berjalan" />
-              <Badge color="#ff4d4f" text="Kritis" />
-              <Badge color="#faad14" text="Tertunda" />
+              <Badge color="#52c41a" text="On Track" />
+              <Badge color="#ff4d4f" text="At Risk" />
+              <Badge color="#faad14" text="Delayed" />
+              <Badge color="#1890ff" text="Completed" />
             </div>
           </div>
         </div>
       </Card>
 
       <div className="mt-6">
-        <GanttChart
-          data={groupedData}
-          viewMode={calendarView}
-          onProjectClick={handleProjectClick}
-        />
+        {loading ? (
+             <div className="flex justify-center py-10"><Spin size="large" /></div>
+        ) : (
+            <GanttChart
+              data={groupedData}
+              viewMode={calendarView}
+              onProjectClick={handleProjectClick}
+            />
+        )}
       </div>
 
       <ProjectDetailDrawer

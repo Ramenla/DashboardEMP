@@ -5,10 +5,11 @@ import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 const { Text } = Typography;
 
 const locations = [
-  'Blok Langsa', 'Blok Malacca Strait', 'Blok Bentu', 'Blok Korinci Baru',
-  'Blok Singa', 'Blok Kangean', 'Blok Gebang', 'Kantor Pusat Jakarta',
+  "block 'B'", "Blok Bireun-Sigli", "Blok Gebang", "Blok Tonga",
+  "Blok Malacca Strait", "Blok Siak", "Blok Kampar", "Blok Bentu", 
+  "Blok Korinci Baru", "Blok South CPP", "Blok Kangean", "Blok Sengkang", "Buzi EPCC"
 ];
-const categories = ['Exploration', 'Drilling', 'Operation', 'Facility'];
+const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
 
 /**
  * komponen filter bar compact untuk halaman project list
@@ -70,7 +71,7 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         <div className="shrink-0">
           <Text className={labelClass}>Kategori</Text>
           <Checkbox.Group
-            options={categories}
+            options={categories.map(c => ({ label: c.charAt(0) + c.slice(1).toLowerCase(), value: c }))}
             value={filters.categories}
             onChange={(val) => handleChange('categories', val)}
             className="flex flex-row gap-3 text-xs"
@@ -83,9 +84,10 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         <div>
           <Text className={labelClass}>Status</Text>
           <Radio.Group value={filters.status} onChange={(e) => handleChange('status', e.target.value)} buttonStyle="solid" size="small">
-            <Radio.Button value="Kritis" onClick={() => handleRadioClick('status', 'Kritis')} className="text-[11px] px-2">Kritis</Radio.Button>
-            <Radio.Button value="Tertunda" onClick={() => handleRadioClick('status', 'Tertunda')} className="text-[11px] px-2">Tertunda</Radio.Button>
-            <Radio.Button value="Berjalan" onClick={() => handleRadioClick('status', 'Berjalan')} className="text-[11px] px-2">Berjalan</Radio.Button>
+            <Radio.Button value="AT_RISK" onClick={() => handleRadioClick('status', 'AT_RISK')} className="text-[11px] px-2">At Risk</Radio.Button>
+            <Radio.Button value="DELAYED" onClick={() => handleRadioClick('status', 'DELAYED')} className="text-[11px] px-2">Delayed</Radio.Button>
+            <Radio.Button value="ON_TRACK" onClick={() => handleRadioClick('status', 'ON_TRACK')} className="text-[11px] px-2">On Track</Radio.Button>
+            <Radio.Button value="COMPLETED" onClick={() => handleRadioClick('status', 'COMPLETED')} className="text-[11px] px-2">Completed</Radio.Button>
           </Radio.Group>
         </div>
 
@@ -95,9 +97,9 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         <div>
           <Text className={labelClass}>Prioritas</Text>
           <Radio.Group value={filters.priority} onChange={(e) => handleChange('priority', e.target.value)} buttonStyle="solid" size="small">
-            <Radio.Button value="Rendah" onClick={() => handleRadioClick('priority', 'Rendah')} className="text-[11px] px-2">Rendah</Radio.Button>
-            <Radio.Button value="Sedang" onClick={() => handleRadioClick('priority', 'Sedang')} className="text-[11px] px-2">Sedang</Radio.Button>
-            <Radio.Button value="Tinggi" onClick={() => handleRadioClick('priority', 'Tinggi')} className="text-[11px] px-2">Tinggi</Radio.Button>
+            <Radio.Button value="LOW" onClick={() => handleRadioClick('priority', 'LOW')} className="text-[11px] px-2">Low</Radio.Button>
+            <Radio.Button value="MEDIUM" onClick={() => handleRadioClick('priority', 'MEDIUM')} className="text-[11px] px-2">Medium</Radio.Button>
+            <Radio.Button value="HIGH" onClick={() => handleRadioClick('priority', 'HIGH')} className="text-[11px] px-2">High</Radio.Button>
           </Radio.Group>
         </div>
 

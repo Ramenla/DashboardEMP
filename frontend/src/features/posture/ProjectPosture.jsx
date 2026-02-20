@@ -1,10 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Select, Button, Empty, Popover, Badge, Tag } from 'antd';
+import { Row, Col, Select, Button, Empty, Popover, Badge, Tag, Spin, message } from 'antd';
 import { ReloadOutlined, FilterOutlined } from '@ant-design/icons';
-
-// data
-import { projectsData } from '../../shared/data/mockData';
-
 
 import KpiRow from './components/KpiRow';
 import StatusDonut from './components/StatusDonut';
@@ -14,6 +11,41 @@ import BudgetMonitoring from './components/BudgetMonitoring';
 import TopIssuesTable from './components/TopIssuesTable';
 
 const { Option } = Select;
+const API_URL = 'http://localhost:5000/api/projects';
+
+// Simple Error Boundary Component for debugging
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({ error, errorInfo });
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-10 text-red-600 bg-red-50 border border-red-200 rounded m-5">
+          <h2 className="font-bold text-lg mb-2">Something went wrong.</h2>
+          <details className="whitespace-pre-wrap text-sm font-mono text-gray-800">
+            {this.state.error && this.state.error.toString()}
+            <br />
+            {this.state.errorInfo && this.state.errorInfo.componentStack}
+          </details>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 /**
  * halaman project posture - visual overview kesehatan project
@@ -29,11 +61,33 @@ const ProjectPosture = () => {
     status: null,
   });
 
-  const [filteredData, setFilteredData] = useState(projectsData);
+  const [projectsData, setProjectsData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const categories = ['Exploration', 'Drilling', 'Operation', 'Facility'];
-  const statuses = ['Berjalan', 'Kritis', 'Tertunda'];
+  // Fetch Data
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Gagal mengambil data');
+      const data = await res.json();
+      setProjectsData(data);
+    } catch (error) {
+      console.error(error);
+      message.error('Gagal mengambil data proyek');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
+  const statuses = ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'];
   const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -41,14 +95,45 @@ const ProjectPosture = () => {
 
   useEffect(() => {
     const result = projectsData.filter((item) => {
-      const itemYear = item.startDate ? parseInt(item.startDate.split(' ')[2]) : 2026;
+      // Safe Year Extraction
+      let itemYear = 2026;
+      if (item.startDate) {
+          if (item.startDate instanceof Date) {
+              itemYear = item.startDate.getFullYear();
+          } else if (typeof item.startDate === 'string') {
+               // Handle ISO string or YYYY-MM-DD
+               const d = new Date(item.startDate);
+               if (!isNaN(d.getTime())) {
+                   itemYear = d.getFullYear();
+               } else {
+                   // Fallback for simple string if Date parse fails (unlikely)
+                   itemYear = parseInt(item.startDate.split('-')[0]) || 2026;
+               }
+          }
+      }
       const matchYear = itemYear === filters.year;
 
       let matchMonth = true;
       if (filters.month !== null) {
-        const start = item.startMonth;
-        const end = start + item.duration;
-        matchMonth = filters.month >= start && filters.month < end;
+        // Simple month overlap check
+        if(item.startDate && item.endDate) {
+           const s = new Date(item.startDate);
+           const e = new Date(item.endDate);
+           if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
+                const filterDateStart = new Date(filters.year, filters.month, 1);
+                const filterDateEnd = new Date(filters.year, filters.month + 1, 0);
+                // Check overlap
+                matchMonth = s <= filterDateEnd && e >= filterDateStart;
+           } else {
+                // Fallback if dates invalid
+                matchMonth = false;
+           }
+        } else {
+             // Fallback to old logic if needed, or just true if no dates
+             const start = item.startMonth || 0;
+             const end = start + (item.duration || 1);
+             matchMonth = filters.month >= start && filters.month < end;
+        }
       }
 
       const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
@@ -57,7 +142,7 @@ const ProjectPosture = () => {
       return matchYear && matchMonth && matchCategory && matchStatus;
     });
     setFilteredData(result);
-  }, [filters]);
+  }, [filters, projectsData]);
 
   const handleReset = () => {
     setFilters({ year: 2026, month: null, categories: [], status: null });
@@ -95,7 +180,7 @@ const ProjectPosture = () => {
         <div>
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Status</span>
           <Select value={filters.status} onChange={(val) => setFilters({ ...filters, status: val ?? null })} style={{ width: '100%' }} placeholder="Semua" allowClear size="small">
-            {statuses.map(s => <Option key={s} value={s}>{s}</Option>)}
+            {statuses.map(s => <Option key={s} value={s}>{s.replace('_', ' ')}</Option>)}
           </Select>
         </div>
         <Button icon={<ReloadOutlined />} onClick={handleReset} size="small" block className="mt-1">Reset Filter</Button>
@@ -104,6 +189,7 @@ const ProjectPosture = () => {
   );
 
   return (
+    <ErrorBoundary>
     <div className="pb-4 -mt-10">
       {/* header — plain title + filter */}
       <div className="flex items-center justify-between mb-3">
@@ -128,7 +214,9 @@ const ProjectPosture = () => {
       </div>
 
       {/* content */}
-      {filteredData.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-10"><Spin size="large" /></div>
+      ) : filteredData.length === 0 ? (
         <div className="mt-10 mb-10">
           <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
         </div>
@@ -162,6 +250,7 @@ const ProjectPosture = () => {
         </>
       )}
     </div>
+    </ErrorBoundary>
   );
 };
 

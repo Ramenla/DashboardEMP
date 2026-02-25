@@ -50,7 +50,7 @@ const PremiumTooltip = ({ title, children, placement = 'top' }) => {
 /**
  * Specialized tooltip for issues, listing projects and their categories
  */
-export const IssueTooltip = ({ issueName, projects = [], children, placement = 'top' }) => {
+export const IssueTooltip = ({ issueName, projects = [], onProjectClick, children, placement = 'top' }) => {
     if (!projects || projects.length === 0) return children;
 
     const tooltipTitle = (
@@ -58,10 +58,20 @@ export const IssueTooltip = ({ issueName, projects = [], children, placement = '
             <div className="font-bold text-[12px] mb-2 text-gray-900 border-b border-gray-100 pb-1.5">
                 Ditemukan di {projects.length} Proyek
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
                 {projects.map((proj, i) => (
-                    <div key={i} className="text-[11px] leading-tight">
-                        <div className="flex items-start gap-1.5 mb-0.5">
+                    <div
+                        key={i}
+                        className={`text-[11px] leading-tight shrink-0 flex flex-col gap-0.5 p-1 rounded-md ${onProjectClick ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}`}
+                        onClick={(e) => {
+                            if (onProjectClick) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onProjectClick(proj);
+                            }
+                        }}
+                    >
+                        <div className="flex items-start gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
                             <span className="font-medium text-gray-800">{proj.name}</span>
                         </div>
@@ -88,7 +98,7 @@ export const IssueTooltip = ({ issueName, projects = [], children, placement = '
  */
 export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
     if (!project) return children;
-    
+
     // Formatting date
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';

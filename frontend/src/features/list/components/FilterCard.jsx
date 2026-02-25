@@ -5,9 +5,19 @@ import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 const { Text } = Typography;
 
 const locations = [
-  "block 'B'", "Blok Bireun-Sigli", "Blok Gebang", "Blok Tonga",
-  "Blok Malacca Strait", "Blok Siak", "Blok Kampar", "Blok Bentu", 
-  "Blok Korinci Baru", "Blok South CPP", "Blok Kangean", "Blok Sengkang", "Buzi EPCC"
+  "'B' Block (Sumatra)",
+  "Bireun-Sigli Block (Sumatra)",
+  "Gebang Block (Sumatra)",
+  "Tonga Block (Sumatra)",
+  "Malacca Strait Block (Sumatra)",
+  "Siak Block (Sumatra)",
+  "Kampar Block (Sumatra)",
+  "Bentu Block (Sumatra)",
+  "Korinci Baru Block (Sumatra)",
+  "South CPP Block (Sumatra)",
+  "Kangean Block (Jawa)",
+  "Sengkang Block (Sulawesi)",
+  "Buzi EPCC (Mozambique)"
 ];
 const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
 
@@ -97,9 +107,9 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
         <div>
           <Text className={labelClass}>Prioritas</Text>
           <Radio.Group value={filters.priority} onChange={(e) => handleChange('priority', e.target.value)} buttonStyle="solid" size="small">
-            <Radio.Button value="LOW" onClick={() => handleRadioClick('priority', 'LOW')} className="text-[11px] px-2">Low</Radio.Button>
-            <Radio.Button value="MEDIUM" onClick={() => handleRadioClick('priority', 'MEDIUM')} className="text-[11px] px-2">Medium</Radio.Button>
-            <Radio.Button value="HIGH" onClick={() => handleRadioClick('priority', 'HIGH')} className="text-[11px] px-2">High</Radio.Button>
+            <Radio.Button value="Rendah" onClick={() => handleRadioClick('priority', 'Rendah')} className="text-[11px] px-2">Rendah</Radio.Button>
+            <Radio.Button value="Sedang" onClick={() => handleRadioClick('priority', 'Sedang')} className="text-[11px] px-2">Sedang</Radio.Button>
+            <Radio.Button value="Tinggi" onClick={() => handleRadioClick('priority', 'Tinggi')} className="text-[11px] px-2">Tinggi</Radio.Button>
           </Radio.Group>
         </div>
 

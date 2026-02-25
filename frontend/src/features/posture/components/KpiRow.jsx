@@ -8,42 +8,81 @@ import {
 } from '@ant-design/icons';
 import PremiumTooltip from '../../../components/ui/ProjectTooltip';
 
-/**
- * mini radial gauge untuk menampilkan skor spi/cpi
- * menggunakan svg circle untuk visualisasi progress circular
- * @param {number} value - nilai 0-2 (1 = ideal)
- * @param {string} color - warna stroke
- * @param {number} size - ukuran svg
- * @returns {JSX.Element} mini gauge svg
+/** Speedometer gauge untuk SPI dan CPI
+ * Radial setengah lingkaran dengan batas absolut: merah (< 1.0) dan hijau (>= 1.0)
+ * @param {number} value - nilai performa (target 1.0)
+ * @param {number} size - ukuran lebar svg
  */
-const MiniGauge = ({ value, color, size = 44 }) => {
-  const radius = (size - 6) / 2;
+
+const SpeedometerGauge = ({ value, size = 68 }) => {
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const pct = Math.min(value / 1.5, 1); // normalize ke max 1.5
-  const offset = circumference * (1 - pct);
+  const halfCircumference = circumference / 2;
+
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Nilai maksimum gauge
+  const maxVal = 1.5;
+  const targetVal = 1.0;
+
+  const redPct = targetVal / maxVal;
+  const greenPct = (maxVal - targetVal) / maxVal;
+
+  const redDash = `${halfCircumference * redPct} ${circumference}`;
+  const greenDash = `${halfCircumference * greenPct} ${circumference}`;
+
+  const pct = Math.min(Math.max(value / maxVal, 0), 1);
+  const needleAngle = -180 + (pct * 180);
+
+  const valueColor = value >= targetVal ? '#52c41a' : '#ff4d4f';
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div className="flex flex-col items-center justify-center pt-2">
+      <svg width={size} height={size / 2 + strokeWidth / 2} className="overflow-visible block">
+        {/* Area Merah (< 1.0) */}
         <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="#f0f0f0" strokeWidth={4}
+          cx={cx}
+          cy={cy}
+          r={radius}
+          fill="none"
+          stroke="#ff4d4f"
+          strokeOpacity={0.8}
+          strokeWidth={strokeWidth}
+          strokeDasharray={redDash}
+          transform={`rotate(-180 ${cx} ${cy})`}
         />
+        {/* Area Hijau (>= 1.0) */}
         <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke={color} strokeWidth={4}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-500"
+          cx={cx}
+          cy={cy}
+          r={radius}
+          fill="none"
+          stroke="#52c41a"
+          strokeOpacity={0.8}
+          strokeWidth={strokeWidth}
+          strokeDasharray={greenDash}
+          transform={`rotate(${-180 + (redPct * 180)} ${cx} ${cy})`}
         />
+
+        {/* Jarum (Needle) */}
+        <line
+          x1={cx}
+          y1={cy}
+          x2={cx + radius - 4}
+          y2={cy}
+          stroke="#374151"
+          strokeWidth={2.5}
+          strokeLinecap="round" className="transition-all duration-700 ease-out"
+          transform={`rotate(${needleAngle} ${cx} ${cy})`}
+        />
+        {/* Titik Tengah */}
+        <circle cx={cx} cy={cy} r={4} fill="#374151" />
       </svg>
-      <span
-        className="absolute inset-0 flex items-center justify-center text-[11px] font-bold"
-        style={{ color }}
-      >
+      <div className="font-bold text-[13px] mt-1.5 leading-none" style={{ color: valueColor }}>
         {value}
-      </span>
+      </div>
     </div>
   );
 };
@@ -54,33 +93,37 @@ const MiniGauge = ({ value, color, size = 44 }) => {
  * @param {Array} data - array project data yang sudah difilter
  * @returns {JSX.Element} row berisi 4 kpi cards
  */
-const KpiRow = ({ data = [] }) => {
+const KpiRow = ({ data = [], stats }) => {
   const m = useMemo(() => {
+    if (stats) {
+      return {
+        total: stats.total,
+        spi: stats.spiAvg,
+        cpi: stats.cpiAvg,
+        atRisk: stats.atRisk,
+        onTrack: stats.onTrack
+      };
+    }
+
     if (data.length === 0) return { total: 0, spi: 0, cpi: 0, atRisk: 0, onTrack: 0 };
 
     let spiSum = 0, cpiSum = 0, atRisk = 0, onTrack = 0;
 
     data.forEach((p) => {
-      const valProgress = p.progress || 0;
-      const valTarget = p.target || 1; // avoid div by zero
-      const spi = valProgress / valTarget;
+      const spi = parseFloat(p.spi) || 1;
+      const cpi = parseFloat(p.cpi) || 1;
       spiSum += spi;
-
-      // CPI = EV% / AC%
-      // AC% = (Actual Cost / Total Budget) * 100
-      const totalBudget = parseFloat(p.totalBudget) || 1;
-      const actualCost = parseFloat(p.budgetUsed) || 0;
-      const acPct = (actualCost / totalBudget) * 100;
-      
-      // EV% = progress
-      const cpi = acPct > 0 ? valProgress / acPct : 1;
       cpiSum += cpi;
 
-      if (spi >= 0.9 && p.status !== 'Beresiko') onTrack++;
-      
-      // Check if budget usage > 90%
+      const totalBudget = parseFloat(p.totalBudget) || 1;
+      const actualCost = parseFloat(p.budgetUsed) || 0;
       const budgetPct = (actualCost / totalBudget) * 100;
-      if (p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90) atRisk++;
+
+      if (p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90) {
+        atRisk++;
+      } else if (spi >= 0.9 && p.status !== 'Beresiko') {
+        onTrack++;
+      }
     });
 
     return {
@@ -90,10 +133,10 @@ const KpiRow = ({ data = [] }) => {
       atRisk,
       onTrack,
     };
-  }, [data]);
+  }, [data, stats]);
 
-  const spiColor = m.spi >= 1 ? '#52c41a' : m.spi >= 0.8 ? '#faad14' : '#ff4d4f';
-  const cpiColor = m.cpi >= 1 ? '#52c41a' : m.cpi >= 0.8 ? '#faad14' : '#ff4d4f';
+  const spiColor = m.spi >= 1 ? '#52c41a' : '#ff4d4f';
+  const cpiColor = m.cpi >= 1 ? '#52c41a' : '#ff4d4f';
 
   const cards = [
     {
@@ -116,10 +159,10 @@ const KpiRow = ({ data = [] }) => {
       tooltip: 'Schedule Performance Index: Perbandingan progres aktual vs target (≥ 1.00 berarti tepat waktu)',
       content: (
         <div className="flex items-center gap-3">
-          <MiniGauge value={m.spi} color={spiColor} />
+          <SpeedometerGauge value={m.spi} size={68} />
           <div>
-            <p className="text-[10px] m-0" style={{ color: spiColor }}>
-              {m.spi >= 1 ? 'Tepat Jadwal' : m.spi >= 0.8 ? 'Sedikit Terlambat' : 'Tertinggal'}
+            <p className="text-[11px] font-bold m-0" style={{ color: spiColor }}>
+              {m.spi >= 1 ? 'Tepat Jadwal' : 'Tertinggal'}
             </p>
             <p className="text-[10px] text-gray-400 m-0">target ≥ 1.00</p>
           </div>
@@ -131,10 +174,10 @@ const KpiRow = ({ data = [] }) => {
       tooltip: 'Cost Performance Index: Perbandingan progres vs budget (≥ 1.00 berarti efisien)',
       content: (
         <div className="flex items-center gap-3">
-          <MiniGauge value={m.cpi} color={cpiColor} />
+          <SpeedometerGauge value={m.cpi} size={68} />
           <div>
-            <p className="text-[10px] m-0" style={{ color: cpiColor }}>
-              {m.cpi >= 1 ? 'Efisien' : m.cpi >= 0.8 ? 'Sedikit Melebihi' : 'Melebihi Anggaran'}
+            <p className="text-[11px] font-bold m-0" style={{ color: cpiColor }}>
+              {m.cpi >= 1 ? 'Efisien' : 'Melebihi Anggaran'}
             </p>
             <p className="text-[10px] text-gray-400 m-0">target ≥ 1.00</p>
           </div>

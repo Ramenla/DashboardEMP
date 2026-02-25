@@ -12,13 +12,15 @@ const { Text } = Typography;
  * @param {Array} data - array project data yang sudah difilter
  * @returns {JSX.Element} card dengan tabel top 5 issues
  */
-const TopIssuesTable = ({ data = [] }) => {
+const TopIssuesTable = ({ data = [], topIssues }) => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const issues = useMemo(() => {
+    if (topIssues && topIssues.length > 0) return topIssues;
+
     const map = {};
     data.forEach((p) => {
       if (p.issues && Array.isArray(p.issues)) {
@@ -39,7 +41,7 @@ const TopIssuesTable = ({ data = [] }) => {
       .map(([name, d]) => ({ name, count: d.count, categories: Array.from(d.categories), projects: d.projects }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
-  }, [data]);
+  }, [data, topIssues]);
 
   // warna untuk ranking badge
   const rankColors = ['#ff4d4f', '#fa8c16', '#faad14', '#1890ff', '#8c8c8c'];
@@ -68,7 +70,8 @@ const TopIssuesTable = ({ data = [] }) => {
             <IssueTooltip
               key={idx}
               issueName={issue.name}
-              projects={issue.projects.map(p => ({ name: p.name, category: p.category }))} // mapping untuk tooltip format
+              projects={issue.projects}
+              onProjectClick={handleProjectClick}
             >
               <div
                 className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"

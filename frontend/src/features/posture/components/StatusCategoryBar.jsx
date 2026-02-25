@@ -102,7 +102,7 @@ const StatusCategoryBar = ({ data = [] }) => {
       {chartData.length === 0 ? (
         <Empty description="Tidak ada data" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
-        <div className="w-full h-[220px]">
+        <div className="w-full h-[250px]">
           <ResponsiveContainer>
             <BarChart
               data={chartData}
@@ -184,7 +184,7 @@ const StatusCategoryBar = ({ data = [] }) => {
                     <Tag
                       color={
                         p.status === 'Berjalan' || p.status === 'Selesai' ? 'green' :
-                        p.status === 'Beresiko' ? 'red' : 'orange'
+                          p.status === 'Beresiko' ? 'red' : 'orange'
                       }
                       className="text-[9px] m-0 leading-none px-1.5 py-0 rounded"
                     >

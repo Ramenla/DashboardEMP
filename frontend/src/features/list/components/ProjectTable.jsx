@@ -150,7 +150,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       sorter: (a, b) => (a.spi || 0) - (b.spi || 0),
       render: (val) => (
         <PremiumTooltip title="Schedule Performance Index (Target >= 1.0)">
-          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{val}</Tag>
+          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{parseFloat(val).toFixed(2)}</Tag>
         </PremiumTooltip>
       ),
     },
@@ -162,14 +162,15 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       sorter: (a, b) => (a.cpi || 0) - (b.cpi || 0),
       render: (val) => (
         <PremiumTooltip title="Cost Performance Index (Target >= 1.0)">
-          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{val}</Tag>
+          <Tag color={val >= 1 ? 'success' : val >= 0.8 ? 'warning' : 'error'}>{parseFloat(val).toFixed(2)}</Tag>
         </PremiumTooltip>
       ),
     },
     {
-      title: 'Budget',
+      title: 'Realisasi Anggaran',
       dataIndex: 'budgetUsed',
       key: 'budget',
+      align: 'center',
       sorter: (a, b) => {
         const pctA = (parseFloat(a.budgetUsed) || 0) / (parseFloat(a.totalBudget) || 1);
         const pctB = (parseFloat(b.budgetUsed) || 0) / (parseFloat(b.totalBudget) || 1);
@@ -191,6 +192,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
     {
       title: 'Total Kendala',
       key: 'issue',
+      align: 'center',
       sorter: (a, b) => (a.issues?.length || 0) - (b.issues?.length || 0),
       render: (_, record) => {
         const issueCount = record.issues?.length || 0;

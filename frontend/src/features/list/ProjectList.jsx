@@ -38,8 +38,10 @@ const ProjectList = () => {
     try {
       const res = await fetch(API_URL);
       if (!res.ok) throw new Error('Gagal mengambil data');
-      const data = await res.json();
-      setAllData(data);
+      const result = await res.json();
+      // Handle both old array format and new object format
+      const projects = Array.isArray(result) ? result : (result.projects || []);
+      setAllData(projects);
     } catch (err) {
       message.error(err.message || 'Gagal mengambil data dari server');
     } finally {

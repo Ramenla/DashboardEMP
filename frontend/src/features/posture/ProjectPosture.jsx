@@ -66,6 +66,9 @@ const ProjectPosture = () => {
 
   const [projectsData, setProjectsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [topIssues, setTopIssues] = useState([]);
+
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -74,11 +77,29 @@ const ProjectPosture = () => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const response = await fetch(API_URL);
+        // Build query string based on filters for server-side logic
+        const queryParams = new URLSearchParams();
+        if (filters.year) queryParams.append('year', filters.year);
+        if (filters.month !== null) queryParams.append('month', filters.month);
+        if (filters.status) queryParams.append('status', filters.status);
+        if (filters.location) queryParams.append('location', filters.location);
+        if (filters.categories.length > 0) {
+          filters.categories.forEach(c => queryParams.append('category', c));
+        }
+
+        const response = await fetch(`${API_URL}?${queryParams.toString()}`);
         if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        const normalized = data.map(normalizeProjectData);
+        const result = await response.json();
+
+        const projects = Array.isArray(result) ? result : (result.projects || []);
+        const serverStats = Array.isArray(result) ? null : result.stats;
+        const serverTopIssues = Array.isArray(result) ? [] : (result.topIssues || []);
+
+        const normalized = projects.map(normalizeProjectData);
         setProjectsData(normalized);
+        setFilteredData(normalized);
+        setStats(serverStats);
+        setTopIssues(serverTopIssues);
       } catch (error) {
         console.error('Error fetching projects:', error);
         message.error('Gagal mengambil data proyek dari server');
@@ -88,7 +109,7 @@ const ProjectPosture = () => {
     };
 
     fetchProjects();
-  }, []);
+  }, [filters.year, filters.month, filters.categories, filters.status, filters.location]); // Refetch when any filter changes
 
   const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
   const statuses = ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
@@ -97,47 +118,19 @@ const ProjectPosture = () => {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
-  useEffect(() => {
-    const result = projectsData.filter((item) => {
-      // Use central date parsing utility
-      const startDate = parseProjectDate(item.startDate);
-      const endDate = parseProjectDate(item.endDate);
-
-      let itemYear = isNaN(startDate.getTime()) ? 2026 : startDate.getFullYear();
-      const matchYear = itemYear === filters.year;
-
-      let matchMonth = true;
-      if (filters.month !== null) {
-        if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-          const filterDateStart = new Date(filters.year, filters.month, 1);
-          const filterDateEnd = new Date(filters.year, filters.month + 1, 0);
-          // Check overlap: proyek jalan jika start <= akhir_bulan AND end >= awal_bulan
-          matchMonth = startDate <= filterDateEnd && endDate >= filterDateStart;
-        } else {
-          // Fallback to old month index logic if dates missing/invalid
-          const start = item.startMonth || 0;
-          const end = start + (item.duration || 1);
-          matchMonth = filters.month >= start && filters.month < end;
-        }
-      }
-
-      const matchCategory = filters.categories.length === 0 || filters.categories.includes(item.category);
-      const matchStatus = filters.status === null || item.status === filters.status;
-
-      return matchYear && matchMonth && matchCategory && matchStatus;
-    });
-    setFilteredData(result);
-  }, [filters, projectsData]);
+  // No longer need local filtering useEffect for months as backend handles it now
 
   const handleReset = () => {
-    setFilters({ year: 2026, month: null, categories: [], status: null });
+    setFilters({ year: 2026, month: null, categories: [], status: null, location: null });
+    setFilterOpen(false);
   };
 
   const activeFilterCount =
     (filters.year !== 2026 ? 1 : 0) +
     (filters.month !== null ? 1 : 0) +
     (filters.categories.length > 0 ? 1 : 0) +
-    (filters.status !== null ? 1 : 0);
+    (filters.status !== null ? 1 : 0) +
+    (filters.location !== null ? 1 : 0);
 
   const filterContent = (
     <div style={{ width: 260 }}>
@@ -168,6 +161,35 @@ const ProjectPosture = () => {
             {statuses.map(s => <Option key={s} value={s}>{s.replace('_', ' ')}</Option>)}
           </Select>
         </div>
+        <div>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Lokasi</span>
+          <Select
+            showSearch
+            value={filters.location}
+            onChange={(val) => setFilters({ ...filters, location: val ?? null })}
+            style={{ width: '100%' }}
+            placeholder="Semua Lokasi"
+            allowClear
+            size="small"
+            filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
+          >
+            {[
+              "'B' Block (Sumatra)",
+              "Bireun-Sigli Block (Sumatra)",
+              "Gebang Block (Sumatra)",
+              "Tonga Block (Sumatra)",
+              "Malacca Strait Block (Sumatra)",
+              "Siak Block (Sumatra)",
+              "Kampar Block (Sumatra)",
+              "Bentu Block (Sumatra)",
+              "Korinci Baru Block (Sumatra)",
+              "South CPP Block (Sumatra)",
+              "Kangean Block (Jawa)",
+              "Sengkang Block (Sulawesi)",
+              "Buzi EPCC (Mozambique)"
+            ].map(loc => <Option key={loc} value={loc}>{loc}</Option>)}
+          </Select>
+        </div>
         <Button icon={<ReloadOutlined />} onClick={handleReset} size="small" block className="mt-1">Reset Filter</Button>
       </div>
     </div>
@@ -190,6 +212,9 @@ const ProjectPosture = () => {
             {filters.status && (
               <Tag closable onClose={() => setFilters({ ...filters, status: null })} className="text-xs m-0">{filters.status}</Tag>
             )}
+            {filters.location && (
+              <Tag closable onClose={() => setFilters({ ...filters, location: null })} className="text-xs m-0">{filters.location}</Tag>
+            )}
             <Popover content={filterContent} title={<span className="text-sm font-semibold">Filter Project</span>} trigger="click" open={filterOpen} onOpenChange={setFilterOpen} placement="bottomRight">
               <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
                 <Button icon={<FilterOutlined />} type={activeFilterCount > 0 ? 'primary' : 'default'} ghost={activeFilterCount > 0}>Filter</Button>
@@ -208,7 +233,7 @@ const ProjectPosture = () => {
         ) : (
           <>
             {/* row 1: kpi */}
-            <KpiRow data={filteredData} />
+            <KpiRow data={filteredData} stats={stats} />
 
             {/* row 2: donuts + stacked bar */}
             <Row gutter={[12, 12]} className="mt-3">
@@ -229,7 +254,7 @@ const ProjectPosture = () => {
                 <BudgetMonitoring data={filteredData} />
               </Col>
               <Col xs={24} lg={12}>
-                <TopIssuesTable data={filteredData} />
+                <TopIssuesTable data={filteredData} topIssues={topIssues} />
               </Col>
             </Row>
           </>

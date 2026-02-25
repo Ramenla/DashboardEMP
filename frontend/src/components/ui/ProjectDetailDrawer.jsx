@@ -59,7 +59,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
   const isNegative = currentDeviation < 0;
 
   // Calculate budget used percentage
-  const totalBudget = parseFloat(project.totalBudget) || 0; 
+  const totalBudget = parseFloat(project.totalBudget) || 0;
   const budgetUsedVal = parseFloat(project.budgetUsed) || 0;
   const budgetUsedPct = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
@@ -70,17 +70,32 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
    */
   const sCurveData = useMemo(() => {
     const data = [];
-    const periods = ['Bulan 1', 'Bulan 2', 'Bulan 3', 'Bulan 4', 'Bulan 5', 'Bulan 6'];
-    const numPeriods = periods.length;
+    // Safety check for dates
+    const start = project.startDate ? new Date(project.startDate) : new Date();
+    const end = project.endDate ? new Date(project.endDate) : new Date(start.getTime() + (project.duration || 6) * 30 * 24 * 60 * 60 * 1000);
 
-    const finalPV = project.target;
-    const finalEV = project.progress;
+    let numPeriods = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+    // Cap at a reasonable number for visualization if data is wonky
+    if (numPeriods <= 0) numPeriods = 1;
+    if (numPeriods > 36) numPeriods = 36;
+
+    const periods = [];
+    const formatter = new Intl.DateTimeFormat('id-ID', { month: 'short', year: '2-digit' });
+
+    // Generate actual month labels
+    for (let i = 0; i < numPeriods; i++) {
+      const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      periods.push(formatter.format(d));
+    }
+
+    const finalPV = project.target || 0;
+    const finalEV = project.progress || 0;
     const finalAC = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
     for (let i = 0; i < numPeriods; i++) {
-        // ... (existing loop logic is fine, but noticed finalAC usage above. 
-        // Need to be careful not to break sCurveData generation if I change variable definitions above)
-        // I changed `totalBudget` default from 1 to 0, so I need to handle division safely.
+      // ... (existing loop logic is fine, but noticed finalAC usage above. 
+      // Need to be careful not to break sCurveData generation if I change variable definitions above)
+      // I changed `totalBudget` default from 1 to 0, so I need to handle division safely.
       const progressRatio = (i + 1) / numPeriods;
 
       const pvFactor = Math.pow(progressRatio, 1.2);
@@ -116,10 +131,10 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <Descriptions.Item label="Durasi">{project.duration} Bulan</Descriptions.Item>
               <Descriptions.Item label="Status"><Tag color={getStatusColor(project.status)}>{project.status}</Tag></Descriptions.Item>
               <Descriptions.Item label="Total Anggaran" span={2}>
-                 <span className="text-blue-600">{formatCurrency(totalBudget)}</span>
+                <span className="text-blue-600">{formatCurrency(totalBudget)}</span>
               </Descriptions.Item>
               <Descriptions.Item label="Realisasi Biaya" span={2}>
-                 <span className={budgetUsedPct > 90 ? "text-red-500" : "text-green-600"}>{formatCurrency(budgetUsedVal)} ({budgetUsedPct.toFixed(1)}%)</span>
+                <span className={budgetUsedPct > 90 ? "text-red-500" : "text-green-600"}>{formatCurrency(budgetUsedVal)} ({budgetUsedPct.toFixed(1)}%)</span>
               </Descriptions.Item>
             </Descriptions>
           </Card>
@@ -184,9 +199,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
                       formatter={(value, name, props) => {
                         if (name === 'Planned Value (PV)') return [`${value}%`, name];
                         if (name === 'Earned Value (EV)') {
-                           const pv = props.payload.pv;
-                           const dev = (value - pv).toFixed(1);
-                           return [`${value}% (Dev: ${dev > 0 ? '+' : ''}${dev}%)`, name];
+                          const pv = props.payload.pv;
+                          const dev = (value - pv).toFixed(1);
+                          return [`${value}% (Dev: ${dev > 0 ? '+' : ''}${dev}%)`, name];
                         }
                         if (name === 'Actual Cost (AC)') return [`${value}%`, name];
                         return [`${value}%`, name];
@@ -203,37 +218,37 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
             {/* Budget Stats */}
             <Row gutter={[12, 12]}>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>} 
-                      value={project.target} 
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }} 
-                   />
-                 </Card>
-               </Col>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-green-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-green-600">Earned (EV)</span>} 
-                      value={project.progress} 
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#52c41a' }} 
-                   />
-                 </Card>
-               </Col>
-               <Col span={8}>
-                 <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
-                   <Statistic 
-                      title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>} 
-                      value={budgetUsedPct} 
-                      precision={1}
-                      suffix="%" 
-                      valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }} 
-                   />
-                 </Card>
-               </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-blue-600">Plan (PV)</span>}
+                    value={project.target}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#1890ff' }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-green-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-green-600">Earned (EV)</span>}
+                    value={project.progress}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#52c41a' }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card size="small" bordered={false} className="shadow-sm bg-red-50 text-center">
+                  <Statistic
+                    title={<span className="text-xs font-semibold text-red-600">Cost (AC)</span>}
+                    value={budgetUsedPct}
+                    precision={1}
+                    suffix="%"
+                    valueStyle={{ fontSize: 18, fontWeight: 'bold', color: '#ff4d4f' }}
+                  />
+                </Card>
+              </Col>
             </Row>
           </div>
 

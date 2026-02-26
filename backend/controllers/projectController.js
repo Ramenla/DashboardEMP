@@ -164,7 +164,6 @@ export const getProjects = async (req, res) => {
         let totalSpi = 0, totalCpi = 0, atRiskCount = 0, onTrackCount = 0;
 
         const projectsResult = projects.map(p => {
-            const localStatus = mapStatus(p.status);
             const startMonth = getMonthIndex(p.startDate);
             const duration = getDuration(p.startDate, p.endDate) || 1;
             const progress = parseFloat(p.progress) || 0;

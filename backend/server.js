@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import db from './config/db.js';
 import projectRoutes from './routes/projectRoutes.js';
+import { seedRandomProjects } from './controllers/seedController.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/api/projects', projectRoutes);
+app.post('/api/seed', seedRandomProjects);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Backend is running' });

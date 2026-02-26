@@ -7,7 +7,7 @@ import ProjectTable from './components/ProjectTable';
 
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 
-const API_URL = 'http://localhost:5000/api/projects';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
  * halaman project list - daftar semua project dengan filtering

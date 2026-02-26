@@ -4,7 +4,7 @@ import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 import { normalizeProjectData, parseProjectDate } from '../../utils/dateUtils';
 
-const API_URL = 'http://localhost:5000/api/projects';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
  * halaman progres proyek dengan gantt chart

@@ -13,7 +13,7 @@ import TopIssuesTable from './components/TopIssuesTable';
 import { parseProjectDate, normalizeProjectData } from '../../utils/dateUtils';
 
 const { Option } = Select;
-const API_URL = 'http://localhost:5000/api/projects';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 // Simple Error Boundary Component for debugging
 class ErrorBoundary extends React.Component {

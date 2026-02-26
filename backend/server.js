@@ -15,7 +15,7 @@ app.use(express.json());
 // Routes
 app.use('/api/projects', projectRoutes);
 
-// Sample Route
+// Health check Endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Backend is running' });
 });

@@ -78,33 +78,45 @@ export const getProjects = async (req, res) => {
         const projectIds = projects.map(p => p.id);
         let allIssues = [];
         if (projectIds.length > 0) {
-            [allIssues] = await db.query(`
-                SELECT id, projectId, title, severity, status, impactScore
-                FROM issues
-                WHERE projectId IN (?)
-            `, [projectIds]);
+            try {
+                [allIssues] = await db.query(`
+                    SELECT id, projectId, title, severity, status, impactScore
+                    FROM issues
+                    WHERE projectId IN (?)
+                `, [projectIds]);
+            } catch (err) {
+                console.warn("Issues table missing or query failed:", err.message);
+            }
         }
 
         // 3. Get all timeline events for the filtered projects
         let allTimeline = [];
         if (projectIds.length > 0) {
-            [allTimeline] = await db.query(`
-                SELECT id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress
-                FROM timeline_events
-                WHERE projectId IN (?)
-                ORDER BY startDate ASC
-            `, [projectIds]);
+            try {
+                [allTimeline] = await db.query(`
+                    SELECT id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress
+                    FROM timeline_events
+                    WHERE projectId IN (?)
+                    ORDER BY startDate ASC
+                `, [projectIds]);
+            } catch (err) {
+                console.warn("Timeline table missing or query failed:", err.message);
+            }
         }
 
         // 4. Get all project members
         let allMembers = [];
         if (projectIds.length > 0) {
-            [allMembers] = await db.query(`
-                SELECT pmb.projectId, pmb.role, e.name
-                FROM project_members pmb
-                LEFT JOIN employees e ON e.id = pmb.employeeId
-                WHERE pmb.projectId IN (?)
-            `, [projectIds]);
+            try {
+                [allMembers] = await db.query(`
+                    SELECT pmb.projectId, pmb.role, e.name
+                    FROM project_members pmb
+                    LEFT JOIN employees e ON e.id = pmb.employeeId
+                    WHERE pmb.projectId IN (?)
+                `, [projectIds]);
+            } catch (err) {
+                console.warn("Members tables missing or query failed:", err.message);
+            }
         }
 
         // Build lookup maps
@@ -169,12 +181,7 @@ export const getProjects = async (req, res) => {
             }
 
             // Update issueStats with categories for Top Issues
-            if (issueMap[p.id]) {
-                issueMap[p.id].forEach(title => {
-                    issueStats[title].categories.add(p.category);
-                    issueStats[title].projects.push({ id: p.id, name: p.name, category: p.category, manager: p.manager });
-                });
-            }
+
 
             // Calculate target from plannedValue
             const target = totalBudget > 0 ? (plannedValue / totalBudget) * 100 : 0;
@@ -185,7 +192,7 @@ export const getProjects = async (req, res) => {
                 team = [{ name: p.manager, role: 'Project Manager' }];
             }
 
-            return {
+            const projectObj = {
                 id: p.id,
                 name: p.name,
                 category: p.category,
@@ -209,6 +216,16 @@ export const getProjects = async (req, res) => {
                 gallery: [],
                 documents: []
             };
+
+            // Update issueStats with categories for Top Issues
+            if (issueMap[p.id]) {
+                issueMap[p.id].forEach(title => {
+                    issueStats[title].categories.add(p.category);
+                    issueStats[title].projects.push(projectObj);
+                });
+            }
+
+            return projectObj;
         });
 
         const topIssues = Object.values(issueStats)

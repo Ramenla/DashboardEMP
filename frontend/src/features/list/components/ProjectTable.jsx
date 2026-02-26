@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, Table, Tag, Progress, Typography, Button, Space, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Card, Table, Tag, Progress, Typography, Space } from 'antd';
 import PremiumTooltip, { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
 import { formatProjectDate } from '../../../utils/dateUtils';
 
@@ -208,43 +207,6 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
           </PremiumTooltip>
         );
       },
-    },
-    {
-      title: 'Aksi',
-      key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
-          <PremiumTooltip title="Edit Proyek">
-            <Button
-              type="text"
-              size="small"
-              icon={<EditOutlined className="text-blue-500" />}
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(record);
-              }}
-            />
-          </PremiumTooltip>
-          <Popconfirm
-            title="Hapus proyek?"
-            onConfirm={(e) => {
-              e.stopPropagation();
-              onDelete(record.id);
-            }}
-            onCancel={(e) => e.stopPropagation()}
-            okText="Ya"
-            cancelText="Tidak"
-          >
-            <Button
-              type="text"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Popconfirm>
-        </Space>
-      ),
     },
   ];
 

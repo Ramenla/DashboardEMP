@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Input, Button, message, Space, Spin } from 'antd';
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { Input, message, Space, Spin } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 import FilterCard from './components/FilterCard';
 import ProjectTable from './components/ProjectTable';
-import ProjectModal from './components/ProjectModal';
+
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 
 const API_URL = 'http://localhost:5000/api/projects';
@@ -28,9 +28,6 @@ const ProjectList = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editProject, setEditProject] = useState(null);
-  const [saving, setSaving] = useState(false);
 
   // fetch data dari backend
   const fetchProjects = useCallback(async () => {
@@ -84,60 +81,6 @@ const ProjectList = () => {
     setFilters({ search: filters.search, categories: [], status: '', priority: '', location: '' });
   };
 
-  // buka modal tambah
-  const handleAdd = () => {
-    setEditProject(null);
-    setIsModalOpen(true);
-  };
-
-  // buka modal edit
-  const handleEdit = (project) => {
-    setEditProject(project);
-    setIsModalOpen(true);
-  };
-
-  // simpan project (tambah / edit)
-  const handleSave = async (values) => {
-    setSaving(true);
-    try {
-      const isEdit = !!editProject;
-      const url = isEdit ? `${API_URL}/${editProject.id}` : API_URL;
-      const method = isEdit ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Gagal menyimpan');
-      }
-
-      message.success(isEdit ? 'Project berhasil diperbarui' : 'Project berhasil ditambahkan');
-      setIsModalOpen(false);
-      setEditProject(null);
-      fetchProjects();
-    } catch (err) {
-      message.error(err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // hapus project
-  const handleDelete = async (id) => {
-    try {
-      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Gagal menghapus');
-      message.success('Project berhasil dihapus');
-      fetchProjects();
-    } catch (err) {
-      message.error(err.message);
-    }
-  };
-
   return (
     <div className="pb-4 -mt-10">
       {/* header: title + search + action */}
@@ -153,14 +96,6 @@ const ProjectList = () => {
             className="rounded-lg"
             style={{ width: 320 }}
           />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAdd}
-            className="rounded-lg shadow-sm"
-          >
-            Tambah Proyek
-          </Button>
         </Space>
       </div>
 
@@ -172,20 +107,9 @@ const ProjectList = () => {
         <ProjectTable
           dataSource={filteredData}
           onRowClick={handleProjectClick}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
           loading={loading}
         />
       </div>
-
-      {/* modal tambah/edit */}
-      <ProjectModal
-        open={isModalOpen}
-        onCancel={() => { setIsModalOpen(false); setEditProject(null); }}
-        onSave={handleSave}
-        project={editProject}
-        loading={saving}
-      />
 
       {/* drawer detail */}
       <ProjectDetailDrawer project={selectedProject} open={isDrawerOpen} onClose={closeDrawer} />

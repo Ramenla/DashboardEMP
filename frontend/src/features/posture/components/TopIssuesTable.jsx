@@ -52,7 +52,9 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
   };
 
   const handleProjectClick = (project) => {
-    setSelectedProject(project);
+    // Cari data lengkap dari props 'data' jika object project yang diklik adalah data parsial
+    const fullProject = data.find(p => p.id === project.id) || project;
+    setSelectedProject(fullProject);
     setIsDrawerOpen(true);
   };
 

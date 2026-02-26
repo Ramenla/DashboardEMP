@@ -127,18 +127,22 @@ export const getProjects = async (req, res) => {
             issueMap[issue.projectId].push({ title: issue.title, division: issue.division });
 
             // Count issues for Top Issues
-            if (!issueStats[issue.title]) {
-                issueStats[issue.title] = {
-                    name: issue.title,
-                    count: 0,
-                    categories: new Set(),
-                    divisions: new Set(),
-                    projects: []
-                };
-            }
-            issueStats[issue.title].count++;
-            if (issue.division) {
-                issueStats[issue.title].divisions.add(issue.division);
+            const trimmedTitle = issue.title ? issue.title.trim() : "";
+            if (trimmedTitle) {
+                if (!issueStats[trimmedTitle]) {
+                    issueStats[trimmedTitle] = {
+                        name: trimmedTitle,
+                        count: 0,
+                        categories: new Set(),
+                        divisions: new Set(),
+                        projects: [],
+                        addedProjects: new Set() // Internal set to track (projectId:division)
+                    };
+                }
+                issueStats[trimmedTitle].count++;
+                if (issue.division) {
+                    issueStats[trimmedTitle].divisions.add(issue.division.trim());
+                }
             }
         }
 
@@ -229,10 +233,17 @@ export const getProjects = async (req, res) => {
             // Update issueStats with categories for Top Issues
             if (issueMap[p.id]) {
                 issueMap[p.id].forEach(issueItem => {
-                    const issueTitle = issueItem.title;
+                    const issueTitle = issueItem.title ? issueItem.title.trim() : "";
+                    const division = issueItem.division ? issueItem.division.trim() : "";
+                    const projectKey = `${p.id}:${division}`;
+
                     if (issueStats[issueTitle]) {
                         issueStats[issueTitle].categories.add(p.category);
-                        issueStats[issueTitle].projects.push(projectObj);
+                        // Only add if not already added for this (projectId, division)
+                        if (!issueStats[issueTitle].addedProjects.has(projectKey)) {
+                            issueStats[issueTitle].projects.push({ ...projectObj, activeDivision: division });
+                            issueStats[issueTitle].addedProjects.add(projectKey);
+                        }
                     }
                 });
             }
@@ -241,11 +252,14 @@ export const getProjects = async (req, res) => {
         });
 
         const topIssues = Object.values(issueStats)
-            .map(issue => ({
-                ...issue,
-                categories: Array.from(issue.categories),
-                divisions: Array.from(issue.divisions)
-            }))
+            .map(issue => {
+                const { addedProjects, ...rest } = issue; // Remove Set before sending to JSON
+                return {
+                    ...rest,
+                    categories: Array.from(issue.categories),
+                    divisions: Array.from(issue.divisions)
+                };
+            })
             .sort((a, b) => b.count - a.count)
             .slice(0, 5);
 

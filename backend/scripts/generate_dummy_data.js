@@ -2,208 +2,109 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config();
 
 const connectionString = process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.TIDB_URL;
 
-const dbConfig = connectionString 
-    ? { uri: connectionString, multipleStatements: true } 
-    : {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'dashboard_emp',
-        multipleStatements: true
-      };
-
-// Real EMP Assets / Locations
-const ASSETS = [
-    // Sumatra
-    { region: 'Sumatra', name: "'B' Block", location: "Riau" },
-    { region: 'Sumatra', name: "Bireun-Sigli Block", location: "Aceh" },
-    { region: 'Sumatra', name: "Gebang Block", location: "Sumatera Utara" },
-    { region: 'Sumatra', name: "Tonga Block", location: "Sumatera Utara" },
-    { region: 'Sumatra', name: "Malacca Strait Block", location: "Riau" },
-    { region: 'Sumatra', name: "Siak Block", location: "Riau" },
-    { region: 'Sumatra', name: "Kampar Block", location: "Riau" },
-    { region: 'Sumatra', name: "Bentu Block", location: "Riau" },
-    { region: 'Sumatra', name: "Korinci Baru Block", location: "Riau" },
-    { region: 'Sumatra', name: "South CPP Block", location: "Riau" },
-    // Jawa
-    { region: 'Jawa', name: "Kangean Block", location: "Jawa Timur (Offshore)" },
-    // Sulawesi
-    { region: 'Sulawesi', name: "Sengkang Block", location: "Sulawesi Selatan" },
-    // Mozambique
-    { region: 'Mozambique', name: "Buzi EPCC", location: "Mozambique" }
-];
-
-// Realistic Activities per Category
-const ACTIVITIES = {
-    'EXPLORATION': ['Seismic 2D Acquisition', 'Seismic 3D Survey', 'Exploration Well Drilling', 'Geological Study', 'G&G Analysis'],
-    'DRILLING': ['Development Well Drilling', 'Infill Drilling', 'Workover Well', 'Well Deepening', 'Rig Mobilization'],
-    'OPERATION': ['Production Optimization', 'Gas Compressor Overhaul', 'Pipeline Inspection', 'Well Maintenance', 'Pump Replacement'],
-    'FACILITY': ['New Separator Installation', 'Storage Tank Repair', 'Flowline Replacement', 'Control Room Upgrade', 'HSE Equipment Upgrade']
-};
-
-const CATEGORIES = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
-const PRIORITIES = ['Tinggi', 'Sedang', 'Rendah'];
-// Updated Statuses: Berjalan, Beresiko, Tertunda, Selesai
-const STATUSES = ['Berjalan', 'Berjalan', 'Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
-const MANAGERS = ['Budi Santoso', 'Siti Aminah', 'Eko Prasetyo', 'Dewi Lestari', 'Agus Setiawan', 'Rina Wati', 'Joko Widodo', 'Andi Hidayat'];
-const DIVISIONS = ['HSE', 'D&C', 'Commercial', 'Exploration', 'Operations', 'Facility', 'Finance'];
-
-// Helper for date
-const randomDate = (startYear = 2026, endYear = 2027) => {
-    const start = new Date(`${startYear}-01-01`);
-    const end = new Date(`${endYear}-12-31`);
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().slice(0, 19).replace('T', ' ');
-};
-
-const addMonths = (dateStr, months) => {
-    const d = new Date(dateStr);
-    d.setMonth(d.getMonth() + months);
-    return d.toISOString().slice(0, 19).replace('T', ' ');
-};
-
-const generateProjects = async () => {
+async function generateData() {
     let connection;
+
     try {
-        console.log('Connecting to database...');
-        connection = await mysql.createConnection(dbConfig);
-        console.log('Connected.');
-
-        // ALTER TABLE to ensure status column can hold new strings (if it was ENUM)
-        console.log('Updating schema...');
-        try {
-            await connection.query("ALTER TABLE projects MODIFY COLUMN status VARCHAR(50)");
-            await connection.query("ALTER TABLE projects MODIFY COLUMN priority VARCHAR(50)");
-        } catch (e) {
-            console.log("Schema update note: " + e.message); // Ignore if already varchar
+        console.log('🔄 Connecting to MySQL server to generate dummy data...');
+        if (connectionString) {
+             connection = await mysql.createConnection({
+                 uri: connectionString,
+                 multipleStatements: true
+             });
+        } else {
+             connection = await mysql.createConnection({
+                 host: process.env.DB_HOST || 'localhost',
+                 user: process.env.DB_USER || 'root',
+                 password: process.env.DB_PASSWORD || '',
+                 database: process.env.DB_NAME || 'dashboard_emp',
+                 multipleStatements: true
+             });
         }
-
-        console.log('Cleaning existing data...');
+        
+        console.log('🧹 Cleaning existing data...');
         await connection.query('DELETE FROM project_metrics');
         await connection.query('DELETE FROM issues');
         await connection.query('DELETE FROM task_milestones');
         await connection.query('DELETE FROM timeline_events');
+        await connection.query('DELETE FROM project_members');
+        await connection.query('DELETE FROM employees');
         await connection.query('DELETE FROM projects');
 
-        console.log('Generating 25 realistic EMP projects...');
+        console.log('🌱 Seeding EVM ERD Dummy Data...');
 
-        for (let i = 1; i <= 25; i++) {
-            const asset = ASSETS[Math.floor(Math.random() * ASSETS.length)];
-            const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-            const possibleActivities = ACTIVITIES[category];
-            const activityName = possibleActivities[Math.floor(Math.random() * possibleActivities.length)];
+        // 1. Insert Projects
+        await connection.query(`
+            INSERT INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget) VALUES
+            ('PRJ-001', 'EXP-01', 'Eksplorasi Blok A', 'EXPLORATION', 'HIGH', 'ON_TRACK', '2026-01-01', '2026-12-31', 5000000000),
+            ('PRJ-002', 'DRL-01', 'Pengeboran Sumur B', 'DRILLING', 'HIGH', 'AT_RISK', '2026-02-15', '2026-11-30', 12000000000),
+            ('PRJ-003', 'OPR-01', 'Maintanance Fasilitas C', 'OPERATION', 'MEDIUM', 'DELAYED', '2026-03-01', '2026-09-30', 3500000000),
+            ('PRJ-004', 'FAC-01', 'Pembangunan Pipa Gas D', 'FACILITY', 'LOW', 'COMPLETED', '2025-06-01', '2026-01-15', 8000000000);
+        `);
 
-            const name = `${asset.name} - ${activityName} #${Math.floor(Math.random() * 5) + 1}`;
+        // 2. Insert Employees
+        await connection.query(`
+            INSERT INTO employees (id, name, position, department) VALUES
+            ('EMP-01', 'Budi Santoso', 'Project Manager', 'Engineering'),
+            ('EMP-02', 'Siti Aminah', 'Lead Driller', 'Operations'),
+            ('EMP-03', 'Andi Wijaya', 'HSE Officer', 'Safety');
+        `);
 
-            const catCode = category.substring(0, 3);
-            const seq = String(i).padStart(3, '0');
-            const projectCode = `EMP-${catCode}-${seq}`;
-            const id = projectCode;
+        // 3. Insert Project Members
+        await connection.query(`
+            INSERT INTO project_members (id, project_id, employee_id, role) VALUES
+            ('PM-01', 'PRJ-001', 'EMP-01', 'Project Manager'),
+            ('PM-02', 'PRJ-001', 'EMP-03', 'HSE Officer'),
+            ('PM-03', 'PRJ-002', 'EMP-02', 'Lead Driller');
+        `);
 
-            const priority = PRIORITIES[Math.floor(Math.random() * PRIORITIES.length)];
-            const status = STATUSES[Math.floor(Math.random() * STATUSES.length)];
-            const manager = MANAGERS[Math.floor(Math.random() * MANAGERS.length)];
+        // 4. Insert Timeline Events
+        await connection.query(`
+            INSERT INTO timeline_events (id, project_id, event_name, start_date, end_date, task_budget, calculated_progress) VALUES
+            ('EVT-01', 'PRJ-001', 'Studi Seismik', '2026-01-01', '2026-03-31', 1000000000, 100),
+            ('EVT-02', 'PRJ-001', 'Pembebasan Lahan', '2026-04-01', '2026-06-30', 2000000000, 50),
+            ('EVT-03', 'PRJ-002', 'Mobilisasi Rig', '2026-02-15', '2026-04-15', 3000000000, 100),
+            ('EVT-04', 'PRJ-002', 'Drilling Phase 1', '2026-04-16', '2026-08-30', 6000000000, 20);
+        `);
 
-            const startDate = randomDate(2026, 2026);
-            const duration = Math.floor(Math.random() * 8) + 2;
-            const endDate = addMonths(startDate, duration);
+        // 5. Insert Task Milestones
+        await connection.query(`
+            INSERT INTO task_milestones (id, timeline_event_id, milestone_name, progress_contribution, is_completed, completed_at) VALUES
+            ('MIL-01', 'EVT-01', 'Izin Survei Keluar', 50, true, '2026-01-15'),
+            ('MIL-02', 'EVT-01', 'Laporan Seismik Selesai', 50, true, '2026-03-20'),
+            ('MIL-03', 'EVT-02', 'Negosiasi Warga', 50, true, '2026-05-10'),
+            ('MIL-04', 'EVT-02', 'Pembayaran Lahan', 50, false, null),
+            ('MIL-05', 'EVT-03', 'Rig Tiba di Lokasi', 100, true, '2026-04-10'),
+            ('MIL-06', 'EVT-04', 'Mencapai Kedalaman 1000m', 20, true, '2026-05-20'),
+            ('MIL-07', 'EVT-04', 'Mencapai Kedalaman Target', 80, false, null);
+        `);
 
-            let minBudget = 1000000000;
-            let maxBudget = 100000000000;
+        // 6. Insert Issues
+        await connection.query(`
+            INSERT INTO issues (id, project_id, title, severity, status, impact_score) VALUES
+            ('ISS-01', 'PRJ-002', 'Cuaca Buruk Menghambat Drilling', 'HIGH', 'OPEN', 5),
+            ('ISS-02', 'PRJ-003', 'Suku Cadang Terlambat Datang', 'MEDIUM', 'IN_PROGRESS', 3);
+        `);
 
-            if (category === 'DRILLING') {
-                minBudget = 50000000000; // 50 M
-                maxBudget = 1500000000000; // 1.5 T
-            } else if (category === 'EXPLORATION') {
-                minBudget = 20000000000; // 20 M
-                maxBudget = 500000000000; // 500 M
-            } else if (category === 'FACILITY') {
-                minBudget = 5000000000; // 5 M
-                maxBudget = 200000000000; // 200 M
-            }
+        // 7. Insert Project Metrics (EVM)
+        await connection.query(`
+            INSERT INTO project_metrics (id, project_id, record_date, actual_cost, actual_progress, planned_value, earned_value, schedule_variance, cost_variance, spi, cpi) VALUES
+            ('MET-01', 'PRJ-001', '2026-05-31', 2300000000, 50, 2400000000, 2500000000, 100000000, 200000000, 1.04, 1.08),
+            ('MET-02', 'PRJ-002', '2026-05-31', 6000000000, 35, 5000000000, 4200000000, -800000000, -1800000000, 0.84, 0.70);
+        `);
 
-            const totalBudget = Math.floor(Math.random() * (maxBudget - minBudget + 1)) + minBudget;
-
-            const locationStr = `${asset.name} (${asset.region})`;
-
-            // Insert Project
-            await connection.query(`
-                INSERT INTO projects (id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, location, manager)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, locationStr, manager]);
-
-            // Insert Timeline Events
-            const phases = ['Preparation', 'Execution', 'Reporting'];
-            const durationPerPhase = Math.floor(duration / phases.length) || 1;
-
-            let currentStart = startDate;
-            for (let j = 0; j < phases.length; j++) {
-                const eventId = `evt-${id}-${j}`;
-                const eventEnd = addMonths(currentStart, durationPerPhase);
-
-                await connection.query(`
-                    INSERT INTO timeline_events (id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                `, [eventId, id, phases[j], currentStart, eventEnd, totalBudget / phases.length, status === 'Selesai' ? 100 : Math.floor(Math.random() * 100)]);
-
-                currentStart = eventEnd;
-            }
-
-            // Insert Issues (Realistic)
-            if (status === 'Beresiko' || status === 'Tertunda' || Math.random() > 0.8) {
-                const numIssues = Math.floor(Math.random() * 2) + 1;
-                const ISSUE_TEMPLATES = [
-                    "Keterlambatan persetujuan izin dari pemerintah daerah",
-                    "Kerusakan peralatan saat operasi",
-                    "Cuaca buruk menghentikan aktivitas offshore",
-                    "Gangguan rantai pasok untuk suku cadang kritis",
-                    "Temuan geologis tak terduga memerlukan revisi rencana",
-                    "Sengketa pembebasan lahan dengan masyarakat lokal",
-                    "Investigasi insiden keselamatan diperlukan",
-                    "Kekurangan tenaga kerja kontraktor"
-                ];
-
-                for (let k = 0; k < numIssues; k++) {
-                    const issueId = `iss-${id}-${k}`;
-                    const template = ISSUE_TEMPLATES[Math.floor(Math.random() * ISSUE_TEMPLATES.length)];
-                    const division = DIVISIONS[Math.floor(Math.random() * DIVISIONS.length)];
-                    await connection.query(`
-                        INSERT INTO issues (id, projectId, title, division, severity, status, impactScore)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    `, [issueId, id, template, division, 'HIGH', 'OPEN', Math.floor(Math.random() * 5) + 1]);
-                }
-            }
-
-            // Insert Metrics
-            const progress = status === 'Selesai' ? 100 : Math.floor(Math.random() * 90);
-            // Generate target (Planned Progress) roughly around actual progress (with some deviation)
-            const target = Math.max(0, Math.min(100, progress + (Math.random() * 20 - 10)));
-
-            // Calculate absolute values (Currency)
-            const earnedValue = totalBudget * (progress / 100);
-            const plannedValue = totalBudget * (target / 100);
-            const actualCost = totalBudget * (progress / 100) * (Math.random() * 0.4 + 0.8); // Random cost efficiency
-
-            const spi = plannedValue > 0 ? (earnedValue / plannedValue).toFixed(2) : 1;
-            const cpi = actualCost > 0 ? (earnedValue / actualCost).toFixed(2) : 1;
-
-            await connection.query(`
-                INSERT INTO project_metrics (id, projectId, recordDate, actualCost, actualProgress, plannedValue, earnedValue, spi, cpi)
-                VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?)
-            `, [`met-${id}`, id, actualCost, progress, plannedValue, earnedValue, spi, cpi]);
-        }
-
-        console.log('Successfully generated 25 realistic EMP projects.');
+        console.log('✅ Dummy data successfully seeded!');
 
     } catch (error) {
-        console.error('Generation failed:', error);
+        console.error('❌ Data generation failed:', error);
+        process.exit(1);
     } finally {
         if (connection) await connection.end();
-        process.exit();
     }
-};
+}
 
-generateProjects();
+generateData();

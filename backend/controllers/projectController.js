@@ -20,6 +20,13 @@ const mapStatus = (s) => {
     return s;
 };
 
+const mapPriority = (p) => {
+    if (p === 'HIGH') return 'Tinggi';
+    if (p === 'MEDIUM') return 'Sedang';
+    if (p === 'LOW') return 'Rendah';
+    return p;
+};
+
 export const getProjects = async (req, res) => {
     try {
         const { year, month, category, status } = req.query;
@@ -63,8 +70,9 @@ export const getProjects = async (req, res) => {
                 query += ` AND p.start_date <= ? AND p.end_date >= ?`;
                 queryParams.push(endOfMonth, startOfMonth);
             } else {
-                query += ` AND YEAR(p.start_date) = ?`;
-                queryParams.push(year);
+                // Tampilkan proyek yang AKTIF di tahun tersebut (bukan hanya yang mulai di tahun tersebut)
+                query += ` AND YEAR(p.start_date) <= ? AND YEAR(p.end_date) >= ?`;
+                queryParams.push(year, year);
             }
         }
         if (category) {
@@ -73,10 +81,14 @@ export const getProjects = async (req, res) => {
             queryParams.push(categories);
         }
         if (status) {
-            // map Indonesian status back to enum for query
             const reverseStatus = { 'Berjalan': 'ON_TRACK', 'Beresiko': 'AT_RISK', 'Tertunda': 'DELAYED', 'Selesai': 'COMPLETED' };
             query += ` AND p.status = ?`;
             queryParams.push(reverseStatus[status] || status);
+        }
+        if (req.query.priority) {
+            const reversePriority = { 'Tinggi': 'HIGH', 'Sedang': 'MEDIUM', 'Rendah': 'LOW' };
+            query += ` AND p.priority = ?`;
+            queryParams.push(reversePriority[req.query.priority] || req.query.priority);
         }
 
         query += ` ORDER BY p.id ASC`;
@@ -175,7 +187,7 @@ export const getProjects = async (req, res) => {
             const manager = team.find(t => t.role === 'Project Manager')?.name || 'Belum Ditentukan';
 
             return {
-                id: p.id, name: p.name, category: p.category, priority: p.priority,
+                id: p.id, name: p.name, category: p.category, priority: mapPriority(p.priority),
                 status: localStatus, startDate: p.startDate, endDate: p.endDate,
                 startMonth, duration, totalBudget, budgetUsed, target, progress, spi, cpi,
                 location: 'Head Office', manager,

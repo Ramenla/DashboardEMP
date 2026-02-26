@@ -55,6 +55,11 @@ async function initDatabase() {
                 await db.query("ALTER TABLE issues ADD COLUMN division VARCHAR(100) AFTER title");
                 console.log("✅ 'division' column added.");
             }
+            // Migration: isi data division yang masih kosong (NULL) dari existing data
+            await db.query(`
+                UPDATE issues SET division = 'Drilling & Workover' WHERE id = 'ISS-01' AND (division IS NULL OR division = '');
+                UPDATE issues SET division = 'Supply Chain' WHERE id = 'ISS-02' AND (division IS NULL OR division = '');
+            `);
             return;
         }
 

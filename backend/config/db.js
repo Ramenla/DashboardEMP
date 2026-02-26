@@ -3,31 +3,35 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+// Railway menyuntikkan MYSQL_URL secara otomatis jika kita menggunakan MySQL plugin
+const connectionString = process.env.MYSQL_URL || process.env.DATABASE_URL;
 
-// Automatic Schema Adjustment: Check and add 'division' column to 'issues' table
-const ensureSchema = async () => {
-    try {
-        console.log("Checking database schema...");
-        const [columns] = await pool.query("SHOW COLUMNS FROM issues LIKE 'division'");
-        if (columns.length === 0) {
-            console.log("Adding 'division' column to 'issues' table...");
-            await pool.query("ALTER TABLE issues ADD COLUMN division VARCHAR(100) AFTER title");
-            console.log("Column 'division' added successfully.");
-        }
-    } catch (err) {
-        console.error("Schema Adjustment Error:", err.message);
-    }
-};
+let pool;
 
-ensureSchema();
+if (connectionString) {
+    // Production: Railway MySQL via connection string
+    pool = mysql.createPool({
+        uri: connectionString,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        multipleStatements: true
+    });
+    console.log('📡 Using MYSQL_URL for database connection (Production).');
+} else {
+    // Development: koneksi lokal
+    pool = mysql.createPool({
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'dashboard_emp',
+        port: process.env.DB_PORT || 3306,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        multipleStatements: true
+    });
+    console.log('🏠 Using local DB_HOST for database connection (Development).');
+}
 
 export default pool;

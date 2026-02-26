@@ -69,6 +69,23 @@ async function initDatabase() {
                 UPDATE issues SET division = 'Drilling & Workover' WHERE id = 'ISS-01' AND (division IS NULL OR division = '');
                 UPDATE issues SET division = 'Supply Chain' WHERE id = 'ISS-02' AND (division IS NULL OR division = '');
             `);
+            // Migration: update lokasi proyek ke format Indonesia
+            console.log('📍 Updating project locations to Indonesian format...');
+            await db.query(`UPDATE projects SET location = 'Blok B (Sumatra)' WHERE location IS NULL OR location IN ("'B' Block (Sumatra)", 'B Block (Sumatra)')`);
+            await db.query(`UPDATE projects SET location = 'Blok Siak (Sumatra)' WHERE location = 'Siak Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Kampar (Sumatra)' WHERE location = 'Kampar Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Korinci Baru (Sumatra)' WHERE location = 'Korinci Baru Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Kangean (Jawa)' WHERE location = 'Kangean Block (Jawa)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Sengkang (Sulawesi)' WHERE location = 'Sengkang Block (Sulawesi)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Malacca Strait (Sumatra)' WHERE location = 'Malacca Strait Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Bentu (Sumatra)' WHERE location = 'Bentu Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Tonga (Sumatra)' WHERE location = 'Tonga Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Gebang (Sumatra)' WHERE location = 'Gebang Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Bireun-Sigli (Sumatra)' WHERE location = 'Bireun-Sigli Block (Sumatra)'`);
+            await db.query(`UPDATE projects SET location = 'Blok Buzi EPCC (Mozambique)' WHERE location = 'Buzi EPCC (Mozambique)'`);
+            // Proyek yang masih NULL atau Makassar Strait → assign ke Blok South CPP
+            await db.query(`UPDATE projects SET location = 'Blok South CPP (Sumatra)' WHERE location IS NULL OR location = '' OR location = 'Makassar Strait Block'`);
+            console.log('✅ Project locations updated.');
             return;
         }
 
@@ -184,10 +201,10 @@ async function initDatabase() {
         // ───── DUMMY DATA ─────
         await db.query(`
             INSERT INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget, location) VALUES
-            ('PRJ-001', 'EXP-01', 'Eksplorasi Blok A', 'EXPLORATION', 'HIGH', 'ON_TRACK', '2026-01-01', '2026-12-31', 5000000000, \"'B' Block (Sumatra)\"),
-            ('PRJ-002', 'DRL-01', 'Pengeboran Sumur B', 'DRILLING', 'HIGH', 'AT_RISK', '2026-02-15', '2026-11-30', 12000000000, 'Siak Block (Sumatra)'),
-            ('PRJ-003', 'OPR-01', 'Maintenance Fasilitas C', 'OPERATION', 'MEDIUM', 'DELAYED', '2026-03-01', '2026-09-30', 3500000000, 'Kangean Block (Jawa)'),
-            ('PRJ-004', 'FAC-01', 'Pembangunan Pipa Gas D', 'FACILITY', 'LOW', 'COMPLETED', '2025-06-01', '2026-01-15', 8000000000, 'Sengkang Block (Sulawesi)');
+            ('PRJ-001', 'EXP-01', 'Eksplorasi Blok A', 'EXPLORATION', 'HIGH', 'ON_TRACK', '2026-01-01', '2026-12-31', 5000000000, 'Blok B (Sumatra)'),
+            ('PRJ-002', 'DRL-01', 'Pengeboran Sumur B', 'DRILLING', 'HIGH', 'AT_RISK', '2026-02-15', '2026-11-30', 12000000000, 'Blok Siak (Sumatra)'),
+            ('PRJ-003', 'OPR-01', 'Maintenance Fasilitas C', 'OPERATION', 'MEDIUM', 'DELAYED', '2026-03-01', '2026-09-30', 3500000000, 'Blok Kangean (Jawa)'),
+            ('PRJ-004', 'FAC-01', 'Pembangunan Pipa Gas D', 'FACILITY', 'LOW', 'COMPLETED', '2025-06-01', '2026-01-15', 8000000000, 'Blok Sengkang (Sulawesi)');
         `);
 
         await db.query(`

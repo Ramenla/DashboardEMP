@@ -12,19 +12,27 @@ const getDuration = (start, end) => {
     return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
 };
 
-const mapStatus = (s) => {
-    if (s === 'ON_TRACK') return 'Berjalan';
-    if (s === 'AT_RISK') return 'Beresiko';
-    if (s === 'DELAYED') return 'Tertunda';
-    if (s === 'COMPLETED') return 'Selesai';
-    return s;
-};
-
 const mapPriority = (p) => {
     if (p === 'HIGH') return 'Tinggi';
     if (p === 'MEDIUM') return 'Sedang';
     if (p === 'LOW') return 'Rendah';
     return p;
+};
+
+/**
+ * Hitung status proyek dari EVM metrics, bukan dari kolom status di DB.
+ * Logic:
+ * 1. Selesai:  progress == 100
+ * 2. Beresiko: SPI < 0.8 ATAU (budgetUsed/totalBudget > 0.9 && progress < 100)
+ * 3. Tertunda: SPI antara 0.8 – 0.95
+ * 4. Berjalan: SPI > 0.95
+ */
+const computeStatus = (progress, spi, budgetUsed, totalBudget) => {
+    if (progress >= 100) return 'Selesai';
+    const budgetRatio = totalBudget > 0 ? budgetUsed / totalBudget : 0;
+    if (spi < 0.8 || (budgetRatio > 0.9 && progress < 100)) return 'Beresiko';
+    if (spi >= 0.8 && spi < 0.95) return 'Tertunda';
+    return 'Berjalan';
 };
 
 export const getProjects = async (req, res) => {
@@ -39,10 +47,10 @@ export const getProjects = async (req, res) => {
                 p.name,
                 p.category,
                 p.priority,
-                p.status,
                 p.start_date AS startDate,
                 p.end_date AS endDate,
                 p.total_budget AS totalBudget,
+                p.location,
                 COALESCE(pm.actual_cost, 0) AS budgetUsed,
                 COALESCE(pm.actual_progress, 0) AS progress,
                 COALESCE(pm.planned_value, 0) AS plannedValue,
@@ -89,6 +97,10 @@ export const getProjects = async (req, res) => {
             const reversePriority = { 'Tinggi': 'HIGH', 'Sedang': 'MEDIUM', 'Rendah': 'LOW' };
             query += ` AND p.priority = ?`;
             queryParams.push(reversePriority[req.query.priority] || req.query.priority);
+        }
+        if (req.query.location) {
+            query += ` AND p.location = ?`;
+            queryParams.push(req.query.location);
         }
 
         query += ` ORDER BY p.id ASC`;
@@ -162,11 +174,14 @@ export const getProjects = async (req, res) => {
             const spi = parseFloat((parseFloat(p.spi) || 1).toFixed(2));
             const cpi = parseFloat((parseFloat(p.cpi) || 1).toFixed(2));
 
+            // Status dihitung dari EVM metrics, bukan dari kolom status di DB
+            const computedStatus = computeStatus(progress, spi, budgetUsed, totalBudget);
+
             totalSpi += spi;
             totalCpi += cpi;
 
-            if (localStatus === 'Beresiko' || spi < 0.8) atRiskCount++;
-            else if (spi >= 0.9 && localStatus !== 'Beresiko') onTrackCount++;
+            if (computedStatus === 'Beresiko') atRiskCount++;
+            else if (computedStatus === 'Berjalan') onTrackCount++;
 
             if (issueMap[p.id]) {
                 issueMap[p.id].forEach(issue => {
@@ -188,9 +203,9 @@ export const getProjects = async (req, res) => {
 
             return {
                 id: p.id, name: p.name, category: p.category, priority: mapPriority(p.priority),
-                status: localStatus, startDate: p.startDate, endDate: p.endDate,
+                status: computedStatus, startDate: p.startDate, endDate: p.endDate,
                 startMonth, duration, totalBudget, budgetUsed, target, progress, spi, cpi,
-                location: 'Head Office', manager,
+                location: p.location || 'Head Office', manager,
                 issues: issueMap[p.id] || [],
                 timelineEvents: timelineMap[p.id] || [],
                 team, gallery: [], documents: []

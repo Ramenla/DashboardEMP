@@ -57,6 +57,13 @@ async function initDatabase() {
                 await db.query("ALTER TABLE issues ADD COLUMN division VARCHAR(100) AFTER title");
                 console.log("✅ 'division' column added.");
             }
+            // Migration: tambahkan kolom 'location' ke tabel projects jika belum ada
+            const [locCols] = await db.query("SHOW COLUMNS FROM projects LIKE 'location'");
+            if (locCols.length === 0) {
+                console.log("⬆️  Adding 'location' column to projects table...");
+                await db.query("ALTER TABLE projects ADD COLUMN location VARCHAR(255) AFTER total_budget");
+                console.log("✅ 'location' column added.");
+            }
             // Migration: isi data division yang masih kosong (NULL) dari existing data
             await db.query(`
                 UPDATE issues SET division = 'Drilling & Workover' WHERE id = 'ISS-01' AND (division IS NULL OR division = '');
@@ -91,11 +98,11 @@ async function initDatabase() {
               start_date DATETIME,
               end_date DATETIME,
               total_budget DOUBLE,
+              location VARCHAR(255),
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
               updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             );
         `);
-
         await db.query(`
             CREATE TABLE employees (
               id VARCHAR(255) PRIMARY KEY,
@@ -176,11 +183,11 @@ async function initDatabase() {
 
         // ───── DUMMY DATA ─────
         await db.query(`
-            INSERT INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget) VALUES
-            ('PRJ-001', 'EXP-01', 'Eksplorasi Blok A', 'EXPLORATION', 'HIGH', 'ON_TRACK', '2026-01-01', '2026-12-31', 5000000000),
-            ('PRJ-002', 'DRL-01', 'Pengeboran Sumur B', 'DRILLING', 'HIGH', 'AT_RISK', '2026-02-15', '2026-11-30', 12000000000),
-            ('PRJ-003', 'OPR-01', 'Maintenance Fasilitas C', 'OPERATION', 'MEDIUM', 'DELAYED', '2026-03-01', '2026-09-30', 3500000000),
-            ('PRJ-004', 'FAC-01', 'Pembangunan Pipa Gas D', 'FACILITY', 'LOW', 'COMPLETED', '2025-06-01', '2026-01-15', 8000000000);
+            INSERT INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget, location) VALUES
+            ('PRJ-001', 'EXP-01', 'Eksplorasi Blok A', 'EXPLORATION', 'HIGH', 'ON_TRACK', '2026-01-01', '2026-12-31', 5000000000, \"'B' Block (Sumatra)\"),
+            ('PRJ-002', 'DRL-01', 'Pengeboran Sumur B', 'DRILLING', 'HIGH', 'AT_RISK', '2026-02-15', '2026-11-30', 12000000000, 'Siak Block (Sumatra)'),
+            ('PRJ-003', 'OPR-01', 'Maintenance Fasilitas C', 'OPERATION', 'MEDIUM', 'DELAYED', '2026-03-01', '2026-09-30', 3500000000, 'Kangean Block (Jawa)'),
+            ('PRJ-004', 'FAC-01', 'Pembangunan Pipa Gas D', 'FACILITY', 'LOW', 'COMPLETED', '2025-06-01', '2026-01-15', 8000000000, 'Sengkang Block (Sulawesi)');
         `);
 
         await db.query(`

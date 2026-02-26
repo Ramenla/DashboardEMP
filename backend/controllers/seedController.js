@@ -95,7 +95,7 @@ export const seedRandomProjects = async (req, res) => {
             const totalBudget = randInt(1, 50) * 500_000_000;
             const name = PROJECT_NAMES[i] || `Proyek ${category} ${idx}`;
 
-            projects.push([projectId, `${category.substring(0, 3)}-${idx}`, name, category, priority, status, startDate, endDate, totalBudget]);
+            projects.push([projectId, `${category.substring(0, 3)}-${idx}`, name, category, priority, status, startDate, endDate, totalBudget, rand(LOCATIONS)]);
 
             // Project member
             const empId = `EMP-SEED-${randInt(1, 10)}`;
@@ -160,7 +160,7 @@ export const seedRandomProjects = async (req, res) => {
         // Projects
         for (const p of projects) {
             await db.query(
-                `INSERT IGNORE INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, p
+                `INSERT IGNORE INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, p
             );
         }
 

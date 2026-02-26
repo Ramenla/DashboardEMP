@@ -45,6 +45,7 @@ const PRIORITIES = ['Tinggi', 'Sedang', 'Rendah'];
 // Updated Statuses: Berjalan, Beresiko, Tertunda, Selesai
 const STATUSES = ['Berjalan', 'Berjalan', 'Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
 const MANAGERS = ['Budi Santoso', 'Siti Aminah', 'Eko Prasetyo', 'Dewi Lestari', 'Agus Setiawan', 'Rina Wati', 'Joko Widodo', 'Andi Hidayat'];
+const DIVISIONS = ['HSE', 'D&C', 'Commercial', 'Exploration', 'Operations', 'Facility', 'Finance'];
 
 // Helper for date
 const randomDate = (startYear = 2026, endYear = 2027) => {
@@ -163,10 +164,11 @@ const generateProjects = async () => {
                 for (let k = 0; k < numIssues; k++) {
                     const issueId = `iss-${id}-${k}`;
                     const template = ISSUE_TEMPLATES[Math.floor(Math.random() * ISSUE_TEMPLATES.length)];
+                    const division = DIVISIONS[Math.floor(Math.random() * DIVISIONS.length)];
                     await connection.query(`
-                        INSERT INTO issues (id, projectId, title, severity, status, impactScore)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    `, [issueId, id, template, 'HIGH', 'OPEN', Math.floor(Math.random() * 5) + 1]);
+                        INSERT INTO issues (id, projectId, title, division, severity, status, impactScore)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    `, [issueId, id, template, division, 'HIGH', 'OPEN', Math.floor(Math.random() * 5) + 1]);
                 }
             }
 

@@ -27,9 +27,12 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
         p.issues.forEach((issue) => {
           const issueName = (issue && typeof issue === 'object') ? issue.title : issue;
           if (issueName) {
-            if (!map[issueName]) map[issueName] = { count: 0, categories: new Set(), projects: [] };
+            if (!map[issueName]) map[issueName] = { count: 0, categories: new Set(), divisions: new Set(), projects: [] };
             map[issueName].count++;
             map[issueName].categories.add(p.category);
+            if (issue && typeof issue === 'object' && issue.division) {
+              map[issueName].divisions.add(issue.division);
+            }
             // Simpan full object project untuk kebutuhan detail drawer
             map[issueName].projects.push(p);
           }
@@ -38,7 +41,13 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
     });
 
     return Object.entries(map)
-      .map(([name, d]) => ({ name, count: d.count, categories: Array.from(d.categories), projects: d.projects }))
+      .map(([name, d]) => ({
+        name,
+        count: d.count,
+        categories: Array.from(d.categories),
+        divisions: Array.from(d.divisions),
+        projects: d.projects
+      }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
   }, [data, topIssues]);
@@ -96,6 +105,11 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
                         {cat}
                       </Tag>
                     ))}
+                    {issue.divisions && issue.divisions.map((div) => (
+                      <Tag key={div} className="text-[9px] m-0 leading-none border-0 bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded">
+                        {div}
+                      </Tag>
+                    ))}
                   </div>
                 </div>
 
@@ -136,7 +150,14 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
               <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center">
                   <Text strong className="text-[13px] group-hover:text-blue-600">{project.name}</Text>
-                  <Tag color="blue" className="text-[10px] m-0 border-none">{project.category}</Tag>
+                  <div className="flex gap-1">
+                    <Tag color="blue" className="text-[10px] m-0 border-none">{project.category}</Tag>
+                    {project.issues && project.issues.find(iss => (typeof iss === 'object' ? iss.title : iss) === selectedIssue?.name)?.division && (
+                      <Tag className="text-[10px] m-0 border-none bg-blue-50 text-blue-500">
+                        {project.issues.find(iss => (typeof iss === 'object' ? iss.title : iss) === selectedIssue?.name).division}
+                      </Tag>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-2 mt-1">
                   <Text type="secondary" className="text-[11px] font-mono">{project.id}</Text>

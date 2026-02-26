@@ -263,11 +263,16 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               <List
                 size="small"
                 dataSource={project.issues}
-                renderItem={(item, index) => (
-                  <List.Item>
-                    <Text className="text-sm">• {typeof item === 'object' ? item.title : item}</Text>
-                  </List.Item>
-                )}
+                renderItem={(item, index) => {
+                  const title = typeof item === 'object' ? item.title : item;
+                  const division = typeof item === 'object' ? item.division : null;
+                  return (
+                    <List.Item className="flex items-center justify-between border-none py-1">
+                      <Text className="text-sm">• {title}</Text>
+                      {division && <Tag color="default" className="text-[10px] m-0 bg-gray-100 border-none">{division}</Tag>}
+                    </List.Item>
+                  );
+                }}
               />
             ) : (
               <EmptyState text="Tidak ada isu tercatat." />

@@ -80,7 +80,7 @@ export const getProjects = async (req, res) => {
         if (projectIds.length > 0) {
             try {
                 [allIssues] = await db.query(`
-                    SELECT id, projectId, title, severity, status, impactScore
+                    SELECT id, projectId, title, division, severity, status, impactScore
                     FROM issues
                     WHERE projectId IN (?)
                 `, [projectIds]);
@@ -124,13 +124,22 @@ export const getProjects = async (req, res) => {
         const issueStats = {}; // For top issues
         for (const issue of allIssues) {
             if (!issueMap[issue.projectId]) issueMap[issue.projectId] = [];
-            issueMap[issue.projectId].push(issue.title);
+            issueMap[issue.projectId].push({ title: issue.title, division: issue.division });
 
             // Count issues for Top Issues
             if (!issueStats[issue.title]) {
-                issueStats[issue.title] = { name: issue.title, count: 0, categories: new Set(), projects: [] };
+                issueStats[issue.title] = {
+                    name: issue.title,
+                    count: 0,
+                    categories: new Set(),
+                    divisions: new Set(),
+                    projects: []
+                };
             }
             issueStats[issue.title].count++;
+            if (issue.division) {
+                issueStats[issue.title].divisions.add(issue.division);
+            }
         }
 
         const timelineMap = {};
@@ -219,9 +228,12 @@ export const getProjects = async (req, res) => {
 
             // Update issueStats with categories for Top Issues
             if (issueMap[p.id]) {
-                issueMap[p.id].forEach(title => {
-                    issueStats[title].categories.add(p.category);
-                    issueStats[title].projects.push(projectObj);
+                issueMap[p.id].forEach(issueItem => {
+                    const issueTitle = issueItem.title;
+                    if (issueStats[issueTitle]) {
+                        issueStats[issueTitle].categories.add(p.category);
+                        issueStats[issueTitle].projects.push(projectObj);
+                    }
                 });
             }
 
@@ -231,7 +243,8 @@ export const getProjects = async (req, res) => {
         const topIssues = Object.values(issueStats)
             .map(issue => ({
                 ...issue,
-                categories: Array.from(issue.categories)
+                categories: Array.from(issue.categories),
+                divisions: Array.from(issue.divisions)
             }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 5);

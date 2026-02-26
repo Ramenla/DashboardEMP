@@ -29,11 +29,14 @@ const ProjectProgress = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
+      // Menambahkan default year=2026 agar konsisten dengan Posture dan mendapatkan detail lengkap
+      const res = await fetch(`${API_URL}?year=2026`);
       if (!res.ok) throw new Error('Gagal mengambil data');
       const result = await res.json();
-      const projects = Array.isArray(result) ? result : (result.projects || []);
-      const normalized = projects.map(normalizeProjectData);
+
+      // Mengambil array projects baik dari format lama (array) maupun format baru (object {projects, stats, topIssues})
+      const projectsArray = Array.isArray(result) ? result : (result.projects || []);
+      const normalized = projectsArray.map(normalizeProjectData);
       setProjects(normalized);
     } catch (error) {
       console.error(error);

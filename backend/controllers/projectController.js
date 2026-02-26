@@ -88,7 +88,7 @@ export const getProjects = async (req, res) => {
 
         if (projectIds.length > 0) {
             [allIssues] = await db.query(
-                `SELECT id, project_id AS projectId, title, severity, status, impact_score AS impactScore FROM issues WHERE project_id IN (?)`,
+                `SELECT id, project_id AS projectId, title, division, severity, status, impact_score AS impactScore FROM issues WHERE project_id IN (?)`,
                 [projectIds]
             );
             [allTimeline] = await db.query(

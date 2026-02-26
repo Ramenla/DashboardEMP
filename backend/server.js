@@ -47,7 +47,14 @@ async function initDatabase() {
         const [tables] = await db.query("SHOW TABLES LIKE 'projects'");
 
         if (tables.length > 0) {
-            console.log('✅ Tables already exist. Skipping initialization.');
+            console.log('✅ Tables already exist. Running column migrations...');
+            // Migration: tambahkan kolom 'division' ke tabel issues jika belum ada
+            const [cols] = await db.query("SHOW COLUMNS FROM issues LIKE 'division'");
+            if (cols.length === 0) {
+                console.log("⬆️  Adding 'division' column to issues table...");
+                await db.query("ALTER TABLE issues ADD COLUMN division VARCHAR(100) AFTER title");
+                console.log("✅ 'division' column added.");
+            }
             return;
         }
 
@@ -132,6 +139,7 @@ async function initDatabase() {
               id VARCHAR(255) PRIMARY KEY,
               project_id VARCHAR(255),
               title VARCHAR(255) NOT NULL,
+              division VARCHAR(100),
               severity ENUM('HIGH', 'MEDIUM', 'LOW') DEFAULT 'MEDIUM',
               status ENUM('OPEN', 'IN_PROGRESS', 'CLOSED') DEFAULT 'OPEN',
               impact_score INT DEFAULT 1,
@@ -202,9 +210,9 @@ async function initDatabase() {
         `);
 
         await db.query(`
-            INSERT INTO issues (id, project_id, title, severity, status, impact_score) VALUES
-            ('ISS-01', 'PRJ-002', 'Cuaca Buruk Menghambat Drilling', 'HIGH', 'OPEN', 5),
-            ('ISS-02', 'PRJ-003', 'Suku Cadang Terlambat Datang', 'MEDIUM', 'IN_PROGRESS', 3);
+            INSERT INTO issues (id, project_id, title, division, severity, status, impact_score) VALUES
+            ('ISS-01', 'PRJ-002', 'Cuaca Buruk Menghambat Drilling', 'Drilling & Workover', 'HIGH', 'OPEN', 5),
+            ('ISS-02', 'PRJ-003', 'Suku Cadang Terlambat Datang', 'Supply Chain', 'MEDIUM', 'IN_PROGRESS', 3);
         `);
 
         await db.query(`

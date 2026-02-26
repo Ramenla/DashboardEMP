@@ -9,7 +9,8 @@ const getDuration = (start, end) => {
     if (!start || !end) return 0;
     const d1 = new Date(start);
     const d2 = new Date(end);
-    return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+    // Tambah +1 agar inklusif (contoh: Jan-Jan = 1 bulan, bukan 0)
+    return Math.max(1, (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth()) + 1);
 };
 
 const mapPriority = (p) => {

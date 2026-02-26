@@ -215,7 +215,7 @@ const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
       <Table
         dataSource={dataSource}
         columns={columns}
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 5, showSizeChanger: false }}
         rowClassName="cursor-pointer"
         onRow={(record) => ({ onClick: () => onRowClick(record) })}
         size="small"

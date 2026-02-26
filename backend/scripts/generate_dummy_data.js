@@ -1,15 +1,20 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'dashboard_emp',
-    multipleStatements: true
-};
+const connectionString = process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.TIDB_URL;
+
+const dbConfig = connectionString 
+    ? { uri: connectionString, multipleStatements: true } 
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'dashboard_emp',
+        multipleStatements: true
+      };
 
 // Real EMP Assets / Locations
 const ASSETS = [

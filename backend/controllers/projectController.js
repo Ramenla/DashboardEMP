@@ -109,11 +109,16 @@ export const getProjects = async (req, res) => {
         const issueStats = {};
         for (const issue of allIssues) {
             if (!issueMap[issue.projectId]) issueMap[issue.projectId] = [];
-            issueMap[issue.projectId].push(issue.title);
+            // Simpan objek lengkap { title, division } agar frontend bisa baca division
+            issueMap[issue.projectId].push({ title: issue.title, division: issue.division || '' });
+
             if (!issueStats[issue.title]) {
-                issueStats[issue.title] = { name: issue.title, count: 0, categories: new Set(), projects: [] };
+                issueStats[issue.title] = { name: issue.title, count: 0, categories: new Set(), divisions: new Set(), projects: [] };
             }
             issueStats[issue.title].count++;
+            if (issue.division) {
+                issueStats[issue.title].divisions.add(issue.division);
+            }
         }
 
         const timelineMap = {};
@@ -152,9 +157,16 @@ export const getProjects = async (req, res) => {
             else if (spi >= 0.9 && localStatus !== 'Beresiko') onTrackCount++;
 
             if (issueMap[p.id]) {
-                issueMap[p.id].forEach(title => {
-                    issueStats[title].categories.add(p.category);
-                    issueStats[title].projects.push({ id: p.id, name: p.name, category: p.category });
+                issueMap[p.id].forEach(issue => {
+                    const issueName = issue.title;
+                    const issueDivision = issue.division || '';
+                    if (issueStats[issueName]) {
+                        issueStats[issueName].categories.add(p.category);
+                        issueStats[issueName].projects.push({
+                            id: p.id, name: p.name, category: p.category,
+                            activeDivision: issueDivision
+                        });
+                    }
                 });
             }
 
@@ -174,7 +186,7 @@ export const getProjects = async (req, res) => {
         });
 
         const topIssues = Object.values(issueStats)
-            .map(issue => ({ ...issue, categories: Array.from(issue.categories) }))
+            .map(issue => ({ ...issue, categories: Array.from(issue.categories), divisions: Array.from(issue.divisions || []) }))
             .sort((a, b) => b.count - a.count).slice(0, 5);
 
         const n = projectsResult.length;

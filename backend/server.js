@@ -23,20 +23,29 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Sajikan file statis dari folder dist React
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 app.use('/api/projects', projectRoutes);
 app.post('/api/seed', seedRandomProjects);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Backend is running' });
+    res.json({ status: 'OK', message: 'Backend is running' });
 });
 
 app.get('/api/test-db', async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT 1 + 1 AS solution');
-    res.json({ status: 'OK', message: 'Database connection successful', result: rows[0].solution });
-  } catch (error) {
-    res.status(500).json({ status: 'Error', message: 'Database connection failed', error: error.message });
-  }
+    try {
+        const [rows] = await db.query('SELECT 1 + 1 AS solution');
+        res.json({ status: 'OK', message: 'Database connection successful', result: rows[0].solution });
+    } catch (error) {
+        res.status(500).json({ status: 'Error', message: 'Database connection failed', error: error.message });
+    }
+});
+
+// Route catch-all: Kirim index.html untuk rute non-API (untuk mendukung SPA)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 /**

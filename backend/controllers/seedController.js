@@ -3,57 +3,57 @@ import db from '../config/db.js';
 // ─── Reference Data ────────────────────────────────────────────────────────
 
 const PROJECT_NAMES = [
-  'Eksplorasi Cekungan Sumatera Selatan', 'Pengeboran Sumur Dev-3X', 'Rehabilitasi Separator Gas',
-  'Pemasangan Flowline Offshore Block B', 'Survey Seismik 3D Blok Kalimantan',
-  'Pengembangan Lapangan Minyak Matur', 'Upgrade Kompresor Fasilitas Produksi',
-  'Pembangunan Wellpad DRL-09', 'Studi EOR Injeksi Polimer', 'Overhaul Pompa Sentrifugal A',
-  'Pipeline Integrity Assessment', 'Pengembangan Lapangan Gas Bumi Korinci',
-  'Konstruksi Stasiun Pengumpul SP-07', 'Workover Sumur Tua WR-22X', 'Eksplorasi Blok Malacca Strait',
-  'Instalasi Turbin Gas GTG-03', 'Pelapisan Ulang Tangki Timbun TK-12',
-  'Pembangunan Dermaga Pengisian LNG', 'Proyek Deliniasi Sumur SUM-10',
-  'Optimasi Lifting Gas System', 'Penggantian Manifold Header Produksi',
-  'Survei Batimetri Laut Jawa Blok L', 'Instalasi SCADA Real-Time Monitoring',
-  'Rekonstruksi Heater Treater Unit-2', 'Perluasan Tangki Penyimpanan TK-18',
-  'Pengeboran Sumur Appraisal AP-07X', 'Komisi Turbin Uap ST-02',
-  'Perluasan Fasilitas Receiving LNG', 'Simulasi Reservoir Dinamis',
-  'Pembangunan Jalan Akses Ladang Baru', 'Overhaul Kompresor Gas K-04',
-  'Pengembangan Infrastruktur Water Injection', 'Pemasangan Subsea Control Module',
-  'Konstruksi Tangki Storage TK-20', 'Proyek Smart Well Completion',
-  'Persiapan Pengeboran Sumur Dev-7', 'Studi Kelayakan Lapangan X-Ray',
-  'Pengadaan & Instalasi FPSO Unit', 'Pembangunan Power Plant 10 MW',
-  'Uji Produksi Sumur DRL-15', 'Recertifikasi Flare Stack FS-02',
-  'Operasi Penutupan Sumur Tua P&A-5', 'Upgrade Kontrol Sistem DCS',
-  'Modifikasi Slug Catcher SC-01', 'Pengeboran Horizontal HDD-04X',
-  'Eksplorasi Deep Water Blok Makassar', 'Konstruksi Metering Station MS-09',
-  'Overhaul Annual Pompa K-02', 'Studi Prospek Geologi Blok Tonga',
-  'Pembangunan Kamp Fasilitas Pekerja', 'Implementasi Fiber Optic Network'
+    'Eksplorasi Cekungan Sumatera Selatan', 'Pengeboran Sumur Dev-3X', 'Rehabilitasi Separator Gas',
+    'Pemasangan Flowline Offshore Block B', 'Survey Seismik 3D Blok Kalimantan',
+    'Pengembangan Lapangan Minyak Matur', 'Upgrade Kompresor Fasilitas Produksi',
+    'Pembangunan Wellpad DRL-09', 'Studi EOR Injeksi Polimer', 'Overhaul Pompa Sentrifugal A',
+    'Pipeline Integrity Assessment', 'Pengembangan Lapangan Gas Bumi Korinci',
+    'Konstruksi Stasiun Pengumpul SP-07', 'Workover Sumur Tua WR-22X', 'Eksplorasi Blok Malacca Strait',
+    'Instalasi Turbin Gas GTG-03', 'Pelapisan Ulang Tangki Timbun TK-12',
+    'Pembangunan Dermaga Pengisian LNG', 'Proyek Deliniasi Sumur SUM-10',
+    'Optimasi Lifting Gas System', 'Penggantian Manifold Header Produksi',
+    'Survei Batimetri Laut Jawa Blok L', 'Instalasi SCADA Real-Time Monitoring',
+    'Rekonstruksi Heater Treater Unit-2', 'Perluasan Tangki Penyimpanan TK-18',
+    'Pengeboran Sumur Appraisal AP-07X', 'Komisi Turbin Uap ST-02',
+    'Perluasan Fasilitas Receiving LNG', 'Simulasi Reservoir Dinamis',
+    'Pembangunan Jalan Akses Ladang Baru', 'Overhaul Kompresor Gas K-04',
+    'Pengembangan Infrastruktur Water Injection', 'Pemasangan Subsea Control Module',
+    'Konstruksi Tangki Storage TK-20', 'Proyek Smart Well Completion',
+    'Persiapan Pengeboran Sumur Dev-7', 'Studi Kelayakan Lapangan X-Ray',
+    'Pengadaan & Instalasi FPSO Unit', 'Pembangunan Power Plant 10 MW',
+    'Uji Produksi Sumur DRL-15', 'Recertifikasi Flare Stack FS-02',
+    'Operasi Penutupan Sumur Tua P&A-5', 'Upgrade Kontrol Sistem DCS',
+    'Modifikasi Slug Catcher SC-01', 'Pengeboran Horizontal HDD-04X',
+    'Eksplorasi Deep Water Blok Makassar', 'Konstruksi Metering Station MS-09',
+    'Overhaul Annual Pompa K-02', 'Studi Prospek Geologi Blok Tonga',
+    'Pembangunan Kamp Fasilitas Pekerja', 'Implementasi Fiber Optic Network'
 ];
 
 const CATEGORIES = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
 const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'];
 const STATUSES = ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'];
 const LOCATIONS = [
-  'Blok B (Sumatra)', 'Blok Bireun-Sigli (Sumatra)', 'Blok Gebang (Sumatra)',
-  'Blok Tonga (Sumatra)', 'Blok Malacca Strait (Sumatra)', 'Blok Siak (Sumatra)',
-  'Blok Kampar (Sumatra)', 'Blok Bentu (Sumatra)', 'Blok Korinci Baru (Sumatra)',
-  'Blok South CPP (Sumatra)', 'Blok Kangean (Jawa)', 'Blok Sengkang (Sulawesi)',
-  'Blok Buzi EPCC (Mozambique)'
+    'Blok B (Sumatra)', 'Blok Bireun-Sigli (Sumatra)', 'Blok Gebang (Sumatra)',
+    'Blok Tonga (Sumatra)', 'Blok Malacca Strait (Sumatra)', 'Blok Siak (Sumatra)',
+    'Blok Kampar (Sumatra)', 'Blok Bentu (Sumatra)', 'Blok Korinci Baru (Sumatra)',
+    'Blok South CPP (Sumatra)', 'Blok Kangean (Jawa)', 'Blok Sengkang (Sulawesi)',
+    'Blok Buzi EPCC (Mozambique)'
 ];
 const MANAGERS = [
-  'Budi Santoso', 'Siti Aminah', 'Andi Wijaya', 'Rizky Pratama', 'Dewi Lestari',
-  'Fajar Nugroho', 'Hendra Saputra', 'Indah Kusuma', 'Joko Wibowo', 'Kartini Halim'
+    'Budi Santoso', 'Siti Aminah', 'Andi Wijaya', 'Rizky Pratama', 'Dewi Lestari',
+    'Fajar Nugroho', 'Hendra Saputra', 'Indah Kusuma', 'Joko Wibowo', 'Kartini Halim'
 ];
 const DIVISIONS = ['Drilling & Workover', 'Production', 'Facilities Engineering', 'Reservoir', 'Supply Chain', 'HSSE', 'Subsurface'];
 const ISSUE_TITLES = [
-  'Keterlambatan Pengiriman Material', 'Cuaca Buruk di Lokasi', 'Revisi Desain Engineering',
-  'Kekurangan Tenaga Ahli Lapangan', 'Perubahan Regulasi Pemerintah', 'Masalah Perizinan Lahan',
-  'Kerusakan Peralatan Utama', 'Peningkatan Biaya Material', 'Kendala Aksesibilitas Lokasi',
-  'Kegagalan Pengujian Pressure Test', 'Penundaan Mobilisasi Rig', 'Perselisihan Kontrak Vendor'
+    'Keterlambatan Pengiriman Material', 'Cuaca Buruk di Lokasi', 'Revisi Desain Engineering',
+    'Kekurangan Tenaga Ahli Lapangan', 'Perubahan Regulasi Pemerintah', 'Masalah Perizinan Lahan',
+    'Kerusakan Peralatan Utama', 'Peningkatan Biaya Material', 'Kendala Aksesibilitas Lokasi',
+    'Kegagalan Pengujian Pressure Test', 'Penundaan Mobilisasi Rig', 'Perselisihan Kontrak Vendor'
 ];
 const EVENT_NAMES = [
-  ['Studi & Persiapan', 'Mobilisasi Tim', 'Pelaksanaan Utama', 'Commissioning', 'Demobilisasi'],
-  ['Survey Lokasi', 'Engineering Design', 'Pengadaan Material', 'Konstruksi', 'Testing & Handover'],
-  ['Perencanaan', 'Mobilisasi', 'Operasi Lapangan', 'Evaluasi', 'Penutupan'],
+    ['Studi & Persiapan', 'Mobilisasi Tim', 'Pelaksanaan Utama', 'Commissioning', 'Demobilisasi'],
+    ['Survey Lokasi', 'Engineering Design', 'Pengadaan Material', 'Konstruksi', 'Testing & Handover'],
+    ['Perencanaan', 'Mobilisasi', 'Operasi Lapangan', 'Evaluasi', 'Penutupan'],
 ];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ export const seedRandomProjects = async (req, res) => {
             employees.push([empId, MANAGERS[i], rand(['Senior Engineer', 'Project Manager', 'Drilling Engineer']), rand(['Engineering', 'Operations', 'Drilling'])]);
         }
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 25; i++) {
             const idx = startIdx + i;
             const projectId = `PRJ-${String(idx).padStart(3, '0')}`;
             const category = rand(CATEGORIES);

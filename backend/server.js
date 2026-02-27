@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import projectRoutes from './routes/projectRoutes.js';
 import { seedRandomProjects } from './controllers/seedController.js';
@@ -26,6 +27,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Sajikan file statis dari folder dist React (untuk production/Railway)
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 // ───── Routes ─────
 app.use('/api/projects', projectRoutes);
 app.post('/api/seed', seedRandomProjects);
@@ -41,6 +45,17 @@ app.get('/api/test-db', async (req, res, next) => {
         res.json({ status: 'OK', message: 'Database connection successful', result: rows[0].solution });
     } catch (error) {
         next(error);
+    }
+});
+
+// Route catch-all: Kirim index.html untuk rute non-API (untuk mendukung SPA)
+app.get('*', (req, res) => {
+    const indexPath = path.join(__dirname, '../frontend/dist/index.html');
+
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).json({ message: 'Frontend build not found. Run npm run build first.' });
     }
 });
 

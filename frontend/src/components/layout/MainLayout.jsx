@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from 'antd';
-import Header from './layout/Header';
-import Sidebar from './layout/Sidebar';
+import Header from './Header';
+import Sidebar from './Sidebar';
 
 const { Content } = Layout;
 

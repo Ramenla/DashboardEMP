@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from './components/MainLayout';
+import MainLayout from './components/layout/MainLayout';
 import { ProjectList } from './features/list';
 import { ProjectProgress } from './features/progress';
 import { ProjectPosture } from './features/posture';

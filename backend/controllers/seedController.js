@@ -30,31 +30,27 @@ const PROJECT_NAMES = [
 ];
 
 const CATEGORIES = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
-const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'];
-const STATUSES = ['ON_TRACK', 'AT_RISK', 'DELAYED', 'COMPLETED'];
+const PRIORITIES = ['Tinggi', 'Sedang', 'Rendah'];
+const STATUSES = ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
 const LOCATIONS = [
-  'Blok B (Sumatra)', 'Blok Bireun-Sigli (Sumatra)', 'Blok Gebang (Sumatra)',
-  'Blok Tonga (Sumatra)', 'Blok Malacca Strait (Sumatra)', 'Blok Siak (Sumatra)',
-  'Blok Kampar (Sumatra)', 'Blok Bentu (Sumatra)', 'Blok Korinci Baru (Sumatra)',
-  'Blok South CPP (Sumatra)', 'Blok Kangean (Jawa)', 'Blok Sengkang (Sulawesi)',
-  'Blok Buzi EPCC (Mozambique)'
+  'Bentu Block (Sumatra)', 'Bireun-Sigli Block (Sumatra)', 'Gebang Block (Sumatra)',
+  'Tonga Block (Sumatra)', 'Malacca Strait Block (Sumatra)', 'Siak Block (Sumatra)',
+  'Kampar Block (Sumatra)', '\'B\' Block (Sumatra)', 'Korinci Baru Block (Sumatra)',
+  'South CPP Block (Sumatra)', 'Kangean Block (Jawa)', 'Sengkang Block (Sulawesi)',
+  'Buzi EPCC (Mozambique)'
 ];
 const MANAGERS = [
-  'Budi Santoso', 'Siti Aminah', 'Andi Wijaya', 'Rizky Pratama', 'Dewi Lestari',
-  'Fajar Nugroho', 'Hendra Saputra', 'Indah Kusuma', 'Joko Wibowo', 'Kartini Halim'
+  'Budi Santoso', 'Siti Aminah', 'Andi Hidayat', 'Rina Wati', 'Dewi Lestari',
+  'Joko Widodo', 'Agus Setiawan', 'Eko Prasetyo', 'Hendra Saputra', 'Indah Kusuma'
 ];
 const DIVISIONS = ['Drilling & Workover', 'Production', 'Facilities Engineering', 'Reservoir', 'Supply Chain', 'HSSE', 'Subsurface'];
 const ISSUE_TITLES = [
-  'Keterlambatan Pengiriman Material', 'Cuaca Buruk di Lokasi', 'Revisi Desain Engineering',
-  'Kekurangan Tenaga Ahli Lapangan', 'Perubahan Regulasi Pemerintah', 'Masalah Perizinan Lahan',
-  'Kerusakan Peralatan Utama', 'Peningkatan Biaya Material', 'Kendala Aksesibilitas Lokasi',
-  'Kegagalan Pengujian Pressure Test', 'Penundaan Mobilisasi Rig', 'Perselisihan Kontrak Vendor'
+  'Keterlambatan Pengiriman Material', 'Cuaca buruk menghentikan aktivitas offshore', 'Revisi Desain Engineering',
+  'Kekurangan tenaga kerja kontraktor', 'Keterlambatan persetujuan izin dari pemerintah daerah', 'Sengketa pembebasan lahan dengan masyarakat lokal',
+  'Kerusakan peralatan saat operasi', 'Peningkatan Biaya Material', 'Investigasi insiden keselamatan diperlukan',
+  'Temuan geologis tak terduga memerlukan revisi rencana', 'Gangguan rantai pasok untuk suku cadang kritis', 'Perselisihan Kontrak Vendor'
 ];
-const EVENT_NAMES = [
-  ['Studi & Persiapan', 'Mobilisasi Tim', 'Pelaksanaan Utama', 'Commissioning', 'Demobilisasi'],
-  ['Survey Lokasi', 'Engineering Design', 'Pengadaan Material', 'Konstruksi', 'Testing & Handover'],
-  ['Perencanaan', 'Mobilisasi', 'Operasi Lapangan', 'Evaluasi', 'Penutupan'],
-];
+const EVENT_NAMES = ['Preparation', 'Execution', 'Reporting'];
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -63,7 +59,7 @@ const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randFloat = (min, max, dec = 2) => parseFloat((Math.random() * (max - min) + min).toFixed(dec));
 const addDays = (date, days) => { const d = new Date(date); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; };
 
-// ─── Main Seed Function ────────────────────────────────────────────────────
+// ─── Main Seed Function (camelCase) ─────────────────────────────────────────
 
 export const seedRandomProjects = async (req, res) => {
     try {
@@ -78,54 +74,58 @@ export const seedRandomProjects = async (req, res) => {
         const issues = [];
         const metrics = [];
 
-        // Generate 50 employees pool
+        // Generate 10 employees pool
         for (let i = 0; i < 10; i++) {
             const empId = `EMP-SEED-${i + 1}`;
             employees.push([empId, MANAGERS[i], rand(['Senior Engineer', 'Project Manager', 'Drilling Engineer']), rand(['Engineering', 'Operations', 'Drilling'])]);
         }
 
+        const CAT_PREFIXES = { 'EXPLORATION': 'EXP', 'DRILLING': 'DRI', 'OPERATION': 'OPE', 'FACILITY': 'FAC' };
+
         for (let i = 0; i < 50; i++) {
             const idx = startIdx + i;
-            const projectId = `PRJ-${String(idx).padStart(3, '0')}`;
             const category = rand(CATEGORIES);
+            const prefix = CAT_PREFIXES[category];
+            const projectId = `EMP-${prefix}-${String(idx).padStart(3, '0')}`;
             const status = rand(STATUSES);
             const priority = rand(PRIORITIES);
-            const startDate = `202${randInt(4, 5)}-${String(randInt(1, 10)).padStart(2, '0')}-01`;
-            const durationMonths = randInt(4, 24);
+            const manager = rand(MANAGERS);
+            const location = rand(LOCATIONS);
+            const startDate = `202${randInt(4, 6)}-${String(randInt(1, 12)).padStart(2, '0')}-${String(randInt(1, 28)).padStart(2, '0')}`;
+            const durationMonths = randInt(4, 12);
             const endDate = addDays(startDate, durationMonths * 30);
             const totalBudget = randInt(1, 50) * 500_000_000;
-            const name = PROJECT_NAMES[i] || `Proyek ${category} ${idx}`;
+            const name = PROJECT_NAMES[i] || `${location.split(' ')[0]} - ${category} Project #${idx}`;
 
-            projects.push([projectId, `${category.substring(0, 3)}-${idx}`, name, category, priority, status, startDate, endDate, totalBudget, rand(LOCATIONS)]);
+            // camelCase columns: id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, location, manager
+            projects.push([projectId, projectId, name, category, priority, status, startDate, endDate, totalBudget, location, manager]);
 
             // Project member
             const empId = `EMP-SEED-${randInt(1, 10)}`;
+            // camelCase: id, projectId, employeeId, role
             projectMembers.push([`PM-SEED-${idx}`, projectId, empId, 'Project Manager']);
 
-            // Timeline events (3–4 events)
-            const eventTemplate = rand(EVENT_NAMES);
-            const numEvents = randInt(3, 4);
+            // Timeline events (3 events: Preparation, Execution, Reporting)
             let eventStart = startDate;
             let overallProgress = 0;
-            const eventIds = [];
 
-            for (let e = 0; e < numEvents; e++) {
-                const evtId = `EVT-SEED-${idx}-${e + 1}`;
+            for (let e = 0; e < 3; e++) {
+                const evtId = `evt-${projectId}-${e}`;
                 const evtEnd = addDays(eventStart, randInt(30, 90));
-                const evtBudget = Math.round(totalBudget / numEvents);
-                const evtProgress = e < numEvents - 1 ? (status === 'COMPLETED' ? 100 : e === 0 ? 100 : randInt(0, 100)) : (status === 'COMPLETED' ? 100 : randInt(0, 60));
-                overallProgress += evtProgress / numEvents;
+                const evtBudget = Math.round(totalBudget / 3);
+                const evtProgress = status === 'Selesai' ? 100 : (e === 0 ? randInt(50, 100) : randInt(0, 95));
+                overallProgress += evtProgress / 3;
 
-                timelineEvents.push([evtId, projectId, eventTemplate[e] || `Fase ${e + 1}`, eventStart, evtEnd, evtBudget, evtProgress]);
-                eventIds.push(evtId);
+                // camelCase: id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress
+                timelineEvents.push([evtId, projectId, EVENT_NAMES[e], eventStart, evtEnd, evtBudget, evtProgress]);
 
                 // 2 milestones per event
                 for (let m = 0; m < 2; m++) {
-                    const milId = `MIL-SEED-${idx}-${e + 1}-${m + 1}`;
-                    const contribution = 50;
+                    const milId = `mil-${projectId}-${e}-${m}`;
                     const isCompleted = evtProgress === 100 || (evtProgress > 50 && m === 0);
                     const completedAt = isCompleted ? addDays(eventStart, randInt(10, 30)) : null;
-                    milestones.push([milId, evtId, `Milestone ${e + 1}.${m + 1}`, contribution, isCompleted, completedAt]);
+                    // camelCase: id, timelineEventId, milestoneName, progressContribution, isCompleted, completedAt
+                    milestones.push([milId, evtId, `Milestone ${e + 1}.${m + 1}`, 50, isCompleted, completedAt]);
                 }
 
                 eventStart = addDays(evtEnd, 1);
@@ -134,8 +134,9 @@ export const seedRandomProjects = async (req, res) => {
             // 0–2 issues
             const numIssues = randInt(0, 2);
             for (let is = 0; is < numIssues; is++) {
-                const issueId = `ISS-SEED-${idx}-${is + 1}`;
-                issues.push([issueId, projectId, rand(ISSUE_TITLES), rand(DIVISIONS), rand(['HIGH', 'MEDIUM', 'LOW']), rand(['OPEN', 'IN_PROGRESS', 'CLOSED']), randInt(1, 10)]);
+                const issueId = `iss-${projectId}-${is}`;
+                // camelCase: id, projectId, title, division, severity, status, impactScore
+                issues.push([issueId, projectId, rand(ISSUE_TITLES), rand(DIVISIONS), rand(['HIGH', 'MEDIUM', 'LOW']), rand(['OPEN', 'IN_PROGRESS', 'CLOSED']), randInt(1, 5)]);
             }
 
             // EVM metrics
@@ -147,47 +148,31 @@ export const seedRandomProjects = async (req, res) => {
             const cpi = budgetUsed > 0 ? parseFloat((earnedValue / budgetUsed).toFixed(2)) : 1.0;
             const sv = earnedValue - plannedValue;
             const cv = earnedValue - budgetUsed;
-            metrics.push([`MET-SEED-${idx}`, projectId, new Date().toISOString().split('T')[0], budgetUsed, progress, plannedValue, earnedValue, sv, cv, spi, cpi]);
+            // camelCase: id, projectId, recordDate, actualCost, actualProgress, plannedValue, earnedValue, scheduleVariance, costVariance, spi, cpi
+            metrics.push([`met-${projectId}`, projectId, new Date().toISOString().split('T')[0], budgetUsed, progress, plannedValue, earnedValue, sv, cv, spi, cpi]);
         }
 
         // ── Insert everything ──────────────────────────────────────────────
-        // Employees (upsert)
         for (const emp of employees) {
-            await db.query(
-                `INSERT IGNORE INTO employees (id, name, position, department) VALUES (?, ?, ?, ?)`, emp
-            );
+            await db.query(`INSERT IGNORE INTO employees (id, name, position, department) VALUES (?, ?, ?, ?)`, emp);
         }
-
-        // Projects
         for (const p of projects) {
-            await db.query(
-                `INSERT IGNORE INTO projects (id, project_code, name, category, priority, status, start_date, end_date, total_budget, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, p
-            );
+            await db.query(`INSERT IGNORE INTO projects (id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, location, manager) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, p);
         }
-
-        // Project Members
         for (const pm of projectMembers) {
-            await db.query(`INSERT IGNORE INTO project_members (id, project_id, employee_id, role) VALUES (?, ?, ?, ?)`, pm);
+            await db.query(`INSERT IGNORE INTO project_members (id, projectId, employeeId, role) VALUES (?, ?, ?, ?)`, pm);
         }
-
-        // Timeline Events
         for (const evt of timelineEvents) {
-            await db.query(`INSERT IGNORE INTO timeline_events (id, project_id, event_name, start_date, end_date, task_budget, calculated_progress) VALUES (?, ?, ?, ?, ?, ?, ?)`, evt);
+            await db.query(`INSERT IGNORE INTO timeline_events (id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress) VALUES (?, ?, ?, ?, ?, ?, ?)`, evt);
         }
-
-        // Milestones
         for (const m of milestones) {
-            await db.query(`INSERT IGNORE INTO task_milestones (id, timeline_event_id, milestone_name, progress_contribution, is_completed, completed_at) VALUES (?, ?, ?, ?, ?, ?)`, m);
+            await db.query(`INSERT IGNORE INTO task_milestones (id, timelineEventId, milestoneName, progressContribution, isCompleted, completedAt) VALUES (?, ?, ?, ?, ?, ?)`, m);
         }
-
-        // Issues
         for (const iss of issues) {
-            await db.query(`INSERT IGNORE INTO issues (id, project_id, title, division, severity, status, impact_score) VALUES (?, ?, ?, ?, ?, ?, ?)`, iss);
+            await db.query(`INSERT IGNORE INTO issues (id, projectId, title, division, severity, status, impactScore) VALUES (?, ?, ?, ?, ?, ?, ?)`, iss);
         }
-
-        // Metrics
         for (const mt of metrics) {
-            await db.query(`INSERT IGNORE INTO project_metrics (id, project_id, record_date, actual_cost, actual_progress, planned_value, earned_value, schedule_variance, cost_variance, spi, cpi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, mt);
+            await db.query(`INSERT IGNORE INTO project_metrics (id, projectId, recordDate, actualCost, actualProgress, plannedValue, earnedValue, scheduleVariance, costVariance, spi, cpi) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, mt);
         }
 
         res.json({

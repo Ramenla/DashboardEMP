@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import db from './config/db.js';
 import projectRoutes from './routes/projectRoutes.js';
@@ -45,7 +46,16 @@ app.get('/api/test-db', async (req, res) => {
 
 // Route catch-all: Kirim index.html untuk rute non-API (untuk mendukung SPA)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    const indexPath = path.join(__dirname, '../frontend/dist/index.html');
+    console.log(`🔍 Serving SPA route: ${req.url} -> ${indexPath}`);
+
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        console.error(`❌ File not found: ${indexPath}`);
+        // Kirim pesan error yang lebih informatif untuk debugging di Railway
+        res.status(404).send(`Halaman tidak ditemukan. Path internal: ${indexPath}. Pastikan build frontend berhasil.`);
+    }
 });
 
 /**

@@ -21,11 +21,10 @@ import PriorityDonut from './components/PriorityDonut';
 import StatusCategoryBar from './components/StatusCategoryBar';
 import BudgetMonitoring from './components/BudgetMonitoring';
 import TopIssuesTable from './components/TopIssuesTable';
-
+import projectService from '../../shared/services/projectService';
 import { parseProjectDate, normalizeProjectData } from '../../utils/dateUtils';
 
 const { Option } = Select;
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
  * Error boundary untuk menangkap error rendering pada komponen child.
@@ -80,26 +79,37 @@ const ProjectPosture = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [stats, setStats] = useState(null);
   const [topIssues, setTopIssues] = useState([]);
+  const [metadata, setMetadata] = useState({ categories: [], statuses: [], locations: [] });
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Fetch metadata on mount
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const data = await projectService.getMetadata();
+        setMetadata(data);
+      } catch (error) {
+        // Error already handled by apiClient interceptor
+        console.error('Error fetching metadata:', error);
+      }
+    };
+    fetchMetadata();
+  }, []);
+
+  // Fetch data projects dari backend
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const queryParams = new URLSearchParams();
-        if (filters.year) queryParams.append('year', filters.year);
-        if (filters.month !== null) queryParams.append('month', filters.month);
-        if (filters.status) queryParams.append('status', filters.status);
-        if (filters.location) queryParams.append('location', filters.location);
-        if (filters.categories.length > 0) {
-          filters.categories.forEach(c => queryParams.append('category', c));
-        }
-
-        const response = await fetch(`${API_URL}?${queryParams.toString()}`);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const result = await response.json();
+        const result = await projectService.getAll({
+          year: filters.year,
+          month: filters.month,
+          status: filters.status,
+          location: filters.location,
+          category: filters.categories
+        });
 
         const projects = Array.isArray(result) ? result : (result.projects || []);
         const serverStats = Array.isArray(result) ? null : result.stats;
@@ -112,7 +122,6 @@ const ProjectPosture = () => {
         setTopIssues(serverTopIssues);
       } catch (error) {
         console.error('Error fetching projects:', error);
-        message.error('Gagal mengambil data proyek dari server');
       } finally {
         setLoading(false);
       }
@@ -121,8 +130,6 @@ const ProjectPosture = () => {
     fetchProjects();
   }, [filters.year, filters.month, filters.categories, filters.status, filters.location]);
 
-  const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
-  const statuses = ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
   const months = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -161,13 +168,13 @@ const ProjectPosture = () => {
         <div>
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Kategori</span>
           <Select mode="multiple" value={filters.categories} onChange={(val) => setFilters({ ...filters, categories: val })} style={{ width: '100%' }} placeholder="Semua" allowClear maxTagCount={2} size="small">
-            {categories.map(c => <Option key={c} value={c}>{c}</Option>)}
+            {metadata.categories.map(c => <Option key={c} value={c}>{c}</Option>)}
           </Select>
         </div>
         <div>
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Status</span>
           <Select value={filters.status} onChange={(val) => setFilters({ ...filters, status: val ?? null })} style={{ width: '100%' }} placeholder="Semua" allowClear size="small">
-            {statuses.map(s => <Option key={s} value={s}>{s.replace('_', ' ')}</Option>)}
+            {metadata.statuses.map(s => <Option key={s} value={s}>{s.replace('_', ' ')}</Option>)}
           </Select>
         </div>
         <div>
@@ -182,21 +189,7 @@ const ProjectPosture = () => {
             size="small"
             filterOption={(input, option) => (option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
           >
-            {[
-              "'B' Block (Sumatra)",
-              "Bireun-Sigli Block (Sumatra)",
-              "Gebang Block (Sumatra)",
-              "Tonga Block (Sumatra)",
-              "Malacca Strait Block (Sumatra)",
-              "Siak Block (Sumatra)",
-              "Kampar Block (Sumatra)",
-              "Bentu Block (Sumatra)",
-              "Korinci Baru Block (Sumatra)",
-              "South CPP Block (Sumatra)",
-              "Kangean Block (Jawa)",
-              "Sengkang Block (Sulawesi)",
-              "Buzi EPCC (Mozambique)"
-            ].map(loc => <Option key={loc} value={loc}>{loc}</Option>)}
+            {metadata.locations.map(loc => <Option key={loc} value={loc}>{loc}</Option>)}
           </Select>
         </div>
         <Button icon={<ReloadOutlined />} onClick={handleReset} size="small" block className="mt-1">Reset Filter</Button>

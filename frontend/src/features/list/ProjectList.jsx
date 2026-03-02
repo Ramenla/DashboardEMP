@@ -12,10 +12,8 @@ import { SearchOutlined } from '@ant-design/icons';
 
 import FilterCard from './components/FilterCard';
 import ProjectTable from './components/ProjectTable';
-
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
+import projectService from '../../shared/services/projectService';
 
 /**
  * @returns {JSX.Element} Halaman project list dengan filter, tabel, dan drawer detail.
@@ -34,29 +32,36 @@ const ProjectList = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [metadata, setMetadata] = useState({ categories: [], statuses: [], locations: [], priorities: [] }); // priorities can be added if backend supports it
 
-  /**
-   * Mengambil data proyek dari backend API.
-   * Mendukung format response array maupun object `{ projects }`.
-   */
+  // fetch data dari backend
+  const fetchMetadata = useCallback(async () => {
+    try {
+      const data = await projectService.getMetadata();
+      setMetadata(data);
+    } catch (err) {
+      console.error('Error fetching metadata:', err);
+    }
+  }, []);
+
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Gagal mengambil data');
-      const result = await res.json();
+      const result = await projectService.getAll();
       const projects = Array.isArray(result) ? result : (result.projects || []);
       setAllData(projects);
     } catch (err) {
-      message.error(err.message || 'Gagal mengambil data dari server');
+      // Error handled by interceptor
+      console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    fetchMetadata();
     fetchProjects();
-  }, [fetchProjects]);
+  }, [fetchMetadata, fetchProjects]);
 
   useEffect(() => {
     const result = allData.filter((item) => {
@@ -105,7 +110,13 @@ const ProjectList = () => {
         </Space>
       </div>
 
-      <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />
+      {/* filter bar */}
+      <FilterCard
+        filters={filters}
+        onFilterChange={setFilters}
+        onReset={handleReset}
+        metadata={metadata}
+      />
 
       <div className="mt-3">
         <ProjectTable

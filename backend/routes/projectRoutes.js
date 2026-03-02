@@ -5,11 +5,12 @@
  */
 
 import express from 'express';
-import { getProjects, createProject, updateProject, deleteProject } from '../controllers/projectController.js';
+import { getProjects, createProject, updateProject, deleteProject, getProjectMetadata } from '../controllers/projectController.js';
 
 const router = express.Router();
 
 router.get('/', getProjects);
+router.get('/metadata', getProjectMetadata);
 router.post('/', createProject);
 router.put('/:id', updateProject);
 router.delete('/:id', deleteProject);

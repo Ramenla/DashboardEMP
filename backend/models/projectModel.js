@@ -219,3 +219,16 @@ export const remove = async (id) => {
     const [result] = await db.query('DELETE FROM projects WHERE id = ?', [id]);
     return result.affectedRows;
 };
+// ───── Query: Metadata (Dynamic Filters) ─────
+
+export const getMetadata = async () => {
+    const [categories] = await db.query('SELECT DISTINCT category FROM projects WHERE category IS NOT NULL');
+    const [statuses] = await db.query('SELECT DISTINCT status FROM projects WHERE status IS NOT NULL');
+    const [locations] = await db.query('SELECT DISTINCT location FROM projects WHERE location IS NOT NULL AND location != ""');
+
+    return {
+        categories: categories.map(c => c.category),
+        statuses: statuses.map(s => s.status),
+        locations: locations.map(l => l.location)
+    };
+};

@@ -9,9 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { Radio, Segmented, Badge, Card, Divider, Typography, Spin, message, Select } from 'antd';
 import GanttChart from './components/GanttChart';
 import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
+import projectService from '../../shared/services/projectService';
 import { normalizeProjectData, parseProjectDate } from '../../utils/dateUtils';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
  * @returns {JSX.Element} Halaman penuh project progress dengan manipulasi view dan GanttChart.
@@ -37,16 +36,13 @@ const ProjectProgress = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Gagal mengambil data');
-      const result = await res.json();
+      const result = await projectService.getAll({ year: 2026 });
 
       const projectsArray = Array.isArray(result) ? result : (result.projects || []);
       const normalized = projectsArray.map(normalizeProjectData);
       setProjects(normalized);
     } catch (error) {
       console.error(error);
-      message.error('Gagal mengambil data proyek');
     } finally {
       setLoading(false);
     }

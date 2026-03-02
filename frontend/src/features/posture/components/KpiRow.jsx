@@ -110,35 +110,9 @@ const KpiRow = ({ data = [], stats }) => {
       };
     }
 
-    if (data.length === 0) return { total: 0, spi: 0, cpi: 0, atRisk: 0, onTrack: 0 };
-
-    let spiSum = 0, cpiSum = 0, atRisk = 0, onTrack = 0;
-
-    data.forEach((p) => {
-      const spi = parseFloat(p.spi) || 1;
-      const cpi = parseFloat(p.cpi) || 1;
-      spiSum += spi;
-      cpiSum += cpi;
-
-      const totalBudget = parseFloat(p.totalBudget) || 1;
-      const actualCost = parseFloat(p.budgetUsed) || 0;
-      const budgetPct = (actualCost / totalBudget) * 100;
-
-      if (p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90) {
-        atRisk++;
-      } else if (spi >= 0.9 && p.status !== 'Beresiko') {
-        onTrack++;
-      }
-    });
-
-    return {
-      total: data.length,
-      spi: (spiSum / data.length).toFixed(2),
-      cpi: (cpiSum / data.length).toFixed(2),
-      atRisk,
-      onTrack,
-    };
-  }, [data, stats]);
+    // Fallback jika stats belum ada (biasanya saat data.length == 0 atau loading)
+    return { total: 0, spi: "0.00", cpi: "0.00", atRisk: 0, onTrack: 0 };
+  }, [stats]);
 
   const spiColor = m.spi >= 1 ? '#52c41a' : '#ff4d4f';
   const cpiColor = m.cpi >= 1 ? '#52c41a' : '#ff4d4f';

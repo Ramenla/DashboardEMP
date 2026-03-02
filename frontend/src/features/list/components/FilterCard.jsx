@@ -12,34 +12,18 @@ import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
-/** @type {string[]} Daftar lokasi blok operasi EMP. */
-const locations = [
-  "Blok B (Sumatra)",
-  "Blok Bireun-Sigli (Sumatra)",
-  "Blok Gebang (Sumatra)",
-  "Blok Tonga (Sumatra)",
-  "Blok Malacca Strait (Sumatra)",
-  "Blok Siak (Sumatra)",
-  "Blok Kampar (Sumatra)",
-  "Blok Bentu (Sumatra)",
-  "Blok Korinci Baru (Sumatra)",
-  "Blok South CPP (Sumatra)",
-  "Blok Kangean (Jawa)",
-  "Blok Sengkang (Sulawesi)",
-  "Blok Buzi EPCC (Mozambique)"
-];
-
-/** @type {string[]} Kategori proyek yang tersedia. */
-const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
-
 /**
- * @param {Object} props
- * @param {Object} props.filters - Objek berisi nilai filter aktif.
- * @param {Function} props.onFilterChange - Callback saat filter berubah.
- * @param {Function} props.onReset - Callback untuk mereset semua filter.
- * @returns {JSX.Element} Filter bar horizontal dalam Card.
+ * komponen filter bar compact untuk halaman project list
+ * 4 filter utama dalam 1 baris: kategori, status, prioritas, lokasi
+ * @param {Object} props.filters - object berisi nilai filter aktif
+ * @param {Function} props.onFilterChange - callback perubahan filter
+ * @param {Function} props.onReset - callback reset filter
+ * @param {Object} props.metadata - data metadata dinamis (kategori, lokasi, etc)
+ * @returns {JSX.Element} filter bar horizontal
  */
-const FilterCard = ({ filters, onFilterChange, onReset }) => {
+const FilterCard = ({ filters, onFilterChange, onReset, metadata = { categories: [], statuses: [], locations: [] } }) => {
+  const locations = metadata.locations || [];
+  const categories = metadata.categories || [];
   const handleChange = (key, value) => {
     onFilterChange({ ...filters, [key]: value });
   };

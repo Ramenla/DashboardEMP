@@ -20,11 +20,17 @@ const getDuration = (start, end) => {
 };
 
 /**
- * Endpoint mengambil list seluruh proyek dan agregasi data statistik,
- * menguraikan performa proyek dan isunya.
- * @param {import('express').Request} req 
- * @param {import('express').Response} res 
+ * Logika terpusat untuk menentukan apakah sebuah proyek "Berisiko" (At Risk)
  */
+export const isProjectAtRisk = (p) => {
+    const spi = parseFloat(p.spi) || 1;
+    const totalBudget = parseFloat(p.totalBudget) || 0;
+    const budgetUsed = parseFloat(p.budgetUsed) || 0;
+    const budgetPct = totalBudget > 0 ? (budgetUsed / totalBudget) * 100 : 0;
+
+    return p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90;
+};
+
 export const getProjects = async (req, res) => {
     try {
         const { year, month, category, status, location } = req.query;
@@ -94,7 +100,8 @@ export const getProjects = async (req, res) => {
             totalCpi += cpi;
 
             const budgetPct = totalBudget > 0 ? (budgetUsed / totalBudget) * 100 : 0;
-            if (p.status === 'Beresiko' || spi < 0.8 || budgetPct >= 90) {
+
+            if (isProjectAtRisk(p)) {
                 atRiskCount++;
             } else if (spi >= 0.9 && p.status !== 'Beresiko') {
                 onTrackCount++;
@@ -235,6 +242,16 @@ export const deleteProject = async (req, res) => {
         res.json({ message: 'Project deleted successfully' });
     } catch (error) {
         console.error("Delete Project Error:", error.message);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getProjectMetadata = async (req, res) => {
+    try {
+        const metadata = await ProjectModel.getMetadata();
+        res.json(metadata);
+    } catch (error) {
+        console.error("Get Metadata Error:", error.message);
         res.status(500).json({ message: error.message });
     }
 };

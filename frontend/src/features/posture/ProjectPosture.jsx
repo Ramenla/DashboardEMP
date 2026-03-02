@@ -69,7 +69,7 @@ class ErrorBoundary extends React.Component {
  */
 const ProjectPosture = () => {
   const [filters, setFilters] = useState({
-    year: 2026,
+    year: null,
     month: null,
     location: null,
     categories: [],
@@ -129,12 +129,12 @@ const ProjectPosture = () => {
   ];
 
   const handleReset = () => {
-    setFilters({ year: 2026, month: null, categories: [], status: null, location: null });
+    setFilters({ year: null, month: null, categories: [], status: null, location: null });
     setFilterOpen(false);
   };
 
   const activeFilterCount =
-    (filters.year !== 2026 ? 1 : 0) +
+    (filters.year !== null ? 1 : 0) +
     (filters.month !== null ? 1 : 0) +
     (filters.categories.length > 0 ? 1 : 0) +
     (filters.status !== null ? 1 : 0) +
@@ -145,7 +145,8 @@ const ProjectPosture = () => {
       <div className="flex flex-col gap-3">
         <div>
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">Tahun</span>
-          <Select value={filters.year} onChange={(val) => setFilters({ ...filters, year: val })} style={{ width: '100%' }} size="small">
+          <Select value={filters.year} onChange={(val) => setFilters({ ...filters, year: val ?? null })} style={{ width: '100%' }} placeholder="Semua Tahun" allowClear size="small">
+            <Option value={2024}>2024</Option>
             <Option value={2025}>2025</Option>
             <Option value={2026}>2026</Option>
             <Option value={2027}>2027</Option>
@@ -210,6 +211,9 @@ const ProjectPosture = () => {
           <h2 className="text-lg font-bold text-[#001529] m-0">Postur Proyek</h2>
 
           <div className="flex items-center gap-2">
+            {filters.year !== null && (
+              <Tag closable onClose={() => setFilters({ ...filters, year: null })} className="text-xs m-0">{filters.year}</Tag>
+            )}
             {filters.month !== null && (
               <Tag closable onClose={() => setFilters({ ...filters, month: null })} className="text-xs m-0">{months[filters.month]}</Tag>
             )}

@@ -87,7 +87,7 @@ export const seedRandomProjects = async (req, res) => {
 
         const CAT_PREFIXES = { 'EXPLORATION': 'EXP', 'DRILLING': 'DRI', 'OPERATION': 'OPE', 'FACILITY': 'FAC' };
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 100; i++) {
             const idx = startIdx + i;
             const category = rand(CATEGORIES);
             const prefix = CAT_PREFIXES[category];
@@ -170,7 +170,7 @@ export const seedRandomProjects = async (req, res) => {
 
         res.json({
             success: true,
-            message: `✅ Berhasil menyisipkan 50 project random beserta data relasionalnya!`,
+            message: `✅ Berhasil menyisipkan 100 project random beserta data relasionalnya!`,
             details: {
                 projects: projects.length,
                 employees: employees.length,

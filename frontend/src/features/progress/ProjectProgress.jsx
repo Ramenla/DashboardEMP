@@ -37,7 +37,7 @@ const ProjectProgress = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}?year=2026`);
+      const res = await fetch(API_URL);
       if (!res.ok) throw new Error('Gagal mengambil data');
       const result = await res.json();
 

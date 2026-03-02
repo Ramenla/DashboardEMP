@@ -12,7 +12,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Select, Button, Empty, Popover, Badge, Tag, Spin, message } from 'antd';
+import { Row, Col, Select, Button, Empty, Popover, Badge, Tag, Skeleton, message } from 'antd';
 import { ReloadOutlined, FilterOutlined } from '@ant-design/icons';
 
 import KpiRow from './components/KpiRow';
@@ -227,38 +227,38 @@ const ProjectPosture = () => {
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-10"><Spin size="large" /></div>
-        ) : filteredData.length === 0 ? (
-          <div className="mt-10 mb-10">
-            <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          </div>
-        ) : (
-          <>
-            <KpiRow data={filteredData} stats={stats} />
+        <Skeleton active loading={loading} paragraph={{ rows: 14 }}>
+          {filteredData.length === 0 ? (
+            <div className="mt-10 mb-10">
+              <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            </div>
+          ) : (
+            <>
+              <KpiRow data={filteredData} stats={stats} />
 
-            <Row gutter={[12, 12]} className="mt-3">
-              <Col xs={24} lg={6}>
-                <StatusDonut data={filteredData} />
-              </Col>
-              <Col xs={24} lg={6}>
-                <PriorityDonut data={filteredData} />
-              </Col>
-              <Col xs={24} lg={12}>
-                <StatusCategoryBar data={filteredData} />
-              </Col>
-            </Row>
+              <Row gutter={[12, 12]} className="mt-3">
+                <Col xs={24} lg={6}>
+                  <StatusDonut data={filteredData} />
+                </Col>
+                <Col xs={24} lg={6}>
+                  <PriorityDonut data={filteredData} />
+                </Col>
+                <Col xs={24} lg={12}>
+                  <StatusCategoryBar data={filteredData} />
+                </Col>
+              </Row>
 
-            <Row gutter={[12, 12]} className="mt-3">
-              <Col xs={24} lg={12}>
-                <BudgetMonitoring data={filteredData} />
-              </Col>
-              <Col xs={24} lg={12}>
-                <TopIssuesTable data={filteredData} topIssues={topIssues} />
-              </Col>
-            </Row>
-          </>
-        )}
+              <Row gutter={[12, 12]} className="mt-3">
+                <Col xs={24} lg={12}>
+                  <BudgetMonitoring data={filteredData} yearFilter={filters.year} />
+                </Col>
+                <Col xs={24} lg={12}>
+                  <TopIssuesTable data={filteredData} topIssues={topIssues} />
+                </Col>
+              </Row>
+            </>
+          )}
+        </Skeleton>
       </div>
     </ErrorBoundary>
   );

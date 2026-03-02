@@ -20,11 +20,12 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', '
  * @param {Object} props
  * @returns {JSX.Element|null}
  */
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label, yearFilter }) => {
   if (active && payload && payload.length > 0) {
+    const title = yearFilter !== null ? `${label} ${yearFilter}` : `Tahun ${label}`;
     return (
       <div className="bg-white rounded-lg shadow-lg px-3 py-2.5 border border-gray-100 text-xs leading-relaxed">
-        <p className="font-bold text-gray-800 m-0 mb-1">{label} 2026</p>
+        <p className="font-bold text-gray-800 m-0 mb-1">{title}</p>
         {payload.map((p, i) => (
           <p key={i} className="m-0" style={{ color: p.color }}>
             {p.name}: <b>{p.value} M</b>
@@ -41,44 +42,87 @@ const CustomTooltip = ({ active, payload, label }) => {
  * @param {Array<Object>} [props.data=[]] - Dataset data proyek hasil filter
  * @returns {JSX.Element} Card berisikan ComposedChart
  */
-const BudgetMonitoring = ({ data = [] }) => {
+const BudgetMonitoring = ({ data = [], yearFilter = null }) => {
   const chartData = useMemo(() => {
-    const months = MONTHS.map((name) => ({ name, plan: 0, actual: 0 }));
+    if (yearFilter !== null) {
+      const targetYear = parseInt(yearFilter, 10);
+      const months = MONTHS.map((name) => ({ name, plan: 0, actual: 0 }));
 
-    data.forEach((p) => {
-      const startDate = p.startDate ? new Date(p.startDate) : null;
-      const endDate = p.endDate ? new Date(p.endDate) : null;
+      data.forEach((p) => {
+        const startDate = p.startDate ? new Date(p.startDate) : null;
+        const endDate = p.endDate ? new Date(p.endDate) : null;
 
-      if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
-      if (startDate.getFullYear() > 2026 || endDate.getFullYear() < 2026) return;
+        if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+        if (startDate.getFullYear() > targetYear || endDate.getFullYear() < targetYear) return;
 
-      const startMonthIndex = startDate.getFullYear() < 2026 ? 0 : startDate.getMonth();
-      const endMonthIndex = endDate.getFullYear() > 2026 ? 11 : endDate.getMonth();
+        const startMonthIndex = startDate.getFullYear() < targetYear ? 0 : startDate.getMonth();
+        const endMonthIndex = endDate.getFullYear() > targetYear ? 11 : endDate.getMonth();
+        const totalDurationMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
 
-      const durationInYear = endMonthIndex - startMonthIndex + 1;
-      const totalDurationMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+        const totalBudget = parseFloat(p.totalBudget) || 0;
+        const actualCost = parseFloat(p.budgetUsed) || 0;
 
-      const totalBudget = parseFloat(p.totalBudget) || 0;
+        const monthlyPlan = totalBudget / Math.max(totalDurationMonths, 1);
+        const monthlyActual = actualCost / Math.max(totalDurationMonths, 1);
+
+        for (let i = startMonthIndex; i <= endMonthIndex; i++) {
+          months[i].plan += monthlyPlan;
+          months[i].actual += monthlyActual;
+        }
+      });
+
+      return months.map(m => ({
+        ...m,
+        plan: m.plan / 1000000000,
+        actual: m.actual / 1000000000
+      }));
+    } else {
+      const yearMap = {};
+
+      data.forEach((p) => {
+        const startDate = p.startDate ? new Date(p.startDate) : null;
+        const endDate = p.endDate ? new Date(p.endDate) : null;
+
+        if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+
+        const startYear = startDate.getFullYear();
+        const endYear = endDate.getFullYear();
+        const totalDurationMonths = (endYear - startYear) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+
+        const totalBudget = parseFloat(p.totalBudget) || 0;
+        const actualCost = parseFloat(p.budgetUsed) || 0;
+
+        const monthlyPlan = totalBudget / Math.max(totalDurationMonths, 1);
+        const monthlyActual = actualCost / Math.max(totalDurationMonths, 1);
+
+        for (let y = startYear; y <= endYear; y++) {
+          if (!yearMap[y]) yearMap[y] = { name: String(y), plan: 0, actual: 0 };
+          
+          let monthsInThisYear = 0;
+          if (startYear === endYear) {
+            monthsInThisYear = endDate.getMonth() - Math.max(startDate.getMonth(), 0) + 1;
+          } else if (y === startYear) {
+            monthsInThisYear = 12 - Math.max(startDate.getMonth(), 0);
+          } else if (y === endYear) {
+            monthsInThisYear = endDate.getMonth() + 1;
+          } else {
+            monthsInThisYear = 12;
+          }
+
+          yearMap[y].plan += monthlyPlan * monthsInThisYear;
+          yearMap[y].actual += monthlyActual * monthsInThisYear;
+        }
+      });
+
+      const years = Object.keys(yearMap).sort((a,b) => Number(a) - Number(b));
       
-      const actualCost = p.budgetUsed;
-
-      const monthlyPlan = totalBudget / Math.max(totalDurationMonths, 1);
-      const monthlyActual = (parseFloat(actualCost) || 0) / Math.max(durationInYear, 1);
-
-      for (let i = startMonthIndex; i <= endMonthIndex; i++) {
-        months[i].plan += monthlyPlan;
-        months[i].actual += monthlyActual;
-      }
-    });
-
-    const displayData = months.map(m => ({
-      ...m,
-      plan: m.plan / 1000000000,
-      actual: m.actual / 1000000000
-    }));
-
-    return displayData;
-  }, [data]);
+      return years.map(y => ({
+        ...yearMap[y],
+        plan: yearMap[y].plan / 1000000000,
+        actual: yearMap[y].actual / 1000000000
+      }));
+    }
+  }, [data, yearFilter]);
 
   const maxValue = useMemo(() => {
     return Math.max(...chartData.map(d => Math.max(d.plan, d.actual)));
@@ -115,11 +159,7 @@ const BudgetMonitoring = ({ data = [] }) => {
                 width={35}
               />
               <Tooltip
-                contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 12 }}
-                formatter={(val) => {
-                  if (val >= 1000) return [`Rp ${(val / 1000).toFixed(2)} Triliun`, undefined];
-                  return [`Rp ${val.toFixed(2)} Miliar`, undefined];
-                }}
+                content={<CustomTooltip yearFilter={yearFilter} />}
               />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
 

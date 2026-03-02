@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { Card, Empty, Modal, Tag, Progress } from 'antd';
+import { Card, Empty, Modal, Tag, Progress, Skeleton } from 'antd';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -37,10 +37,10 @@ const CustomTooltip = ({ active, payload }) => {
 
 /**
  * @param {Object} props
- * @param {Array<Object>} [props.data=[]] - Dataset data proyek hasil filter
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Card berisikan donut chart
  */
-const PriorityDonut = ({ data = [] }) => {
+const PriorityDonut = ({ data = [], loading = false }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -77,7 +77,18 @@ const PriorityDonut = ({ data = [] }) => {
       bordered={false}
       className="h-full rounded-lg [&>.ant-card-head]:!px-5 [&>.ant-card-head]:!border-b-0 [&>.ant-card-head-title]:!text-[13px] [&>.ant-card-head-title]:!font-semibold [&>.ant-card-body]:!px-5 [&>.ant-card-body]:!pb-4 [&>.ant-card-body]:!pt-0"
     >
-      {chartData.length === 0 ? (
+      {loading ? (
+        <div className="py-2">
+          <div className="flex justify-center mb-6 mt-2">
+            <Skeleton.Avatar active shape="circle" size={130} />
+          </div>
+          <div className="flex justify-center gap-4 px-4 mt-8">
+            <Skeleton.Button active size="small" className="h-4 w-12 rounded" />
+            <Skeleton.Button active size="small" className="h-4 w-12 rounded" />
+            <Skeleton.Button active size="small" className="h-4 w-12 rounded" />
+          </div>
+        </div>
+      ) : chartData.length === 0 ? (
         <Empty description="Tidak ada data" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <>

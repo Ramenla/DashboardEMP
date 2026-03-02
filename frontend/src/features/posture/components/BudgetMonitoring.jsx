@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Card, Empty } from 'antd';
+import { Card, Empty, Skeleton } from 'antd';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
@@ -39,10 +39,10 @@ const CustomTooltip = ({ active, payload, label, yearFilter }) => {
 
 /**
  * @param {Object} props
- * @param {Array<Object>} [props.data=[]] - Dataset data proyek hasil filter
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Card berisikan ComposedChart
  */
-const BudgetMonitoring = ({ data = [], yearFilter = null }) => {
+const BudgetMonitoring = ({ data = [], yearFilter = null, loading = false }) => {
   const chartData = useMemo(() => {
     if (yearFilter !== null) {
       const targetYear = parseInt(yearFilter, 10);
@@ -136,7 +136,17 @@ const BudgetMonitoring = ({ data = [], yearFilter = null }) => {
       bordered={false}
       className="h-full rounded-lg [&>.ant-card-head]:!px-5 [&>.ant-card-head]:!border-b-0 [&>.ant-card-head-title]:!text-[13px] [&>.ant-card-head-title]:!font-semibold [&>.ant-card-body]:!px-2 [&>.ant-card-body]:!pb-3 [&>.ant-card-body]:!pt-0"
     >
-      {data.length === 0 ? (
+      {loading ? (
+        <div className="w-full h-[340px] flex items-end justify-between px-8 pb-10 pt-4 gap-2 border-b border-l border-gray-100 ml-6 relative">
+          {[1,2,3,4,5,6,7,8,9,10,11,12].map((i) => (
+             <Skeleton.Button key={i} active size="small" className={`w-8 rounded-t-sm`} style={{ height: `${Math.max(20, Math.random() * 200)}px` }} />
+          ))}
+          <div className="absolute top-2 right-4 flex gap-4">
+             <Skeleton.Button active size="small" className="h-3 w-16" />
+             <Skeleton.Button active size="small" className="h-3 w-16" />
+          </div>
+        </div>
+      ) : data.length === 0 ? (
         <Empty description="Tidak ada data" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <div className="w-full h-[340px]">

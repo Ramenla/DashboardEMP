@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { Card, Tag, Modal, List, Typography } from 'antd';
+import { Card, Tag, Modal, List, Typography, Skeleton } from 'antd';
 import { IssueTooltip } from '../../../components/ui/ProjectTooltip';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 
@@ -16,9 +16,10 @@ const { Text } = Typography;
  * @param {Object} props
  * @param {Array<Object>} [props.data=[]] - Dataset seluruh data proyek.
  * @param {Array<Object>} [props.topIssues] - Top isu yang berasal dari server (optional pre-aggregation).
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Card berisi layout daftar custom untuk 5 top isu.
  */
-const TopIssuesTable = ({ data = [], topIssues }) => {
+const TopIssuesTable = ({ data = [], topIssues, loading = false }) => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,7 +93,20 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
       bordered={false}
       className="h-full rounded-lg [&>.ant-card-head]:!px-5 [&>.ant-card-head]:!border-b-0 [&>.ant-card-head-title]:!text-[13px] [&>.ant-card-head-title]:!font-semibold [&>.ant-card-body]:!px-5 [&>.ant-card-body]:!pb-4 [&>.ant-card-body]:!pt-0"
     >
-      {issues.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col gap-3 mt-1">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+               <Skeleton.Avatar active size="small" shape="circle" className="w-6 h-6 shrink-0" />
+               <div className="flex-1">
+                 <Skeleton.Button active size="small" className="h-4 w-3/4 mb-1 block" />
+                 <Skeleton.Button active size="small" className="h-3 w-1/3 block" />
+               </div>
+               <Skeleton.Button active size="small" className="h-6 w-8 shrink-0" />
+            </div>
+          ))}
+        </div>
+      ) : issues.length === 0 ? (
         <div className="text-center text-gray-400 text-xs py-8">Tidak ada issue</div>
       ) : (
         <div className="flex flex-col gap-2.5">

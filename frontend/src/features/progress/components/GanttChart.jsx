@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { Tag, Empty } from 'antd';
+import { Tag, Empty, Skeleton } from 'antd';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
 import { parseProjectDate } from '../../../utils/dateUtils';
@@ -41,9 +41,10 @@ const SIDEBAR_WIDTH = 280;
  * @param {Array<Object>} [props.data=[]] - Dataset data yang dikelompokan
  * @param {string} [props.viewMode='Monthly'] - Mode kalender ('Daily', 'Weekly', 'Monthly')
  * @param {Function} props.onProjectClick - Callback ketika project di-klik
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Kontainer scrollable untuk visualisasi Gantt Chart
  */
-const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
+const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick, loading = false }) => {
     const [expandedKeys, setExpandedKeys] = useState(['0', '1', '2', '3', '4']);
 
     const toggleCategory = (key) => {
@@ -263,7 +264,42 @@ const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
                 </div>
 
                 <div className="bg-white">
-                    {data.length === 0 ? <Empty description="Tidak ada data project" className="m-5" /> : (
+                    {loading ? (
+                       <div className="flex flex-col w-full h-full">
+                         {[1,2,3,4,5].map(i => (
+                           <React.Fragment key={`s-${i}`}>
+                             {/* Category Header Skeleton */}
+                             <div className="flex border-b border-gray-100 cursor-pointer h-10 relative">
+                                <div style={stickyLeftStyle} className="z-[100] bg-gray-50 border-r border-gray-200 flex items-center px-4 gap-2 shadow-[4px_0_8px_rgba(0,0,0,0.02)]">
+                                     <Skeleton.Button active size="small" className="h-4 w-32" />
+                                </div>
+                                <div className="flex-grow bg-white"></div>
+                             </div>
+                             {/* Project Rows Skeleton */}
+                             {[1,2].map(j => (
+                               <div key={`sr-${i}-${j}`} className="flex h-[50px] border-b border-gray-100 items-center relative">
+                                  <div style={stickyLeftStyle} className="z-[100] bg-white border-r border-gray-200 flex flex-col justify-center px-4 shadow-[4px_0_8px_rgba(0,0,0,0.02)] h-full gap-1">
+                                      <Skeleton.Button active size="small" className="h-4 w-[90%]" />
+                                      <Skeleton.Button active size="small" className="h-3 w-16" />
+                                  </div>
+                                  <div className="flex-grow px-8 pt-3 relative" style={{ display: 'grid', gridTemplateColumns: gridTemplateColumns }}>
+                                      {Array.from({ length: config.totalCols }).map((_, c) => (
+                                          <div key={`sc-${c}`} style={{ gridColumn: c + 1 }} className="border-r border-gray-50 h-full"></div>
+                                      ))}
+                                      {/* Simulated timeline bar */}
+                                      <div style={{
+                                         gridColumn: `${Math.floor(Math.random() * 3) + 1} / span ${Math.floor(Math.random() * 5) + 3}`,
+                                         zIndex: 5
+                                      }}>
+                                         <Skeleton.Button active size="small" block className="h-6 rounded" />
+                                      </div>
+                                  </div>
+                               </div>
+                             ))}
+                           </React.Fragment>
+                         ))}
+                       </div>
+                    ) : data.length === 0 ? <Empty description="Tidak ada data project" className="m-5" /> : (
                         <>
                             {data.map((cat, idx) => {
                                 const isExpanded = expandedKeys.includes(String(idx));

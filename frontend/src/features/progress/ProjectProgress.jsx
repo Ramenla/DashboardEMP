@@ -155,15 +155,12 @@ const ProjectProgress = () => {
       </Card>
 
       <div className="mt-6">
-        {loading ? (
-          <div className="flex justify-center py-10"><Spin size="large" /></div>
-        ) : (
-          <GanttChart
-            data={groupedData}
-            viewMode={calendarView}
-            onProjectClick={handleProjectClick}
-          />
-        )}
+        <GanttChart
+          data={groupedData}
+          viewMode={calendarView}
+          onProjectClick={handleProjectClick}
+          loading={loading}
+        />
       </div>
 
       <ProjectDetailDrawer

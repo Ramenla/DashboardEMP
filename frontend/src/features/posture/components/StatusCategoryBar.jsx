@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Card, Empty, Segmented, Modal, Tag, Progress } from 'antd';
+import { Card, Empty, Segmented, Modal, Tag, Progress, Skeleton } from 'antd';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -29,10 +29,10 @@ const PRIORITY_COLORS = {
 
 /**
  * @param {Object} props
- * @param {Array<Object>} [props.data=[]] - Dataset data proyek terfilter.
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Card berisikan Recharts stacked bar dengan Segmented toggle.
  */
-const StatusCategoryBar = ({ data = [] }) => {
+const StatusCategoryBar = ({ data = [], loading = false }) => {
   const [mode, setMode] = useState('Status');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState({ category: null, key: null });
@@ -96,7 +96,19 @@ const StatusCategoryBar = ({ data = [] }) => {
       bordered={false}
       className="h-full rounded-lg [&>.ant-card-head]:!px-5 [&>.ant-card-head]:!border-b-0 [&>.ant-card-head-title]:!text-[13px] [&>.ant-card-head-title]:!font-semibold [&>.ant-card-body]:!px-3 [&>.ant-card-body]:!pb-3 [&>.ant-card-body]:!pt-0"
     >
-      {chartData.length === 0 ? (
+      {loading ? (
+        <div className="w-full h-[250px] flex flex-col justify-between pt-2 pb-6 px-4">
+          <Skeleton.Button active block size="small" className="h-4 w-[80%]" />
+          <Skeleton.Button active block size="small" className="h-4 w-[60%]" />
+          <Skeleton.Button active block size="small" className="h-4 w-[95%]" />
+          <Skeleton.Button active block size="small" className="h-4 w-[40%]" />
+          <div className="flex gap-4 justify-center mt-2">
+            <Skeleton.Button active size="small" className="h-3 w-16" />
+            <Skeleton.Button active size="small" className="h-3 w-16" />
+            <Skeleton.Button active size="small" className="h-3 w-16" />
+          </div>
+        </div>
+      ) : chartData.length === 0 ? (
         <Empty description="Tidak ada data" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
         <div className="w-full h-[250px]">

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Card, Table, Tag, Progress, Typography, Space } from 'antd';
+import { Card, Table, Tag, Progress, Typography, Space, Skeleton } from 'antd';
 import PremiumTooltip, { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
 import { formatProjectDate } from '../../../utils/dateUtils';
 
@@ -52,9 +52,10 @@ const getStatusColor = (status) => {
  * @param {Function} props.onRowClick - Callback saat baris tabel di-klik.
  * @param {Function} [props.onEdit] - Callback edit proyek (belum diimplementasi).
  * @param {Function} [props.onDelete] - Callback hapus proyek (belum diimplementasi).
+ * @param {boolean} [props.loading=false]
  * @returns {JSX.Element} Tabel Ant Design dengan kolom proyek lengkap.
  */
-const ProjectTable = ({ dataSource, onRowClick }) => {
+const ProjectTable = ({ dataSource, onRowClick, loading = false }) => {
   const columns = [
     {
       title: 'Kode Project',
@@ -229,14 +230,48 @@ const ProjectTable = ({ dataSource, onRowClick }) => {
 
   return (
     <Card bordered={false} className="rounded-lg" bodyStyle={{ padding: 0 }}>
-      <Table
-        dataSource={dataSource}
-        columns={columns}
-        pagination={{ pageSize: 5, showSizeChanger: false }}
-        rowClassName="cursor-pointer"
-        onRow={(record) => ({ onClick: () => onRowClick(record) })}
-        size="small"
-      />
+      {loading ? (
+        <div className="w-full flex flex-col">
+          {/* Table Header Skeleton */}
+          <div className="flex bg-gray-50 px-4 py-3 border-b border-gray-100 mb-2">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <Skeleton.Button key={`h-${i}`} active size="small" className="h-4 w-16 mx-auto flex-1" />
+            ))}
+          </div>
+          {/* Table Rows Skeleton */}
+          {[1, 2, 3, 4, 5].map((row) => (
+            <div key={`r-${row}`} className="flex px-4 py-3 border-b border-gray-50 items-center">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((col) => (
+                <div key={`c-${col}`} className="flex-1 px-2 flex justify-center">
+                  {col === 1 ? (
+                    <div className="flex flex-col items-center gap-1 w-full">
+                      <Skeleton.Button active size="small" className="h-4 w-3/4" />
+                      <Skeleton.Button active size="small" className="h-3 w-1/2" />
+                    </div>
+                  ) : col === 9 ? (
+                     <Skeleton.Avatar active shape="circle" size={34} />
+                  ) : (
+                    <Skeleton.Button active size="small" className="h-5 w-12 rounded" />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+          {/* Pagination Skeleton */}
+          <div className="flex justify-end px-4 py-3">
+             <Skeleton.Button active size="small" className="h-6 w-48" />
+          </div>
+        </div>
+      ) : (
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          pagination={{ pageSize: 5, showSizeChanger: false }}
+          rowClassName="cursor-pointer"
+          onRow={(record) => ({ onClick: () => onRowClick(record) })}
+          size="small"
+        />
+      )}
     </Card>
   );
 };

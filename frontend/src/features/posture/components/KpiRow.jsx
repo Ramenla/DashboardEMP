@@ -95,10 +95,10 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
  *
  * @param {Object} props
  * @param {Array<Object>} [props.data=[]] - Array data proyek hasil filter lokal.
- * @param {Object} [props.stats] - Objek statistik dari backend (jika tersedia).
+ * @param {boolean} [props.loading=false] - Status loading.
  * @returns {JSX.Element} Grid 4 kolom berisi card pengukuran performa.
  */
-const KpiRow = ({ data = [], stats }) => {
+const KpiRow = ({ data = [], stats, loading = false }) => {
   const m = useMemo(() => {
     if (stats) {
       return {
@@ -199,7 +199,17 @@ const KpiRow = ({ data = [], stats }) => {
               <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider m-0 mb-2">
                 {kpi.label}
               </p>
-              {kpi.content}
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <Skeleton.Avatar active shape="square" size={40} className="w-10 h-10 rounded-lg" />
+                  <div className="flex flex-col flex-1 gap-1">
+                    <Skeleton.Button active size="small" className="h-6 w-16" />
+                    <Skeleton.Button active size="small" className="h-3 w-24" />
+                  </div>
+                </div>
+              ) : (
+                kpi.content
+              )}
             </Card>
           </PremiumTooltip>
         </Col>

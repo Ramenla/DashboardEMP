@@ -228,38 +228,38 @@ const ProjectPosture = () => {
           </div>
         </div>
 
-        <Skeleton active loading={loading} paragraph={{ rows: 14 }}>
-          {filteredData.length === 0 ? (
+        <div>
+          {(!loading && filteredData.length === 0) ? (
             <div className="mt-10 mb-10">
               <Empty description="Tidak ada project yang cocok dengan filter" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             </div>
           ) : (
             <>
-              <KpiRow data={filteredData} stats={stats} />
+              <KpiRow data={filteredData} stats={stats} loading={loading} />
 
               <Row gutter={[12, 12]} className="mt-3">
                 <Col xs={24} lg={6}>
-                  <StatusDonut data={filteredData} />
+                  <StatusDonut data={filteredData} loading={loading} />
                 </Col>
                 <Col xs={24} lg={6}>
-                  <PriorityDonut data={filteredData} />
+                  <PriorityDonut data={filteredData} loading={loading} />
                 </Col>
                 <Col xs={24} lg={12}>
-                  <StatusCategoryBar data={filteredData} />
+                  <StatusCategoryBar data={filteredData} loading={loading} />
                 </Col>
               </Row>
 
               <Row gutter={[12, 12]} className="mt-3">
                 <Col xs={24} lg={12}>
-                  <BudgetMonitoring data={filteredData} yearFilter={filters.year} />
+                  <BudgetMonitoring data={filteredData} yearFilter={filters.year} loading={loading} />
                 </Col>
                 <Col xs={24} lg={12}>
-                  <TopIssuesTable data={filteredData} topIssues={topIssues} />
+                  <TopIssuesTable data={filteredData} topIssues={topIssues} loading={loading} />
                 </Col>
               </Row>
             </>
           )}
-        </Skeleton>
+        </div>
       </div>
     </ErrorBoundary>
   );

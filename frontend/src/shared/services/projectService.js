@@ -9,7 +9,7 @@ const projectService = {
      * @param {Object} params - { year, month, category, status, location }
      */
     getAll: async (params = {}) => {
-        const response = await apiClient.get('/projects', { params });
+        const response = await apiClient.get('projects', { params });
         // Returns { projects, stats, topIssues }
         return response.data;
     },
@@ -18,7 +18,7 @@ const projectService = {
      * Get project metadata (categories, statuses, locations)
      */
     getMetadata: async () => {
-        const response = await apiClient.get('/projects/metadata');
+        const response = await apiClient.get('projects/metadata');
         return response.data;
     },
 
@@ -26,7 +26,7 @@ const projectService = {
      * Create a new project
      */
     create: async (projectData) => {
-        const response = await apiClient.post('/projects', projectData);
+        const response = await apiClient.post('projects', projectData);
         return response.data;
     },
 
@@ -34,7 +34,7 @@ const projectService = {
      * Update an existing project
      */
     update: async (id, projectData) => {
-        const response = await apiClient.put(`/projects/${id}`, projectData);
+        const response = await apiClient.put(`projects/${id}`, projectData);
         return response.data;
     },
 
@@ -42,7 +42,7 @@ const projectService = {
      * Delete a project
      */
     delete: async (id) => {
-        const response = await apiClient.delete(`/projects/${id}`);
+        const response = await apiClient.delete(`projects/${id}`);
         return response.data;
     }
 };

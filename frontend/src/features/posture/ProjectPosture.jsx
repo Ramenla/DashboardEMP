@@ -1,3 +1,15 @@
+/**
+ * @file ProjectPosture.jsx
+ * @description Halaman dashboard "Postur Proyek" yang menampilkan ringkasan status
+ * seluruh proyek. Terdiri dari:
+ * - Baris KPI (total proyek, SPI, CPI, jumlah beresiko)
+ * - Donut chart status dan prioritas
+ * - Bar chart breakdown per kategori
+ * - Monitoring anggaran dan tabel isu teratas
+ *
+ * Data di-fetch dari backend API dengan filter server-side
+ * (tahun, bulan, kategori, status, lokasi).
+ */
 
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Select, Button, Empty, Popover, Badge, Tag, Spin, message } from 'antd';
@@ -15,7 +27,10 @@ import { parseProjectDate, normalizeProjectData } from '../../utils/dateUtils';
 const { Option } = Select;
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
-// Simple Error Boundary Component for debugging
+/**
+ * Error boundary untuk menangkap error rendering pada komponen child.
+ * Menampilkan pesan error dan stack trace saat terjadi crash.
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -49,11 +64,8 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-
 /**
- * halaman utama project posture (dashboard status proyek)
- * menampilkan KPI utama, donut chart status & prioritas, dan bar chart per kategori
- * @returns {JSX.Element} dashboard page
+ * @returns {JSX.Element} Dashboard postur proyek dengan KPI, chart, dan filter.
  */
 const ProjectPosture = () => {
   const [filters, setFilters] = useState({
@@ -72,12 +84,10 @@ const ProjectPosture = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch data projects dari backend
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        // Build query string based on filters for server-side logic
         const queryParams = new URLSearchParams();
         if (filters.year) queryParams.append('year', filters.year);
         if (filters.month !== null) queryParams.append('month', filters.month);
@@ -109,7 +119,7 @@ const ProjectPosture = () => {
     };
 
     fetchProjects();
-  }, [filters.year, filters.month, filters.categories, filters.status, filters.location]); // Refetch when any filter changes
+  }, [filters.year, filters.month, filters.categories, filters.status, filters.location]);
 
   const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
   const statuses = ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'];
@@ -117,8 +127,6 @@ const ProjectPosture = () => {
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
-
-  // No longer need local filtering useEffect for months as backend handles it now
 
   const handleReset = () => {
     setFilters({ year: 2026, month: null, categories: [], status: null, location: null });
@@ -198,7 +206,6 @@ const ProjectPosture = () => {
   return (
     <ErrorBoundary>
       <div className="pb-4 -mt-10">
-        {/* header — plain title + filter */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-[#001529] m-0">Postur Proyek</h2>
 
@@ -223,7 +230,6 @@ const ProjectPosture = () => {
           </div>
         </div>
 
-        {/* content */}
         {loading ? (
           <div className="flex justify-center py-10"><Spin size="large" /></div>
         ) : filteredData.length === 0 ? (
@@ -232,10 +238,8 @@ const ProjectPosture = () => {
           </div>
         ) : (
           <>
-            {/* row 1: kpi */}
             <KpiRow data={filteredData} stats={stats} />
 
-            {/* row 2: donuts + stacked bar */}
             <Row gutter={[12, 12]} className="mt-3">
               <Col xs={24} lg={6}>
                 <StatusDonut data={filteredData} />
@@ -248,7 +252,6 @@ const ProjectPosture = () => {
               </Col>
             </Row>
 
-            {/* row 3: budget + issues */}
             <Row gutter={[12, 12]} className="mt-3">
               <Col xs={24} lg={12}>
                 <BudgetMonitoring data={filteredData} />

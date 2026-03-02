@@ -1,3 +1,14 @@
+/**
+ * @file ProjectDetailDrawer.jsx
+ * @description Komponen drawer slide-in untuk menampilkan detail lengkap proyek.
+ * Drawer memiliki 5 tab:
+ * - Ringkasan: info umum, SPI/CPI, progress bar, grafik S-Curve (PV/EV/AC), dan daftar isu.
+ * - Timeline: jadwal dan milestone proyek.
+ * - Tim Proyek: daftar anggota tim beserta peran.
+ * - Dokumen: daftar dokumen proyek yang dapat diunduh.
+ * - Galeri: foto-foto progres proyek.
+ */
+
 import React, { useMemo } from 'react';
 import { Drawer, Tag, Typography, Progress, Divider, Steps, List, Card, Row, Col, Statistic, Tabs, Avatar, Descriptions, Image, Button, Timeline } from 'antd';
 import {
@@ -11,9 +22,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const { Title, Text } = Typography;
 
 /**
- * helper function untuk mendapatkan warna tag berdasarkan status project
- * @param {string} status - status project (Berjalan, Tertunda, Kritis, dll)
- * @returns {string} nama color untuk Ant Design Tag component
+ * Mengembalikan nama warna Ant Design Tag berdasarkan status proyek.
+ *
+ * @param {string} status - Status proyek (Berjalan, Tertunda, Beresiko, Selesai).
+ * @returns {string} Nama warna untuk komponen Tag.
  */
 const getStatusColor = (status) => {
   switch (status) {
@@ -25,7 +37,12 @@ const getStatusColor = (status) => {
   }
 };
 
-// Helper untuk format currency IDR
+/**
+ * Format angka ke mata uang IDR (tanpa desimal).
+ *
+ * @param {number} value - Nilai yang akan diformat.
+ * @returns {string} String dalam format mata uang Indonesia (contoh: "Rp 1.500.000").
+ */
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -35,7 +52,13 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-// Helper internal untuk state kosong
+/**
+ * Komponen placeholder untuk state kosong (data belum tersedia).
+ *
+ * @param {Object} props
+ * @param {string} props.text - Teks yang ditampilkan.
+ * @returns {JSX.Element}
+ */
 const EmptyState = ({ text }) => (
   <div className="text-center py-6 text-gray-400 italic bg-gray-50 rounded border border-gray-100 border-dashed">
     {text}
@@ -43,46 +66,42 @@ const EmptyState = ({ text }) => (
 );
 
 /**
- * komponen drawer untuk menampilkan detail lengkap suatu project
- * menampilkan info umum, progress, budget, chart s-curve, dan timeline
- * @param {Object} props - props komponen
- * @param {Object} props.project - data project yang akan ditampilkan
- * @param {boolean} props.open - state apakah drawer visible
- * @param {Function} props.onClose - callback untuk menutup drawer
- * @returns {JSX.Element|null} drawer dengan detail project, atau null jika project tidak tersedia
+ * Drawer detail proyek yang menampilkan informasi lengkap dalam format multi-tab.
+ *
+ * @param {Object} props
+ * @param {Object} props.project - Data proyek yang akan ditampilkan.
+ * @param {boolean} props.open - Status visibility drawer.
+ * @param {Function} props.onClose - Callback untuk menutup drawer.
+ * @returns {JSX.Element|null} Drawer dengan detail proyek, atau null jika project tidak tersedia.
  */
 const ProjectDetailDrawer = ({ project, open, onClose }) => {
   if (!project) return null;
 
-  // hitung deviasi saat ini
   const currentDeviation = project.progress - project.target;
   const isNegative = currentDeviation < 0;
 
-  // Calculate budget used percentage
   const totalBudget = parseFloat(project.totalBudget) || 0;
   const budgetUsedVal = parseFloat(project.budgetUsed) || 0;
   const budgetUsedPct = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
   /**
-   * generate dummy s-curve data untuk chart PV (planned value), EV (earned value), AC (actual cost)
-   * data di-generate berdasarkan target, progress, dan budget project
-   * @returns {Array} array of objects dengan data PV, EV, AC per bulan
+   * Data S-Curve (PV, EV, AC) yang di-generate berdasarkan data proyek.
+   * Digunakan untuk chart Recharts LineChart pada tab Ringkasan.
+   *
+   * @type {Array<{name: string, pv: number, ev: number, ac: number}>}
    */
   const sCurveData = useMemo(() => {
     const data = [];
-    // Safety check for dates
     const start = project.startDate ? new Date(project.startDate) : new Date();
     const end = project.endDate ? new Date(project.endDate) : new Date(start.getTime() + (project.duration || 6) * 30 * 24 * 60 * 60 * 1000);
 
     let numPeriods = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
-    // Cap at a reasonable number for visualization if data is wonky
     if (numPeriods <= 0) numPeriods = 1;
     if (numPeriods > 36) numPeriods = 36;
 
     const periods = [];
     const formatter = new Intl.DateTimeFormat('id-ID', { month: 'short', year: '2-digit' });
 
-    // Generate actual month labels
     for (let i = 0; i < numPeriods; i++) {
       const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
       periods.push(formatter.format(d));
@@ -93,9 +112,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     const finalAC = totalBudget > 0 ? (budgetUsedVal / totalBudget) * 100 : 0;
 
     for (let i = 0; i < numPeriods; i++) {
-      // ... (existing loop logic is fine, but noticed finalAC usage above. 
-      // Need to be careful not to break sCurveData generation if I change variable definitions above)
-      // I changed `totalBudget` default from 1 to 0, so I need to handle division safely.
       const progressRatio = (i + 1) / numPeriods;
 
       const pvFactor = Math.pow(progressRatio, 1.2);
@@ -112,14 +128,13 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
     return data;
   }, [project, budgetUsedVal, totalBudget]);
 
-  // Items untuk Tabs
+  /** @type {import('antd').TabsProps['items']} */
   const tabItems = [
     {
       key: '1',
       label: <span className="flex items-center gap-2"><LineChartOutlined /> Ringkasan</span>,
       children: (
         <>
-          {/* 1. Informasi Umum */}
           <Card size="small" className="mb-4 bg-gray-50 border-gray-200">
             <Descriptions column={2} size="small" labelStyle={{ color: '#8c8c8c' }} contentStyle={{ fontWeight: 500 }}>
               <Descriptions.Item label="Kategori"><Tag color="blue">{project.category}</Tag></Descriptions.Item>
@@ -139,11 +154,9 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
             </Descriptions>
           </Card>
 
-          {/* 2. Performa & Grafik S-Curve */}
           <div className="mb-6">
             <Title level={5}>Performa Proyek</Title>
 
-            {/* SPI & CPI Metrics */}
             <Row gutter={16} className="mb-4">
               <Col span={12}>
                 <Card size="small" className="bg-blue-50 border-blue-100">
@@ -169,7 +182,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               </Col>
             </Row>
 
-            {/* Progress Bar Utama */}
             <div className="mb-4">
               <div className="flex justify-between text-xs mb-1">
                 <span>Actual Progress (EV)</span>
@@ -185,7 +197,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               </div>
             </div>
 
-            {/* Chart S-Curve */}
             <Card size="small" className="bg-white rounded-lg border border-gray-100 mb-4">
               <div className="w-full h-[250px] mt-2">
                 <ResponsiveContainer>
@@ -216,7 +227,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
               </div>
             </Card>
 
-            {/* Budget Stats */}
             <Row gutter={[12, 12]}>
               <Col span={8}>
                 <Card size="small" bordered={false} className="shadow-sm bg-blue-50 text-center">
@@ -254,7 +264,6 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
 
           <Divider />
 
-          {/* 3. Issue List */}
           <div className="mb-6">
             <Title level={5} className={project.issues && project.issues.length > 0 ? "text-red-500" : ""}>
               <WarningOutlined /> Kendala & Isu ({project.issues ? project.issues.length : 0})
@@ -290,7 +299,7 @@ const ProjectDetailDrawer = ({ project, open, onClose }) => {
           <Timeline
             mode="left"
             items={project.timelineEvents ? project.timelineEvents.map(event => ({
-              color: 'blue', // Simplified color logic as status might not be in event
+              color: 'blue',
               children: (
                 <>
                   <Text strong>{event.eventName || event.title}</Text>

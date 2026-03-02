@@ -1,3 +1,10 @@
+/**
+ * @file server.js
+ * @description Entry point utama server (Node.js/Express) untuk aplikasi backend.
+ * Melakukan inisialisasi koneksi server, routing middleware API proyek, CORS, 
+ * hingga menyajikan build statis frontend saat environment production.
+ */
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -17,7 +24,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ───── Middleware ─────
 const corsOptions = {
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -27,10 +33,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Sajikan file statis dari folder dist React (untuk production/Railway)
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-// ───── Routes ─────
 app.use('/api/projects', projectRoutes);
 app.post('/api/seed', seedRandomProjects);
 
@@ -48,7 +52,6 @@ app.get('/api/test-db', async (req, res, next) => {
     }
 });
 
-// Route catch-all: Kirim index.html untuk rute non-API (untuk mendukung SPA)
 app.get('*', (req, res) => {
     const indexPath = path.join(__dirname, '../frontend/dist/index.html');
 
@@ -59,10 +62,8 @@ app.get('*', (req, res) => {
     }
 });
 
-// ───── Error Handler (harus di paling bawah, setelah semua routes) ─────
 app.use(errorHandler);
 
-// ───── Start Server ─────
 app.listen(PORT, async () => {
     console.log(`🌐 Server is running on port ${PORT}`);
     await initDatabase();

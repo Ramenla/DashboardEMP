@@ -1,3 +1,11 @@
+/**
+ * @file ProjectList.jsx
+ * @description Halaman daftar proyek dengan filtering multi-kriteria.
+ * Menampilkan tabel proyek yang dapat difilter berdasarkan pencarian teks,
+ * kategori, status, prioritas, dan lokasi. Klik baris membuka drawer detail.
+ * Data diambil dari backend API (MySQL).
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Input, message, Space, Spin } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -10,9 +18,7 @@ import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
- * halaman project list - daftar semua project dengan filtering
- * data diambil dari backend API (MySQL)
- * @returns {JSX.Element} halaman project list
+ * @returns {JSX.Element} Halaman project list dengan filter, tabel, dan drawer detail.
  */
 const ProjectList = () => {
   const [allData, setAllData] = useState([]);
@@ -29,14 +35,16 @@ const ProjectList = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // fetch data dari backend
+  /**
+   * Mengambil data proyek dari backend API.
+   * Mendukung format response array maupun object `{ projects }`.
+   */
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(API_URL);
       if (!res.ok) throw new Error('Gagal mengambil data');
       const result = await res.json();
-      // Handle both old array format and new object format
       const projects = Array.isArray(result) ? result : (result.projects || []);
       setAllData(projects);
     } catch (err) {
@@ -50,7 +58,6 @@ const ProjectList = () => {
     fetchProjects();
   }, [fetchProjects]);
 
-  // filter data
   useEffect(() => {
     const result = allData.filter((item) => {
       const matchSearch = (item.id || '').toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -83,7 +90,6 @@ const ProjectList = () => {
 
   return (
     <div className="pb-4 -mt-10">
-      {/* header: title + search + action */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-bold text-[#001529] m-0">Project List</h2>
         <Space size="middle">
@@ -99,10 +105,8 @@ const ProjectList = () => {
         </Space>
       </div>
 
-      {/* filter bar */}
       <FilterCard filters={filters} onFilterChange={setFilters} onReset={handleReset} />
 
-      {/* table */}
       <div className="mt-3">
         <ProjectTable
           dataSource={filteredData}
@@ -111,7 +115,6 @@ const ProjectList = () => {
         />
       </div>
 
-      {/* drawer detail */}
       <ProjectDetailDrawer project={selectedProject} open={isDrawerOpen} onClose={closeDrawer} />
     </div>
   );

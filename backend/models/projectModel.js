@@ -1,11 +1,22 @@
+/**
+ * @file projectModel.js
+ * @description Model database untuk entitas Proyek dan data terkait
+ * (Isus, Timeline, Anggota Tim, Metric). Menggunakan camelCase
+ * sesuai dengan standar schema database yang diinisiasi.
+ */
+
 import db from '../config/db.js';
 
-// ───── Query: Projects + Latest Metrics (camelCase) ─────
-
 /**
- * Ambil semua project beserta metrics, dengan filter opsional.
- * @param {Object} filters - { year, month, category, status, priority, location }
- * @returns {Promise<Array>} rows dari query
+ * Mencari semua list proyek ditambah data agregasi metrik terakhirnya.
+ * @param {Object} [filters={}] - Filter opsional berdasarkan form 
+ * @param {string} [filters.year] - Filter berdasarkan tahun jadwal proyek (start/end date)
+ * @param {string} [filters.month] - Filter berdasarkan rentang bulan
+ * @param {string|string[]} [filters.category] - Filter kategori spesifik
+ * @param {string} [filters.status] - Filter status
+ * @param {string} [filters.priority] - Filter level prioritas
+ * @param {string} [filters.location] - Pencarian term lokasi
+ * @returns {Promise<Array<Object>>} Daftar proyek lengkap beserta metrik terkininya
  */
 export const findAll = async (filters = {}) => {
     let query = `
@@ -67,8 +78,12 @@ export const findAll = async (filters = {}) => {
     return rows;
 };
 
-// ───── Query: Issues (camelCase) ─────
 
+/**
+ * Mengambil rekap isu-isu di beberapa proyek yang diminta.
+ * @param {Array<string>} projectIds - Array ID proyek
+ * @returns {Promise<Array<Object>>} Daftar isu terkait
+ */
 export const findIssues = async (projectIds) => {
     if (!projectIds.length) return [];
     const [rows] = await db.query(
@@ -79,8 +94,11 @@ export const findIssues = async (projectIds) => {
     return rows;
 };
 
-// ───── Query: Timeline Events (camelCase) ─────
-
+/**
+ * Mengambil timeline event ditiap proyek untuk render Gantt Chart
+ * @param {Array<string>} projectIds - Array ID proyek
+ * @returns {Promise<Array<Object>>} Daftar event timeline terkait
+ */
 export const findTimeline = async (projectIds) => {
     if (!projectIds.length) return [];
     const [rows] = await db.query(
@@ -91,8 +109,12 @@ export const findTimeline = async (projectIds) => {
     return rows;
 };
 
-// ───── Query: Members (camelCase) ─────
 
+/**
+ * Mengambil tim/anggota di beberapa proyek yang diminta.
+ * @param {Array<string>} projectIds - Array ID proyek
+ * @returns {Promise<Array<Object>>} Daftar anggota member
+ */
 export const findMembers = async (projectIds) => {
     if (!projectIds.length) return [];
     const [rows] = await db.query(
@@ -105,8 +127,11 @@ export const findMembers = async (projectIds) => {
     return rows;
 };
 
-// ───── Mutation: Create Project (camelCase) ─────
-
+/**
+ * Menyisipkan proyek baru dan init datanya ke project_metrics.
+ * @param {Object} data - Objek insert
+ * @returns {Promise<string>} ID baru yang diinsert
+ */
 export const create = async (data) => {
     const {
         id, projectCode, name, category, priority, status,
@@ -129,8 +154,12 @@ export const create = async (data) => {
     return id;
 };
 
-// ───── Mutation: Update Project (camelCase) ─────
-
+/**
+ * Mengupdate field tertentu proyek berdasarkan ID, termasuk metrik.
+ * @param {string} id - ID proyek target update
+ * @param {Object} data - Objek values yang akan diperbaharui
+ * @returns {Promise<void>}
+ */
 export const update = async (id, data) => {
     const fields = [];
     const values = [];
@@ -150,7 +179,6 @@ export const update = async (id, data) => {
         await db.query(`UPDATE projects SET ${fields.join(', ')} WHERE id = ?`, values);
     }
 
-    // Update metrics if relevant fields provided
     if (data.progress !== undefined || data.budgetUsed !== undefined || data.target !== undefined) {
         const totalBudget = parseFloat(data.totalBudget) || 0;
         const progress = parseFloat(data.progress) || 0;
@@ -176,10 +204,13 @@ export const update = async (id, data) => {
     }
 };
 
-// ───── Mutation: Delete Project (camelCase) ─────
-
+/**
+ * Menghapus data spesifik proyek beserta semua references data lainnya
+ * di table terhubung.
+ * @param {string} id - ID string yang akan dihapus
+ * @returns {Promise<number>} affected rows (jumlah row terhapus)
+ */
 export const remove = async (id) => {
-    // Delete related data first (in case no CASCADE)
     await db.query('DELETE FROM project_metrics WHERE projectId = ?', [id]);
     await db.query('DELETE FROM issues WHERE projectId = ?', [id]);
     await db.query('DELETE FROM timeline_events WHERE projectId = ?', [id]);

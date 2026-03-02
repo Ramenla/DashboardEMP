@@ -1,3 +1,10 @@
+/**
+ * @file BudgetMonitoring.jsx
+ * @description Komponen ComposedChart Recharts untuk memantau pengeluaran anggaran
+ * bulanan vs rencana anggaran dalam tahun berjalan (default 2026).
+ * Kombinasi Bar (Pengeluaran Aktual) dan Line (Rencana).
+ */
+
 import React, { useMemo } from 'react';
 import { Card, Empty } from 'antd';
 import {
@@ -5,10 +12,13 @@ import {
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 
+/** @constant {Array<string>} Daftar bulan label X-Axis. */
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
 /**
- * custom tooltip
+ * Custom Tooltip untuk ComposedChart.
+ * @param {Object} props
+ * @returns {JSX.Element|null}
  */
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length > 0) {
@@ -27,66 +37,40 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 /**
- * budget monitoring bulanan (jan-des)
- * - bar: pengeluaran actual (miliar)
- * - line: rencana budget / limit (miliar)
- * jika bar > line, indikasi overbudget pada bulan tersebut
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} card dengan combo chart
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset data proyek hasil filter
+ * @returns {JSX.Element} Card berisikan ComposedChart
  */
 const BudgetMonitoring = ({ data = [] }) => {
   const chartData = useMemo(() => {
     const months = MONTHS.map((name) => ({ name, plan: 0, actual: 0 }));
 
     data.forEach((p) => {
-      // Parse dates safely
       const startDate = p.startDate ? new Date(p.startDate) : null;
       const endDate = p.endDate ? new Date(p.endDate) : null;
 
       if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
-
-      // Only consider 2026 for this year-based view
       if (startDate.getFullYear() > 2026 || endDate.getFullYear() < 2026) return;
 
       const startMonthIndex = startDate.getFullYear() < 2026 ? 0 : startDate.getMonth();
       const endMonthIndex = endDate.getFullYear() > 2026 ? 11 : endDate.getMonth();
 
-      // Duration in months overlapping 2026
       const durationInYear = endMonthIndex - startMonthIndex + 1;
-      // Total Project Duration (approx)
       const totalDurationMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
 
-      const totalBudget = parseFloat(p.totalBudget) || 0; // Use totalBudget column
-      const budgetUsedVal = parseFloat(p.budgetTotal) ? totalBudget * ((parseFloat(p.budgetUsed) || 0) / 100) : (parseFloat(p.budgetUsed) || 0);
-      // Note: Backend might send budgetUsed as Percentage or Amount depending on implementation. 
-      // In seed: budgetUsed is Amount. In Modal: budgetUsed is %. 
-      // Based on ProjectTable: budgetUsed is Amount. 
-      // Let's assume p.budgetUsed is the Amount sent by backend if available, or we calculate from metric.
-      // Re-reading seed: metric has actualCost (amount). project table fetches 'budgetUsed' likely as alias?
-      // Let's assume p.totalBudget is the Total Amount. p.budgetUsed is the % or Amount?
-      // ProjectTable logic: const used = parseFloat(val) || 0; -> treats as amount.
+      const totalBudget = parseFloat(p.totalBudget) || 0;
+      
+      const actualCost = p.budgetUsed;
 
-      const actualCost = p.budgetUsed; // Assuming amount based on Table
-
-      // Monthly Plan (Simple Linear Distribution)
       const monthlyPlan = totalBudget / Math.max(totalDurationMonths, 1);
-
-      // Monthly Actual (Simple Linear Distribution of what has been spent so far)
-      // This is an approximation. Ideally we have monthly records.
-      const monthlyActual = (actualCost || 0) / Math.max(durationInYear, 1); // Distribute actuals only over active months in this year? 
-      // Better: Distribute actuals from start until NOW (or end). 
+      const monthlyActual = (parseFloat(actualCost) || 0) / Math.max(durationInYear, 1);
 
       for (let i = startMonthIndex; i <= endMonthIndex; i++) {
         months[i].plan += monthlyPlan;
-
-        // Actuals only if month has passed/started
-        const currentMonth = new Date().getMonth();
-        // For dummy data, let's just show actuals for all active months to visualize the bars
         months[i].actual += monthlyActual;
       }
     });
 
-    // Convert to Billions for display (1 Miliar = 1,000,000,000)
     const displayData = months.map(m => ({
       ...m,
       plan: m.plan / 1000000000,
@@ -95,12 +79,6 @@ const BudgetMonitoring = ({ data = [] }) => {
 
     return displayData;
   }, [data]);
-
-  /* Helper format currency compact */
-  const formatCurrency = (val) => {
-    if (val >= 1000) return `${(val / 1000).toFixed(1)}T`;
-    return `${val.toFixed(0)}M`;
-  };
 
   const maxValue = useMemo(() => {
     return Math.max(...chartData.map(d => Math.max(d.plan, d.actual)));

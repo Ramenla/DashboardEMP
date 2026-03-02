@@ -1,14 +1,27 @@
+/**
+ * @file PriorityDonut.jsx
+ * @description Komponen donut chart Recharts untuk distribusi Prioritas proyek.
+ * Memisahkan proyek ke dalam prioritas Tinggi, Sedang, dan Rendah.
+ * Membuka modal daftar proyek detail saat segmen atau legend diklik.
+ */
+
 import React, { useMemo, useState } from 'react';
 import { Card, Empty, Modal, Tag, Progress } from 'antd';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
+/** @constant {Object} Konfigurasi format warna prioritas. */
 const PRIORITY_CONFIG = {
   Tinggi: { color: '#ff4d4f', label: 'Tinggi' },
   Sedang: { color: '#faad14', label: 'Sedang' },
   Rendah: { color: '#bfbfbf', label: 'Rendah' },
 };
 
+/**
+ * Custom Tooltip untuk Recharts
+ * @param {Object} props
+ * @returns {JSX.Element|null}
+ */
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
     const d = payload[0];
@@ -23,11 +36,9 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 /**
- * donut chart menampilkan distribusi prioritas project
- * tinggi (merah), sedang (kuning), rendah (abu)
- * klik segmen untuk melihat daftar project terdampak
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} card dengan donut chart prioritas
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset data proyek hasil filter
+ * @returns {JSX.Element} Card berisikan donut chart
  */
 const PriorityDonut = ({ data = [] }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -50,13 +61,11 @@ const PriorityDonut = ({ data = [] }) => {
 
   const highCount = chartData.find(d => d.name === 'Tinggi')?.value || 0;
 
-  // filter project berdasarkan prioritas yang diklik
   const filteredProjects = useMemo(() => {
     if (!selectedPriority) return [];
     return data.filter((p) => p.priority === selectedPriority);
   }, [data, selectedPriority]);
 
-  // handler klik pada segmen pie
   const handlePieClick = (entry) => {
     setSelectedPriority(entry.name);
     setModalOpen(true);
@@ -103,7 +112,6 @@ const PriorityDonut = ({ data = [] }) => {
             </ResponsiveContainer>
           </div>
 
-          {/* legend – klikable */}
           <div className="flex flex-wrap justify-center gap-4 mt-2 px-2">
             {chartData.map((d) => (
               <div
@@ -123,7 +131,6 @@ const PriorityDonut = ({ data = [] }) => {
         </>
       )}
 
-      {/* modal daftar project */}
       <Modal
         title={
           <div className="flex items-center gap-2">
@@ -149,12 +156,10 @@ const PriorityDonut = ({ data = [] }) => {
               className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               onClick={() => { setSelectedProject(p); setDrawerOpen(true); }}
             >
-              {/* id badge */}
               <span className="text-[10px] font-mono font-bold text-gray-400 shrink-0 w-[70px]">
                 {p.id}
               </span>
 
-              {/* info utama */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -171,7 +176,6 @@ const PriorityDonut = ({ data = [] }) => {
                 </div>
               </div>
 
-              {/* progress */}
               <div className="shrink-0 w-[100px]">
                 <Progress
                   percent={p.progress}
@@ -181,7 +185,6 @@ const PriorityDonut = ({ data = [] }) => {
                 />
               </div>
 
-              {/* budget */}
               <div className="text-right shrink-0 w-[60px]">
                 <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
                   {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
@@ -193,7 +196,6 @@ const PriorityDonut = ({ data = [] }) => {
         </div>
       </Modal>
 
-      {/* sidebar detail project */}
       <ProjectDetailDrawer
         project={selectedProject}
         open={drawerOpen}

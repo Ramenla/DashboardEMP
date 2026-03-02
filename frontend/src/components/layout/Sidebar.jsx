@@ -1,3 +1,10 @@
+/**
+ * @file Sidebar.jsx
+ * @description Komponen sidebar navigasi dengan fitur collapse/expand.
+ * Berisi menu navigasi ke halaman Project Posture, Project List, dan Project Progress.
+ * Menggunakan Ant Design Sider dan Menu dengan posisi fixed di sisi kiri.
+ */
+
 import React from 'react';
 import { Layout, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -11,19 +18,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const { Sider } = Layout;
 
 /**
- * komponen sidebar navigasi dengan fitur collapse/expand
- * @param {Object} props - props komponen
- * @param {boolean} props.collapsed - state apakah sidebar sedang di-collapse
- * @param {Function} props.onCollapse - callback untuk toggle collapse state
- * @returns {JSX.Element} sidebar dengan menu navigasi dan tombol toggle collapse
+ * @param {Object} props
+ * @param {boolean} props.collapsed - Status apakah sidebar sedang di-collapse.
+ * @param {Function} props.onCollapse - Callback untuk toggle state collapse.
+ * @returns {JSX.Element} Sidebar fixed dengan menu navigasi dan tombol toggle.
  */
 const Sidebar = ({ collapsed, onCollapse }) => {
 
-  // hooks untuk navigasi interaktif
   const navigate = useNavigate();
   const location = useLocation();
 
-  // daftar menu sidebar
+  /** @type {import('antd').MenuProps['items']} */
   const items = [
     {
       key: '/posture',
@@ -52,9 +57,7 @@ const Sidebar = ({ collapsed, onCollapse }) => {
       trigger={null}
       className="fixed left-0 h-screen z-[100] top-0 pt-12"
     >
-      {/* header section - icon minimize */}
       <div className={`h-12 flex items-center border-b border-gray-100 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
-        {/* tulisan menu - hilang saat collapsed */}
         {!collapsed && (
           <h2 className="flex items-center justify-start m-0 text-xl font-semibold text-gray-800">
             Menu

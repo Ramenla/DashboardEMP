@@ -1,9 +1,18 @@
+/**
+ * @file FilterCard.jsx
+ * @description komponen filter bar horizontal untuk halaman Project List.
+ * Menyediakan 4 filter dalam satu baris kompak: Lokasi (autocomplete),
+ * Kategori (checkbox group), Status (radio button), dan Prioritas (radio button).
+ * Tombol reset muncul otomatis saat ada filter aktif.
+ */
+
 import React from 'react';
 import { Card, Checkbox, Radio, Typography, Button, Divider, Select, AutoComplete, Input } from 'antd';
 import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
+/** @type {string[]} Daftar lokasi blok operasi EMP. */
 const locations = [
   "Blok B (Sumatra)",
   "Blok Bireun-Sigli (Sumatra)",
@@ -19,15 +28,16 @@ const locations = [
   "Blok Sengkang (Sulawesi)",
   "Blok Buzi EPCC (Mozambique)"
 ];
+
+/** @type {string[]} Kategori proyek yang tersedia. */
 const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
 
 /**
- * komponen filter bar compact untuk halaman project list
- * 4 filter utama dalam 1 baris: kategori, status, prioritas, lokasi
- * @param {Object} props.filters - object berisi nilai filter aktif
- * @param {Function} props.onFilterChange - callback perubahan filter
- * @param {Function} props.onReset - callback reset filter
- * @returns {JSX.Element} filter bar horizontal
+ * @param {Object} props
+ * @param {Object} props.filters - Objek berisi nilai filter aktif.
+ * @param {Function} props.onFilterChange - Callback saat filter berubah.
+ * @param {Function} props.onReset - Callback untuk mereset semua filter.
+ * @returns {JSX.Element} Filter bar horizontal dalam Card.
  */
 const FilterCard = ({ filters, onFilterChange, onReset }) => {
   const handleChange = (key, value) => {
@@ -77,7 +87,6 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
           </AutoComplete>
         </div>
 
-        {/* 2. kategori */}
         <div className="shrink-0">
           <Text className={labelClass}>Kategori</Text>
           <Checkbox.Group
@@ -90,7 +99,6 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-        {/* 3. status */}
         <div>
           <Text className={labelClass}>Status</Text>
           <Radio.Group value={filters.status} onChange={(e) => handleChange('status', e.target.value)} buttonStyle="solid" size="small">
@@ -103,7 +111,6 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-        {/* 4. prioritas */}
         <div>
           <Text className={labelClass}>Prioritas</Text>
           <Radio.Group value={filters.priority} onChange={(e) => handleChange('priority', e.target.value)} buttonStyle="solid" size="small">
@@ -115,7 +122,6 @@ const FilterCard = ({ filters, onFilterChange, onReset }) => {
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-        {/* reset */}
         {hasActive && (
           <>
             <Divider type="vertical" className="h-8 mx-0 mb-1" />

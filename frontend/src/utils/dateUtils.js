@@ -1,7 +1,14 @@
 /**
- * Utilitas untuk menangani parsing tanggal dari berbagai format yang ada di aplikasi
+ * @file dateUtils.js
+ * @description Utilitas parsing dan formatting tanggal untuk data proyek.
+ * Mendukung format Indonesia ("DD MMM YYYY", "DD MMMM YYYY") maupun ISO string.
+ * Juga menyediakan normalisasi data proyek dari format API ke format frontend.
  */
 
+/**
+ * Peta nama bulan (singkatan dan lengkap, Bahasa Indonesia & Inggris) ke indeks bulan JS (0-11).
+ * @type {Object.<string, number>}
+ */
 const MONTH_MAP = {
     'Jan': 0, 'Januari': 0,
     'Feb': 1, 'Februari': 1,
@@ -17,6 +24,10 @@ const MONTH_MAP = {
     'Des': 11, 'Dec': 11, 'Desember': 11
 };
 
+/**
+ * Peta status proyek dari label Indonesia ke konstanta internal.
+ * @type {Object.<string, string>}
+ */
 const STATUS_MAP = {
     'Berjalan': 'ON_TRACK',
     'Tertunda': 'DELAYED',
@@ -24,12 +35,20 @@ const STATUS_MAP = {
     'Selesai': 'COMPLETED'
 };
 
+/**
+ * Peta prioritas proyek dari label Indonesia ke konstanta internal.
+ * @type {Object.<string, string>}
+ */
 const PRIORITY_MAP = {
     'Tinggi': 'HIGH',
     'Sedang': 'MEDIUM',
     'Rendah': 'LOW'
 };
 
+/**
+ * Peta kategori proyek dari label API ke konstanta internal uppercase.
+ * @type {Object.<string, string>}
+ */
 const CATEGORY_MAP = {
     'Exploration': 'EXPLORATION',
     'Drilling': 'DRILLING',
@@ -38,38 +57,33 @@ const CATEGORY_MAP = {
 };
 
 /**
- * Normalisasi data project dari format database ke format yang digunakan frontend
- * @param {Object} project - data project mentah dari API
- * @returns {Object} project yang sudah dinormalisasi
+ * Normalisasi data proyek dari format API ke format yang digunakan frontend.
+ * Backend sudah mengembalikan label Indonesia (Tinggi, Sedang, Berjalan, dll)
+ * sehingga tidak perlu di-map ulang ke enum Inggris.
+ *
+ * @param {Object} project - Data proyek mentah dari API.
+ * @returns {Object} Data proyek yang sudah dinormalisasi.
  */
 export const normalizeProjectData = (project) => {
     if (!project) return project;
-
-    // Backend already returns correct Indonesian labels (Tinggi, Sedang, Berjalan, etc.)
-    // No need to map them back to English Enums.
-    return {
-        ...project,
-        // Ensure date objects if needed, but strings work fine with the new parser
-    };
+    return { ...project };
 };
 
 /**
- * Memparsing string tanggal ke Date object secara aman.
- * Mendukung format: "DD MMM YYYY" (01 Mar 2026), ISO String, dan Date object.
- * 
- * @param {string|Date} dateSource - sumber tanggal
- * @returns {Date} - Date object, atau Invalid Date jika gagal
+ * Mem-parsing string tanggal ke objek Date secara aman.
+ * Mendukung format: "DD MMM YYYY", "DD MMMM YYYY", ISO string, dan objek Date.
+ *
+ * @param {string|Date} dateSource - Sumber tanggal yang akan di-parse.
+ * @returns {Date} Objek Date yang valid, atau Invalid Date jika parsing gagal.
  */
 export const parseProjectDate = (dateSource) => {
     if (!dateSource) return new Date(NaN);
 
     if (dateSource instanceof Date) return dateSource;
 
-    // Coba parse langsung (berhasil untuk ISO string)
     let date = new Date(dateSource);
     if (!isNaN(date.getTime())) return date;
 
-    // Tangani format "DD MMM YYYY" atau "DD MMMM YYYY"
     if (typeof dateSource === 'string') {
         const parts = dateSource.split(' ');
         if (parts.length === 3) {
@@ -89,7 +103,10 @@ export const parseProjectDate = (dateSource) => {
 };
 
 /**
- * Format date ke standar tampilan lokal Indonesia (DD MMM YYYY)
+ * Format objek Date atau string tanggal ke format tampilan Indonesia (DD MMM YYYY).
+ *
+ * @param {string|Date} dateSource - Sumber tanggal yang akan diformat.
+ * @returns {string} Tanggal dalam format "DD MMM YYYY" (contoh: "01 Mar 2026"), atau "-" jika invalid.
  */
 export const formatProjectDate = (dateSource) => {
     const d = parseProjectDate(dateSource);

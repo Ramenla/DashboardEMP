@@ -1,3 +1,11 @@
+/**
+ * @file ProjectTable.jsx
+ * @description Komponen tabel proyek untuk halaman Project List.
+ * Menampilkan kolom: kode proyek, prioritas, kategori, tanggal mulai/selesai,
+ * deviasi progress, SPI, CPI, realisasi anggaran (circle progress), dan jumlah kendala.
+ * Semua kolom dilengkapi tooltip premium dan dapat disortir.
+ */
+
 import React from 'react';
 import { Card, Table, Tag, Progress, Typography, Space } from 'antd';
 import PremiumTooltip, { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
@@ -6,9 +14,10 @@ import { formatProjectDate } from '../../../utils/dateUtils';
 const { Text } = Typography;
 
 /**
- * helper function untuk mendapatkan warna tag berdasarkan priority
- * @param {string} priority - level priority (Kritis, Tinggi, Sedang, Rendah)
- * @returns {string} nama color untuk Ant Design Tag
+ * Mengembalikan warna Ant Design Tag berdasarkan prioritas proyek.
+ *
+ * @param {string} priority - Level prioritas (Tinggi, Sedang, Rendah).
+ * @returns {string} Nama warna Tag.
  */
 const getPriorityColor = (priority) => {
   switch (priority) {
@@ -20,9 +29,10 @@ const getPriorityColor = (priority) => {
 };
 
 /**
- * helper function untuk mendapatkan warna tag berdasarkan status project
- * @param {string} status - status project (Berjalan, Tertunda, Kritis)
- * @returns {string} nama color untuk Ant Design Tag
+ * Mengembalikan warna Ant Design Tag berdasarkan status proyek.
+ *
+ * @param {string} status - Status proyek (Berjalan, Tertunda, Beresiko, Selesai).
+ * @returns {string} Nama warna Tag.
  */
 const getStatusColor = (status) => {
   switch (status) {
@@ -35,7 +45,14 @@ const getStatusColor = (status) => {
 };
 
 /**
- * komponen tabel untuk menampilkan daftar project dengan informasi lengkap
+ * Tabel daftar proyek dengan sortir dan tooltip interaktif.
+ *
+ * @param {Object} props
+ * @param {Array<Object>} props.dataSource - Array data proyek.
+ * @param {Function} props.onRowClick - Callback saat baris tabel di-klik.
+ * @param {Function} [props.onEdit] - Callback edit proyek (belum diimplementasi).
+ * @param {Function} [props.onDelete] - Callback hapus proyek (belum diimplementasi).
+ * @returns {JSX.Element} Tabel Ant Design dengan kolom proyek lengkap.
  */
 const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
   const columns = [

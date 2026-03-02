@@ -1,19 +1,27 @@
+/**
+ * @file KpiRow.jsx
+ * @description Komponen baris KPI (Key Performance Indicator) untuk halaman Postur Proyek.
+ * Menampilkan 4 card: Total Proyek, SPI (Speedometer), CPI (Speedometer), dan Jumlah Berisiko.
+ * Menghitung agregat data berdasarkan metrik yang difilter.
+ */
+
 import React, { useMemo } from 'react';
 import { Row, Col, Card } from 'antd';
 import {
   ProjectOutlined,
-  DashboardOutlined,
-  DollarOutlined,
   AlertOutlined,
 } from '@ant-design/icons';
 import PremiumTooltip from '../../../components/ui/ProjectTooltip';
 
-/** Speedometer gauge untuk SPI dan CPI
- * Radial setengah lingkaran dengan batas absolut: merah (< 1.0) dan hijau (>= 1.0)
- * @param {number} value - nilai performa (target 1.0)
- * @param {number} size - ukuran lebar svg
+/**
+ * Komponen grafik Speedometer untuk SPI dan CPI.
+ * Area merah untuk nilai < 1.0, area warna hijau untuk nilai >= 1.0.
+ *
+ * @param {Object} props
+ * @param {number} props.value - Nilai performa yang ditampilkan (target 1.0).
+ * @param {number} [props.size=68] - Lebar grafik SVG.
+ * @returns {JSX.Element} Grafik speedometer setengah lingkaran.
  */
-
 const SpeedometerGauge = ({ value, size = 68 }) => {
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
@@ -23,7 +31,6 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
   const cx = size / 2;
   const cy = size / 2;
 
-  // Nilai maksimum gauge
   const maxVal = 1.5;
   const targetVal = 1.0;
 
@@ -41,7 +48,6 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
   return (
     <div className="flex flex-col items-center justify-center pt-2">
       <svg width={size} height={size / 2 + strokeWidth / 2} className="overflow-visible block">
-        {/* Area Merah (< 1.0) */}
         <circle
           cx={cx}
           cy={cy}
@@ -53,7 +59,6 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
           strokeDasharray={redDash}
           transform={`rotate(-180 ${cx} ${cy})`}
         />
-        {/* Area Hijau (>= 1.0) */}
         <circle
           cx={cx}
           cy={cy}
@@ -66,7 +71,6 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
           transform={`rotate(${-180 + (redPct * 180)} ${cx} ${cy})`}
         />
 
-        {/* Jarum (Needle) */}
         <line
           x1={cx}
           y1={cy}
@@ -77,7 +81,6 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
           strokeLinecap="round" className="transition-all duration-700 ease-out"
           transform={`rotate(${needleAngle} ${cx} ${cy})`}
         />
-        {/* Titik Tengah */}
         <circle cx={cx} cy={cy} r={4} fill="#374151" />
       </svg>
       <div className="font-bold text-[13px] mt-1.5 leading-none" style={{ color: valueColor }}>
@@ -88,10 +91,12 @@ const SpeedometerGauge = ({ value, size = 68 }) => {
 };
 
 /**
- * komponen kpi row menampilkan 4 metrik utama dashboard
- * total project, spi gauge, cpi gauge, at risk count
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} row berisi 4 kpi cards
+ * Baris KPI yang menampilkan ringkasan performa 4 elemen.
+ *
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Array data proyek hasil filter lokal.
+ * @param {Object} [props.stats] - Objek statistik dari backend (jika tersedia).
+ * @returns {JSX.Element} Grid 4 kolom berisi card pengukuran performa.
  */
 const KpiRow = ({ data = [], stats }) => {
   const m = useMemo(() => {

@@ -1,8 +1,21 @@
+/**
+ * @file ProjectTooltip.jsx
+ * @description Kumpulan komponen tooltip premium untuk menampilkan informasi proyek.
+ *
+ * Ekspor:
+ * - default: `PremiumTooltip` — tooltip dasar dengan style konsisten (shadow, rounded).
+ * - named: `ProjectTooltip` — tooltip khusus proyek (status, progress, budget, isu).
+ * - named: `IssueTooltip` — tooltip daftar proyek yang memiliki isu tertentu.
+ */
+
 import React from 'react';
 import { Tooltip, Tag, Progress } from 'antd';
 
 /**
- * helper function untuk mendapatkan warna tag berdasarkan status project
+ * Mengembalikan nama warna Ant Design Tag berdasarkan status proyek.
+ *
+ * @param {string} status - Status proyek (Berjalan, Tertunda, Beresiko, Selesai).
+ * @returns {string} Nama warna untuk komponen Tag.
  */
 const getStatusColor = (status) => {
     switch (status) {
@@ -15,19 +28,29 @@ const getStatusColor = (status) => {
 };
 
 /**
- * helper function untuk mendapatkan warna tag berdasarkan priority
+ * Mengembalikan nama warna Ant Design Tag berdasarkan prioritas proyek.
+ *
+ * @param {string} priority - Prioritas proyek (HIGH, MEDIUM, LOW).
+ * @returns {string} Nama warna untuk komponen Tag.
  */
 const getPriorityColor = (priority) => {
     switch (priority) {
         case 'HIGH': return 'red';
         case 'MEDIUM': return 'gold';
-        case 'LOW': return 'green'; // changed from default to green for better visibility
+        case 'LOW': return 'green';
         default: return 'default';
     }
 };
 
 /**
- * Reusable premium tooltip component with consistent styling
+ * Komponen tooltip dasar dengan styling premium (shadow, rounded corner).
+ * Digunakan sebagai wrapper oleh tooltip-tooltip spesifik lainnya.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.title - Konten yang ditampilkan di dalam tooltip.
+ * @param {React.ReactNode} props.children - Elemen trigger tooltip (hover target).
+ * @param {string} [props.placement='top'] - Posisi tooltip relatif terhadap trigger.
+ * @returns {JSX.Element}
  */
 const PremiumTooltip = ({ title, children, placement = 'top' }) => {
     return (
@@ -48,7 +71,15 @@ const PremiumTooltip = ({ title, children, placement = 'top' }) => {
 };
 
 /**
- * Specialized tooltip for issues, listing projects and their categories
+ * Tooltip khusus untuk isu, menampilkan daftar proyek yang memiliki isu tersebut.
+ *
+ * @param {Object} props
+ * @param {string} props.issueName - Nama isu yang ditampilkan.
+ * @param {Array<Object>} [props.projects=[]] - Daftar proyek terkait isu.
+ * @param {Function} [props.onProjectClick] - Callback saat proyek di-klik dalam tooltip.
+ * @param {React.ReactNode} props.children - Elemen trigger tooltip.
+ * @param {string} [props.placement='top'] - Posisi tooltip.
+ * @returns {JSX.Element}
  */
 export const IssueTooltip = ({ issueName, projects = [], onProjectClick, children, placement = 'top' }) => {
     if (!projects || projects.length === 0) return children;
@@ -94,12 +125,18 @@ export const IssueTooltip = ({ issueName, projects = [], onProjectClick, childre
 };
 
 /**
- * Specialized project tooltip that uses the premium style
+ * Tooltip khusus proyek yang menampilkan ringkasan lengkap:
+ * nama, ID, status, prioritas, progress vs target, budget, periode, manajer, dan daftar isu.
+ *
+ * @param {Object} props
+ * @param {Object} props.project - Data proyek yang akan ditampilkan.
+ * @param {React.ReactNode} props.children - Elemen trigger tooltip.
+ * @param {string} [props.placement='top'] - Posisi tooltip.
+ * @returns {JSX.Element}
  */
 export const ProjectTooltip = ({ project, children, placement = 'top' }) => {
     if (!project) return children;
 
-    // Formatting date
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' });

@@ -1,3 +1,10 @@
+/**
+ * @file GanttChart.jsx
+ * @description Komponen interaktif yang menampilkan timeline proyek-proyek
+ * dalam bentuk Gantt Chart. Mendukung mode tampilan Harian, Mingguan, dan Bulanan,
+ * serta membagi proyek berdasarkan kategori dan visualisasi progres timeline.
+ */
+
 import React, { useMemo, useState } from 'react';
 import { Tag, Empty } from 'antd';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
@@ -5,7 +12,10 @@ import { ProjectTooltip } from '../../../components/ui/ProjectTooltip';
 import { parseProjectDate } from '../../../utils/dateUtils';
 
 /**
- * helper function untuk mendapatkan warna project bar berdasarkan status
+ * Mendapatkan konfigurasi warna chart berdasarkan status proyek.
+ *
+ * @param {string} status - Status dari proyek (Berjalan, Beresiko, dsb)
+ * @returns {{main: string, light: string}} Objek berisi warna utama dan terang
  */
 const getColors = (status) => {
     switch (status) {
@@ -26,6 +36,13 @@ const getDaysDiff = (start, end) => {
 
 const SIDEBAR_WIDTH = 280;
 
+/**
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset data yang dikelompokan
+ * @param {string} [props.viewMode='Monthly'] - Mode kalender ('Daily', 'Weekly', 'Monthly')
+ * @param {Function} props.onProjectClick - Callback ketika project di-klik
+ * @returns {JSX.Element} Kontainer scrollable untuk visualisasi Gantt Chart
+ */
 const GanttChart = ({ data = [], viewMode = 'Monthly', onProjectClick }) => {
     const [expandedKeys, setExpandedKeys] = useState(['0', '1', '2', '3', '4']);
 

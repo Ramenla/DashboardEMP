@@ -1,3 +1,9 @@
+/**
+ * @file StatusCategoryBar.jsx
+ * @description Komponen stacked horizontal bar chart Recharts untuk distribusi Status dan Prioritas 
+ * per Kategori proyek. Menampilkan mode toggle interaktif (Status/Prioritas) dan modal detail list proyek.
+ */
+
 import React, { useState, useMemo } from 'react';
 import { Card, Empty, Segmented, Modal, Tag, Progress } from 'antd';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
@@ -6,9 +12,7 @@ import {
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 
-/**
- * warna per status
- */
+/** @constant {Object} Konfigurasi warna status proyek */
 const STATUS_COLORS = {
   Berjalan: '#52c41a',
   Beresiko: '#ff4d4f',
@@ -16,9 +20,7 @@ const STATUS_COLORS = {
   Selesai: '#1890ff',
 };
 
-/**
- * warna per prioritas
- */
+/** @constant {Object} Konfigurasi warna prioritas proyek */
 const PRIORITY_COLORS = {
   Tinggi: '#ff4d4f',
   Sedang: '#faad14',
@@ -26,10 +28,9 @@ const PRIORITY_COLORS = {
 };
 
 /**
- * stacked horizontal bar chart dengan toggle status / prioritas
- * klik bar segment untuk melihat daftar project terdampak
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} card dengan stacked bar chart + toggle
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset data proyek terfilter.
+ * @returns {JSX.Element} Card berisikan Recharts stacked bar dengan Segmented toggle.
  */
 const StatusCategoryBar = ({ data = [] }) => {
   const [mode, setMode] = useState('Status');
@@ -44,9 +45,7 @@ const StatusCategoryBar = ({ data = [] }) => {
       if (!map[p.category]) {
         map[p.category] = {
           name: p.category,
-          // status
           Berjalan: 0, Beresiko: 0, Tertunda: 0, Selesai: 0,
-          // prioritas
           Tinggi: 0, Sedang: 0, Rendah: 0,
           total: 0,
         };
@@ -62,7 +61,6 @@ const StatusCategoryBar = ({ data = [] }) => {
   const colors = isStatus ? STATUS_COLORS : PRIORITY_COLORS;
   const keys = isStatus ? ['Berjalan', 'Beresiko', 'Tertunda', 'Selesai'] : ['Tinggi', 'Sedang', 'Rendah'];
 
-  // filter project berdasarkan kategori + status/prioritas yang diklik
   const filteredProjects = useMemo(() => {
     if (!selectedFilter.category || !selectedFilter.key) return [];
     return data.filter((p) => {
@@ -74,7 +72,6 @@ const StatusCategoryBar = ({ data = [] }) => {
     });
   }, [data, selectedFilter, isStatus]);
 
-  // handler klik pada bar segment
   const handleBarClick = (chartEntry, dataKey) => {
     if (chartEntry && dataKey) {
       setSelectedFilter({ category: chartEntry.name, key: dataKey });
@@ -141,7 +138,6 @@ const StatusCategoryBar = ({ data = [] }) => {
         </div>
       )}
 
-      {/* modal daftar project */}
       <Modal
         title={
           <div className="flex items-center gap-2">
@@ -172,12 +168,10 @@ const StatusCategoryBar = ({ data = [] }) => {
                 className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
                 onClick={() => { setSelectedProject(p); setDrawerOpen(true); }}
               >
-                {/* id badge */}
                 <span className="text-[10px] font-mono font-bold text-gray-400 shrink-0 w-[70px]">
                   {p.id}
                 </span>
 
-                {/* info utama */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -198,7 +192,6 @@ const StatusCategoryBar = ({ data = [] }) => {
                   </div>
                 </div>
 
-                {/* progress */}
                 <div className="shrink-0 w-[100px]">
                   <Progress
                     percent={p.progress}
@@ -208,7 +201,6 @@ const StatusCategoryBar = ({ data = [] }) => {
                   />
                 </div>
 
-                {/* budget */}
                 <div className="text-right shrink-0 w-[60px]">
                   <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
                     {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
@@ -221,7 +213,6 @@ const StatusCategoryBar = ({ data = [] }) => {
         </div>
       </Modal>
 
-      {/* sidebar detail project */}
       <ProjectDetailDrawer
         project={selectedProject}
         open={drawerOpen}

@@ -1,10 +1,18 @@
+/**
+ * @file StatusDonut.jsx
+ * @description Komponen donut chart Recharts untuk distribusi Status proyek.
+ * Menampilkan legend interaktif, nilai total di tengah, modal riwayat daftar proyek 
+ * berdasarkan status yang diklik, dan drawer detail ketika list di klik.
+ */
+
 import React, { useMemo, useState } from 'react';
 import { Card, Empty, Modal, Tag, Progress } from 'antd';
 import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 /**
- * warna dan label per status project
+ * Konfigurasi warna untuk setiap status.
+ * @constant {Object}
  */
 const STATUS_CONFIG = {
   Berjalan: { color: '#52c41a', label: 'Berjalan' },
@@ -14,7 +22,11 @@ const STATUS_CONFIG = {
 };
 
 /**
- * custom tooltip untuk donut chart
+ * Custom Tooltip untuk PieChart Recharts.
+ * @param {Object} props
+ * @param {boolean} props.active
+ * @param {Array} props.payload
+ * @returns {JSX.Element|null} 
  */
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
@@ -30,12 +42,9 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 /**
- * donut chart menampilkan distribusi status project
- * berjalan (hijau), kritis (merah), tertunda (kuning)
- * dengan angka total di tengah dan legend di bawah
- * klik segmen untuk melihat daftar project terdampak
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} card dengan donut chart
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset proyek yang sudah terfilter.
+ * @returns {JSX.Element} Card berisikan donut chart interaktif.
  */
 const StatusDonut = ({ data = [] }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,13 +67,11 @@ const StatusDonut = ({ data = [] }) => {
 
   const total = data.length;
 
-  // filter project berdasarkan status yang diklik
   const filteredProjects = useMemo(() => {
     if (!selectedStatus) return [];
     return data.filter((p) => p.status === selectedStatus);
   }, [data, selectedStatus]);
 
-  // handler klik pada segmen pie
   const handlePieClick = (entry) => {
     setSelectedStatus(entry.name);
     setModalOpen(true);
@@ -81,7 +88,6 @@ const StatusDonut = ({ data = [] }) => {
       ) : (
         <>
           <div className="relative w-full h-[180px]">
-            {/* center text */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10">
               <p className="text-2xl font-bold text-gray-800 m-0 leading-none">{total}</p>
               <p className="text-[10px] text-gray-400 m-0">Total</p>
@@ -110,7 +116,6 @@ const StatusDonut = ({ data = [] }) => {
             </ResponsiveContainer>
           </div>
 
-          {/* legend – grid 2x2 */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4 px-4">
             {chartData.map((d) => (
               <div
@@ -132,7 +137,6 @@ const StatusDonut = ({ data = [] }) => {
         </>
       )}
 
-      {/* modal daftar project */}
       <Modal
         title={
           <div className="flex items-center gap-2">
@@ -158,12 +162,10 @@ const StatusDonut = ({ data = [] }) => {
               className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               onClick={() => { setSelectedProject(p); setDrawerOpen(true); }}
             >
-              {/* id badge */}
               <span className="text-[10px] font-mono font-bold text-gray-400 shrink-0 w-[70px]">
                 {p.id}
               </span>
 
-              {/* info utama */}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-800 m-0 truncate">{p.name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -174,7 +176,6 @@ const StatusDonut = ({ data = [] }) => {
                 </div>
               </div>
 
-              {/* progress */}
               <div className="shrink-0 w-[100px]">
                 <Progress
                   percent={p.progress}
@@ -184,7 +185,6 @@ const StatusDonut = ({ data = [] }) => {
                 />
               </div>
 
-              {/* budget */}
               <div className="text-right shrink-0 w-[60px]">
                 <p className="text-xs font-bold m-0" style={{ color: (p.budgetUsed / (p.totalBudget || 1) * 100) >= 90 ? '#ff4d4f' : '#555' }}>
                   {Math.round((parseInt(p.budgetUsed) / (parseInt(p.totalBudget) || 1)) * 100)}%
@@ -196,7 +196,6 @@ const StatusDonut = ({ data = [] }) => {
         </div>
       </Modal>
 
-      {/* sidebar detail project */}
       <ProjectDetailDrawer
         project={selectedProject}
         open={drawerOpen}

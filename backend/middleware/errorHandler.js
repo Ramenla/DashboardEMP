@@ -1,6 +1,15 @@
 /**
- * Centralized error handling middleware untuk Express.
- * Menangkap semua error yang di-throw atau di-next(err) dari route/controller.
+ * @file errorHandler.js
+ * @description Centralized error handling middleware untuk Express.
+ * Menangkap dan memformat response error secara konsisten ke client.
+ */
+
+/**
+ * Express error handling middleware function
+ * @param {Error} err - Error object caught by Express
+ * @param {import('express').Request} req - Express request
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} _next - Next middleware function
  */
 const errorHandler = (err, req, res, _next) => {
     console.error('❌ Server Error:', err.message);
@@ -11,7 +20,6 @@ const errorHandler = (err, req, res, _next) => {
         message: err.message || 'Internal Server Error',
     };
 
-    // Tampilkan stack trace hanya di development
     if (process.env.NODE_ENV !== 'production') {
         response.stack = err.stack;
     }

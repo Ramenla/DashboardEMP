@@ -1,3 +1,10 @@
+/**
+ * @file TopIssuesTable.jsx
+ * @description Komponen tabel daftar 5 isu teratas yang paling sering muncul
+ * dari semua proyek. Klik isu akan memunculkan modal daftar proyek terdampak,
+ * dan klik proyek ri modal membuka history lengkap drawer.
+ */
+
 import React, { useMemo, useState } from 'react';
 import { Card, Tag, Modal, List, Typography } from 'antd';
 import { IssueTooltip } from '../../../components/ui/ProjectTooltip';
@@ -6,11 +13,10 @@ import ProjectDetailDrawer from '../../../components/ui/ProjectDetailDrawer';
 const { Text } = Typography;
 
 /**
- * komponen tabel top 5 issues yang paling sering muncul
- * menghitung frekuensi issue dari semua project,
- * menampilkan ranking, nama issue, kategori terkait, dan total kemunculan
- * @param {Array} data - array project data yang sudah difilter
- * @returns {JSX.Element} card dengan tabel top 5 issues
+ * @param {Object} props
+ * @param {Array<Object>} [props.data=[]] - Dataset seluruh data proyek.
+ * @param {Array<Object>} [props.topIssues] - Top isu yang berasal dari server (optional pre-aggregation).
+ * @returns {JSX.Element} Card berisi layout daftar custom untuk 5 top isu.
  */
 const TopIssuesTable = ({ data = [], topIssues }) => {
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -35,7 +41,7 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
                 categories: new Set(),
                 divisions: new Set(),
                 projects: [],
-                addedProjects: new Set() // Track (projectId:division)
+                addedProjects: new Set()
               };
             }
 
@@ -45,7 +51,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
               map[issueName].divisions.add(division);
             }
 
-            // Simpan object project dengan activeDivision untuk kebutuhan modal
             const projectKey = `${p.id}:${division}`;
             if (!map[issueName].addedProjects.has(projectKey)) {
               map[issueName].projects.push({ ...p, activeDivision: division });
@@ -68,7 +73,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
       .slice(0, 5);
   }, [data, topIssues]);
 
-  // warna untuk ranking badge
   const rankColors = ['#ff4d4f', '#fa8c16', '#faad14', '#1890ff', '#8c8c8c'];
 
   const handleIssueClick = (issue) => {
@@ -77,7 +81,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
   };
 
   const handleProjectClick = (project) => {
-    // Cari data lengkap dari props 'data' jika object project yang diklik adalah data parsial
     const fullProject = data.find(p => p.id === project.id) || project;
     setSelectedProject(fullProject);
     setIsDrawerOpen(true);
@@ -104,7 +107,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
                 className="flex items-start gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
                 onClick={() => handleIssueClick(issue)}
               >
-                {/* rank badge */}
                 <div
                   className="flex items-center justify-center w-6 h-6 rounded-full shrink-0 text-white text-[10px] font-bold"
                   style={{ backgroundColor: rankColors[idx] || '#8c8c8c' }}
@@ -112,7 +114,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
                   {idx + 1}
                 </div>
 
-                {/* content */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-gray-800 m-0 leading-snug">{issue.name}</p>
                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -124,7 +125,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
                   </div>
                 </div>
 
-                {/* count */}
                 <div className="text-right shrink-0">
                   <span className="text-sm font-bold text-gray-700">{issue.count}</span>
                   <p className="text-[9px] text-gray-400 m-0">project</p>
@@ -135,7 +135,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
         </div>
       )}
 
-      {/* Modal Daftar Project */}
       <Modal
         title={
           <div className="border-b border-gray-100 pb-2 mb-0">
@@ -181,7 +180,6 @@ const TopIssuesTable = ({ data = [], topIssues }) => {
         />
       </Modal>
 
-      {/* Detail Project Drawer */}
       <ProjectDetailDrawer
         project={selectedProject}
         open={isDrawerOpen}

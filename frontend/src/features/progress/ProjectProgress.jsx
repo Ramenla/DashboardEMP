@@ -1,3 +1,10 @@
+/**
+ * @file ProjectProgress.jsx
+ * @description Halaman utama untuk navigasi "Project Progress".
+ * Menampilkan baris aksi berisi Mode Tampilan, Prioritas Filter, Urutan Sorting.
+ * Menggabungkan dan merender child component GanttChart dengan data proyek terfilter.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Radio, Segmented, Badge, Card, Divider, Typography, Spin, message, Select } from 'antd';
 import GanttChart from './components/GanttChart';
@@ -7,9 +14,7 @@ import { normalizeProjectData, parseProjectDate } from '../../utils/dateUtils';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/projects';
 
 /**
- * halaman progres proyek dengan gantt chart
- * menampilkan timeline project dengan filter prioritas dan mode tampilan
- * @returns {JSX.Element} halaman dengan gantt chart, filter, dan drawer detail
+ * @returns {JSX.Element} Halaman penuh project progress dengan manipulasi view dan GanttChart.
  */
 const ProjectProgress = () => {
   const [priorityFilter, setPriorityFilter] = useState('ALL');
@@ -21,20 +26,21 @@ const ProjectProgress = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortBy, setSortBy] = useState('START_DATE_ASC');
 
-  // Fetch data
   useEffect(() => {
     fetchProjects();
   }, []);
 
+  /**
+   * Mengambil data backend (spesifik 2026 sebagai default year),
+   * untuk diteruskan ke GanttChart sebagai data source utaman.
+   */
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      // Menambahkan default year=2026 agar konsisten dengan Posture dan mendapatkan detail lengkap
       const res = await fetch(`${API_URL}?year=2026`);
       if (!res.ok) throw new Error('Gagal mengambil data');
       const result = await res.json();
 
-      // Mengambil array projects baik dari format lama (array) maupun format baru (object {projects, stats, topIssues})
       const projectsArray = Array.isArray(result) ? result : (result.projects || []);
       const normalized = projectsArray.map(normalizeProjectData);
       setProjects(normalized);
@@ -51,7 +57,6 @@ const ProjectProgress = () => {
       priorityFilter === 'ALL' ? true : p.priority === priorityFilter
     );
 
-    // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'START_DATE_ASC':
@@ -87,14 +92,11 @@ const ProjectProgress = () => {
 
   return (
     <div className="pb-4 -mt-10">
-      {/* title */}
       <h2 className="text-lg font-bold text-[#001529] m-0 mb-3">Progres Proyek</h2>
 
-      {/* filter card */}
       <Card bordered={false} className="rounded-lg mb-4" bodyStyle={{ padding: '10px 16px' }}>
         <div className="flex flex-row flex-wrap gap-x-5 gap-y-2 items-end">
 
-          {/* 1. mode tampilan */}
           <div>
             <span className={labelClass}>Mode Tampilan</span>
             <Segmented
@@ -111,7 +113,6 @@ const ProjectProgress = () => {
 
           <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-          {/* 2. filter prioritas */}
           <div>
             <span className={labelClass}>Prioritas</span>
             <Radio.Group value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} buttonStyle="solid" size="small">
@@ -124,7 +125,6 @@ const ProjectProgress = () => {
 
           <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-          {/* 3. Sort Order */}
           <div>
             <span className={labelClass}>Urutkan</span>
             <Select
@@ -144,7 +144,6 @@ const ProjectProgress = () => {
 
           <Divider type="vertical" className="h-8 mx-0 mb-1" />
 
-          {/* 4. keterangan warna */}
           <div>
             <span className={labelClass}>Keterangan Warna</span>
             <div className="flex gap-3 items-center text-xs">

@@ -1,6 +1,11 @@
-import db from '../config/db.js';
+/**
+ * @file seedController.js
+ * @description Controller untuk seeding (menyuntikkan secara dinamis) puluhan data
+ * proyek, pegawai, metrik progres, hingga isu dan timeline untuk kebutuhan demonstrasi 
+ * atau pengetesan di env development/staging secara relasional dan utuh.
+ */
 
-// ─── Reference Data ────────────────────────────────────────────────────────
+import db from '../config/db.js';
 
 const PROJECT_NAMES = [
     'Eksplorasi Cekungan Sumatera Selatan', 'Pengeboran Sumur Dev-3X', 'Rehabilitasi Separator Gas',
@@ -52,15 +57,16 @@ const ISSUE_TITLES = [
 ];
 const EVENT_NAMES = ['Preparation', 'Execution', 'Reporting'];
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randFloat = (min, max, dec = 2) => parseFloat((Math.random() * (max - min) + min).toFixed(dec));
 const addDays = (date, days) => { const d = new Date(date); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; };
 
-// ─── Main Seed Function (camelCase) ─────────────────────────────────────────
-
+/**
+ * Controller menghasilkan 50 dummy projects yang masuk akal
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 export const seedRandomProjects = async (req, res) => {
     try {
         const [existingProjects] = await db.query("SELECT COUNT(*) as cnt FROM projects");
@@ -74,7 +80,6 @@ export const seedRandomProjects = async (req, res) => {
         const issues = [];
         const metrics = [];
 
-        // Generate 10 employees pool
         for (let i = 0; i < 10; i++) {
             const empId = `EMP-SEED-${i + 1}`;
             employees.push([empId, MANAGERS[i], rand(['Senior Engineer', 'Project Manager', 'Drilling Engineer']), rand(['Engineering', 'Operations', 'Drilling'])]);
@@ -97,15 +102,11 @@ export const seedRandomProjects = async (req, res) => {
             const totalBudget = randInt(1, 50) * 500_000_000;
             const name = PROJECT_NAMES[i] || `${location.split(' ')[0]} - ${category} Project #${idx}`;
 
-            // camelCase columns: id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, location, manager
             projects.push([projectId, projectId, name, category, priority, status, startDate, endDate, totalBudget, location, manager]);
 
-            // Project member
             const empId = `EMP-SEED-${randInt(1, 10)}`;
-            // camelCase: id, projectId, employeeId, role
             projectMembers.push([`PM-SEED-${idx}`, projectId, empId, 'Project Manager']);
 
-            // Timeline events (3 events: Preparation, Execution, Reporting)
             let eventStart = startDate;
             let overallProgress = 0;
 
@@ -116,30 +117,24 @@ export const seedRandomProjects = async (req, res) => {
                 const evtProgress = status === 'Selesai' ? 100 : (e === 0 ? randInt(50, 100) : randInt(0, 95));
                 overallProgress += evtProgress / 3;
 
-                // camelCase: id, projectId, eventName, startDate, endDate, taskBudget, calculatedProgress
                 timelineEvents.push([evtId, projectId, EVENT_NAMES[e], eventStart, evtEnd, evtBudget, evtProgress]);
 
-                // 2 milestones per event
                 for (let m = 0; m < 2; m++) {
                     const milId = `mil-${projectId}-${e}-${m}`;
                     const isCompleted = evtProgress === 100 || (evtProgress > 50 && m === 0);
                     const completedAt = isCompleted ? addDays(eventStart, randInt(10, 30)) : null;
-                    // camelCase: id, timelineEventId, milestoneName, progressContribution, isCompleted, completedAt
                     milestones.push([milId, evtId, `Milestone ${e + 1}.${m + 1}`, 50, isCompleted, completedAt]);
                 }
 
                 eventStart = addDays(evtEnd, 1);
             }
 
-            // 0–2 issues
             const numIssues = randInt(0, 2);
             for (let is = 0; is < numIssues; is++) {
                 const issueId = `iss-${projectId}-${is}`;
-                // camelCase: id, projectId, title, division, severity, status, impactScore
                 issues.push([issueId, projectId, rand(ISSUE_TITLES), rand(DIVISIONS), rand(['HIGH', 'MEDIUM', 'LOW']), rand(['OPEN', 'IN_PROGRESS', 'CLOSED']), randInt(1, 5)]);
             }
 
-            // EVM metrics
             const progress = Math.min(100, Math.round(overallProgress));
             const budgetUsed = Math.round(totalBudget * (progress / 100) * randFloat(0.85, 1.15));
             const plannedValue = Math.round(totalBudget * randFloat(0.3, 0.9));
@@ -148,11 +143,9 @@ export const seedRandomProjects = async (req, res) => {
             const cpi = budgetUsed > 0 ? parseFloat((earnedValue / budgetUsed).toFixed(2)) : 1.0;
             const sv = earnedValue - plannedValue;
             const cv = earnedValue - budgetUsed;
-            // camelCase: id, projectId, recordDate, actualCost, actualProgress, plannedValue, earnedValue, scheduleVariance, costVariance, spi, cpi
             metrics.push([`met-${projectId}`, projectId, new Date().toISOString().split('T')[0], budgetUsed, progress, plannedValue, earnedValue, sv, cv, spi, cpi]);
         }
 
-        // ── Insert everything ──────────────────────────────────────────────
         for (const emp of employees) {
             await db.query(`INSERT IGNORE INTO employees (id, name, position, department) VALUES (?, ?, ?, ?)`, emp);
         }

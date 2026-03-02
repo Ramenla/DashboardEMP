@@ -1,18 +1,26 @@
+/**
+ * @file App.jsx
+ * @description Komponen root aplikasi yang mengatur routing halaman.
+ * Menggunakan React.lazy untuk code-splitting pada setiap halaman fitur,
+ * sehingga bundle awal tetap ringan dan halaman dimuat sesuai kebutuhan.
+ *
+ * Rute yang tersedia:
+ * - `/`         → Redirect ke `/posture`
+ * - `/posture`  → Dashboard postur proyek (KPI, chart status & prioritas)
+ * - `/list`     → Tabel daftar proyek dengan filter
+ * - `/progress` → Gantt chart progres timeline proyek
+ */
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import { ProjectList } from './features/list';
-import { ProjectProgress } from './features/progress';
-import { ProjectPosture } from './features/posture';
 
-// Lazy load komponen utama fitur
 const LazyProjectList = React.lazy(() => import('./features/list/ProjectList'));
 const LazyProjectProgress = React.lazy(() => import('./features/progress/ProjectProgress'));
 const LazyProjectPosture = React.lazy(() => import('./features/posture/ProjectPosture'));
 
 /**
- * komponen utama aplikasi yang mengatur routing
- * @returns {JSX.Element} struktur routing aplikasi dengan MainLayout sebagai wrapper
+ * @returns {JSX.Element} Struktur routing aplikasi dengan MainLayout sebagai wrapper.
  */
 function App() {
   return (
@@ -23,16 +31,9 @@ function App() {
         </div>
       }>
         <Routes>
-          {/* jika user buka halaman awal (root), langsung ke dashboard */}
           <Route path="/" element={<Navigate to="/posture" replace />} />
-
-          {/* rute halaman dashboard */}
           <Route path="/posture" element={<LazyProjectPosture />} />
-
-          {/* rute halaman posture */}
           <Route path="/list" element={<LazyProjectList />} />
-
-          {/* rute halaman progress */}
           <Route path="/progress" element={<LazyProjectProgress />} />
         </Routes>
       </React.Suspense>

@@ -1,3 +1,11 @@
+/**
+ * @file eslint.config.js
+ * @description Konfigurasi ESLint flat config untuk frontend Dashboard EMP.
+ * Menggunakan recommended rules dari eslint, react-hooks, dan react-refresh.
+ * Variabel yang dimulai huruf kapital atau underscore dikecualikan dari
+ * aturan no-unused-vars (untuk komponen React dan konstanta).
+ */
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

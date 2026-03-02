@@ -1,9 +1,17 @@
+/**
+ * @file initDb.js
+ * @description Inisialisasi struktur database secara otomatis saat server berjalan.
+ * Jika tabel belum ada, tabel akan dibuat beserta relasi dan data dummynya.
+ * Mendukung migrasi skema ringan untuk environment development.
+ */
+
 import db from './db.js';
 
 /**
- * Inisialisasi database secara otomatis saat server pertama kali berjalan.
- * Membuat tabel-tabel dan mengisi data dummy jika belum ada.
- * Schema menggunakan camelCase column names sesuai konvensi JavaScript.
+ * Mengeksekusi pengecekan, migrasi, pembuatan tabel, dan penyisipan data dummy
+ * ke dalam database MySQL.
+ * @async
+ * @returns {Promise<void>}
  */
 async function initDatabase() {
     try {
@@ -13,7 +21,6 @@ async function initDatabase() {
         if (tables.length > 0) {
             console.log('✅ Tables already exist. Running column migrations...');
 
-            // Migration: tambahkan kolom 'division' ke tabel issues jika belum ada
             try {
                 const [cols] = await db.query("SHOW COLUMNS FROM issues LIKE 'division'");
                 if (cols.length === 0) {
@@ -25,7 +32,6 @@ async function initDatabase() {
                 console.warn("Migration check for 'division' failed:", e.message);
             }
 
-            // Migration: tambahkan kolom 'manager' ke tabel projects jika belum ada
             try {
                 const [mgrCols] = await db.query("SHOW COLUMNS FROM projects LIKE 'manager'");
                 if (mgrCols.length === 0) {
@@ -43,7 +49,6 @@ async function initDatabase() {
 
         console.log('🆕 No tables found. Creating schema and seeding dummy data...');
 
-        // ───── SCHEMA (camelCase) ─────
         await db.query(`
             SET FOREIGN_KEY_CHECKS = 0;
             DROP TABLE IF EXISTS project_metrics;
@@ -153,7 +158,6 @@ async function initDatabase() {
 
         console.log('✅ Schema created (camelCase). Now seeding dummy data...');
 
-        // ───── DUMMY DATA ─────
         await db.query(`
             INSERT INTO projects (id, projectCode, name, category, priority, status, startDate, endDate, totalBudget, location, manager) VALUES
             ('EMP-DRI-002', 'EMP-DRI-002', 'Bentu Block - Workover Well #5', 'DRILLING', 'Sedang', 'Berjalan', '2026-06-04 07:12:50', '2026-10-04 00:12:50', 698722592716, 'Bentu Block (Sumatra)', 'Andi Hidayat'),

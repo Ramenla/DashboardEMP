@@ -1,15 +1,20 @@
+/**
+ * @file db.js
+ * @description Konfigurasi koneksi MySQL Database Backend.
+ * Menggunakan pool connections dan mendukung string Connection Railway (Production) 
+ * atau kredensial env lokal (Development).
+ */
+
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Railway menyuntikkan MYSQL_URL secara otomatis jika kita menggunakan MySQL plugin
 const connectionString = process.env.MYSQL_URL || process.env.DATABASE_URL;
 
 let pool;
 
 if (connectionString) {
-    // Production: Railway MySQL via connection string
     pool = mysql.createPool({
         uri: connectionString,
         waitForConnections: true,
@@ -19,7 +24,6 @@ if (connectionString) {
     });
     console.log('📡 Using MYSQL_URL for database connection (Production).');
 } else {
-    // Development: koneksi lokal
     pool = mysql.createPool({
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'root',
@@ -34,4 +38,7 @@ if (connectionString) {
     console.log('🏠 Using local DB_HOST for database connection (Development).');
 }
 
+/**
+ * @exports pool MySQL Connection Pool
+ */
 export default pool;

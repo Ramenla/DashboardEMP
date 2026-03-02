@@ -1,3 +1,10 @@
+/**
+ * @file projectController.js
+ * @description Controller untuk menangani endpoint API pengelolaan data proyek,
+ * menghitung EVM (Earned Value Management) secara agregat, kompilasi data issues,
+ * timeline proyek, dan pengelolaan data tim proyek.
+ */
+
 import * as ProjectModel from '../models/projectModel.js';
 
 const getMonthIndex = (date) => {
@@ -12,11 +19,16 @@ const getDuration = (start, end) => {
     return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
 };
 
+/**
+ * Endpoint mengambil list seluruh proyek dan agregasi data statistik,
+ * menguraikan performa proyek dan isunya.
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 export const getProjects = async (req, res) => {
     try {
         const { year, month, category, status, location } = req.query;
 
-        // ── Ambil data dari Model ──
         const projects = await ProjectModel.findAll({ year, month, category, status, location });
         const projectIds = projects.map(p => p.id);
 
@@ -25,7 +37,6 @@ export const getProjects = async (req, res) => {
         try { allTimeline = await ProjectModel.findTimeline(projectIds); } catch (e) { console.warn("Timeline query failed:", e.message); }
         try { allMembers = await ProjectModel.findMembers(projectIds); } catch (e) { console.warn("Members query failed:", e.message); }
 
-        // ── Build maps ──
         const issueMap = {};
         const issueStats = {};
         for (const issue of allIssues) {
@@ -67,7 +78,6 @@ export const getProjects = async (req, res) => {
             teamMap[member.projectId].push({ name: member.name || 'Staff', role: member.role || 'Member' });
         }
 
-        // ── Build result ──
         let totalSpi = 0, totalCpi = 0, atRiskCount = 0, onTrackCount = 0;
 
         const projectsResult = projects.map(p => {
@@ -92,7 +102,6 @@ export const getProjects = async (req, res) => {
 
             const target = totalBudget > 0 ? (plannedValue / totalBudget) * 100 : 0;
 
-            // Build team
             let team = teamMap[p.id] || [];
             if (team.length === 0 && p.manager) {
                 team = [{ name: p.manager, role: 'Project Manager' }];
@@ -110,7 +119,6 @@ export const getProjects = async (req, res) => {
                 team, gallery: [], documents: []
             };
 
-            // Update issueStats with categories & project details
             if (issueMap[p.id]) {
                 issueMap[p.id].forEach(issueItem => {
                     const issueTitle = issueItem.title ? issueItem.title.trim() : "";
@@ -156,6 +164,11 @@ export const getProjects = async (req, res) => {
     }
 };
 
+/**
+ * Controller membuat proyek baru beserta placeholder value di DB.
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 export const createProject = async (req, res) => {
     const p = req.body;
     try {
@@ -192,6 +205,11 @@ export const createProject = async (req, res) => {
     }
 };
 
+/**
+ * Controller pembaruan proyek.
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 export const updateProject = async (req, res) => {
     const { id } = req.params;
     const p = req.body;
@@ -204,6 +222,11 @@ export const updateProject = async (req, res) => {
     }
 };
 
+/**
+ * Controller penghapusan proyek.
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 export const deleteProject = async (req, res) => {
     const { id } = req.params;
     try {

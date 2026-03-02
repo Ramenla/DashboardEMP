@@ -12,6 +12,7 @@ import ProjectDetailDrawer from '../../components/ui/ProjectDetailDrawer';
 import projectService from '../../shared/services/projectService';
 import { normalizeProjectData, parseProjectDate } from '../../utils/dateUtils';
 
+
 /**
  * @returns {JSX.Element} Halaman penuh project progress dengan manipulasi view dan GanttChart.
  */
@@ -24,6 +25,7 @@ const ProjectProgress = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortBy, setSortBy] = useState('START_DATE_ASC');
+
 
   useEffect(() => {
     fetchProjects();

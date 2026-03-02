@@ -54,7 +54,7 @@ const getStatusColor = (status) => {
  * @param {Function} [props.onDelete] - Callback hapus proyek (belum diimplementasi).
  * @returns {JSX.Element} Tabel Ant Design dengan kolom proyek lengkap.
  */
-const ProjectTable = ({ dataSource, onRowClick, onEdit, onDelete }) => {
+const ProjectTable = ({ dataSource, onRowClick }) => {
   const columns = [
     {
       title: 'Kode Project',

@@ -180,7 +180,6 @@ export const createProject = async (req, res) => {
     const p = req.body;
     try {
         const id = p.id || `EMP-NEW-${Date.now()}`;
-
         const progress = parseFloat(p.progress) || 0;
         const totalBudget = parseFloat(p.totalBudget) || 0;
         const budgetUsed = parseFloat(p.budgetUsed) || 0;
@@ -228,6 +227,7 @@ export const updateProject = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 /**
  * Controller penghapusan proyek.

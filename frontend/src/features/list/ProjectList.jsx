@@ -93,6 +93,7 @@ const ProjectList = () => {
     setFilters({ search: filters.search, categories: [], status: '', priority: '', location: '' });
   };
 
+
   return (
     <div className="pb-4 -mt-10">
       <div className="flex items-center justify-between mb-3">
@@ -125,6 +126,7 @@ const ProjectList = () => {
           loading={loading}
         />
       </div>
+
 
       <ProjectDetailDrawer project={selectedProject} open={isDrawerOpen} onClose={closeDrawer} />
     </div>

@@ -87,7 +87,7 @@ export const seedRandomProjects = async (req, res) => {
 
         const CAT_PREFIXES = { 'EXPLORATION': 'EXP', 'DRILLING': 'DRI', 'OPERATION': 'OPE', 'FACILITY': 'FAC' };
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 50; i++) {
             const idx = startIdx + i;
             const category = rand(CATEGORIES);
             const prefix = CAT_PREFIXES[category];
@@ -170,7 +170,7 @@ export const seedRandomProjects = async (req, res) => {
 
         res.json({
             success: true,
-            message: `✅ Berhasil menyisipkan 100 project random beserta data relasionalnya!`,
+            message: `✅ Berhasil menyisipkan 50 project random beserta data relasionalnya!`,
             details: {
                 projects: projects.length,
                 employees: employees.length,
@@ -183,6 +183,34 @@ export const seedRandomProjects = async (req, res) => {
 
     } catch (error) {
         console.error('Seed Error:', error.message);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * Controller untuk menghapus semua data proyek (Reset Database).
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
+export const clearAllProjects = async (req, res) => {
+    try {
+        await db.query('SET FOREIGN_KEY_CHECKS = 0;');
+        await db.query('TRUNCATE TABLE project_metrics;');
+        await db.query('TRUNCATE TABLE issues;');
+        await db.query('TRUNCATE TABLE task_milestones;');
+        await db.query('TRUNCATE TABLE timeline_events;');
+        await db.query('TRUNCATE TABLE project_members;');
+        // Option to keep employees, or truncate them too
+        // await db.query('TRUNCATE TABLE employees;'); 
+        await db.query('TRUNCATE TABLE projects;');
+        await db.query('SET FOREIGN_KEY_CHECKS = 1;');
+
+        res.json({
+            success: true,
+            message: '✅ Semua data proyek berhasil dihapus (Reset).'
+        });
+    } catch (error) {
+        console.error('Clear DB Error:', error.message);
         res.status(500).json({ success: false, message: error.message });
     }
 };

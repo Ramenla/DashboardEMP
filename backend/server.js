@@ -12,7 +12,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import projectRoutes from './routes/projectRoutes.js';
-import { seedRandomProjects } from './controllers/seedController.js';
+import { seedRandomProjects, clearAllProjects } from './controllers/seedController.js';
 import initDatabase from './config/initDb.js';
 import errorHandler from './middleware/errorHandler.js';
 
@@ -37,6 +37,7 @@ app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 app.use('/api/projects', projectRoutes);
 app.post('/api/seed', seedRandomProjects);
+app.delete('/api/seed/clear', clearAllProjects);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Backend is running' });

@@ -5,19 +5,19 @@ import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 const { Text } = Typography;
 
 const locations = [
-  "'B' Block (Sumatra)",
-  "Bireun-Sigli Block (Sumatra)",
-  "Gebang Block (Sumatra)",
-  "Tonga Block (Sumatra)",
-  "Malacca Strait Block (Sumatra)",
-  "Siak Block (Sumatra)",
-  "Kampar Block (Sumatra)",
-  "Bentu Block (Sumatra)",
-  "Korinci Baru Block (Sumatra)",
-  "South CPP Block (Sumatra)",
-  "Kangean Block (Jawa)",
-  "Sengkang Block (Sulawesi)",
-  "Buzi EPCC (Mozambique)"
+  "Blok B (Sumatra)",
+  "Blok Bireun-Sigli (Sumatra)",
+  "Blok Gebang (Sumatra)",
+  "Blok Tonga (Sumatra)",
+  "Blok Malacca Strait (Sumatra)",
+  "Blok Siak (Sumatra)",
+  "Blok Kampar (Sumatra)",
+  "Blok Bentu (Sumatra)",
+  "Blok Korinci Baru (Sumatra)",
+  "Blok South CPP (Sumatra)",
+  "Blok Kangean (Jawa)",
+  "Blok Sengkang (Sulawesi)",
+  "Blok Buzi EPCC (Mozambique)"
 ];
 const categories = ['EXPLORATION', 'DRILLING', 'OPERATION', 'FACILITY'];
 

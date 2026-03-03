@@ -28,7 +28,6 @@ const ProjectList = () => {
     status: '',
     priority: '',
     location: '',
-    dateRange: null,
   });
 
   const [filteredData, setFilteredData] = useState([]);
@@ -74,22 +73,7 @@ const ProjectList = () => {
       const matchLocation = !filters.location ||
         (item.location || '').toLowerCase().includes(filters.location.toLowerCase());
 
-      // Date range filter
-      let matchDate = true;
-      if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
-        const from = filters.dateRange[0].startOf('day').valueOf();
-        const to = filters.dateRange[1].endOf('day').valueOf();
-        const startDate = item.startDate ? new Date(item.startDate).getTime() : null;
-        const endDate = item.endDate ? new Date(item.endDate).getTime() : null;
-
-        if (startDate && endDate) {
-          matchDate = startDate <= to && endDate >= from;
-        } else if (startDate) {
-          matchDate = startDate >= from && startDate <= to;
-        }
-      }
-
-      return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation && matchDate;
+      return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation;
     });
     setFilteredData(result);
   }, [filters, allData]);
@@ -105,7 +89,7 @@ const ProjectList = () => {
   };
 
   const handleReset = () => {
-    setFilters({ search: '', categories: [], status: '', priority: '', location: '', dateRange: null });
+    setFilters({ search: '', categories: [], status: '', priority: '', location: '' });
   };
 
   // Hitung jumlah proyek total dan yang terfilter

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Row, Col, Card } from 'antd';
+import { Row, Col, Card, Skeleton } from 'antd';
 import {
   ProjectOutlined,
   AlertOutlined,

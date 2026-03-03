@@ -117,6 +117,7 @@ const ProjectList = () => {
         onFilterChange={setFilters}
         onReset={handleReset}
         metadata={metadata}
+        loading={loading}
       />
 
       <div className="mt-3">

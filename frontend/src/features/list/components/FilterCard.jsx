@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Card, Checkbox, Radio, Typography, Button, Divider, Select, AutoComplete, Input } from 'antd';
+import { Card, Checkbox, Radio, Typography, Button, Divider, Select, AutoComplete, Input, Skeleton } from 'antd';
 import { ReloadOutlined, DownOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
@@ -21,7 +21,7 @@ const { Text } = Typography;
  * @param {Object} props.metadata - data metadata dinamis (kategori, lokasi, etc)
  * @returns {JSX.Element} filter bar horizontal
  */
-const FilterCard = ({ filters, onFilterChange, onReset, metadata = { categories: [], statuses: [], locations: [] } }) => {
+const FilterCard = ({ filters, onFilterChange, onReset, metadata = { categories: [], statuses: [], locations: [] }, loading = false }) => {
   const locations = metadata.locations || [];
   const categories = metadata.categories || [];
   const handleChange = (key, value) => {
@@ -73,12 +73,21 @@ const FilterCard = ({ filters, onFilterChange, onReset, metadata = { categories:
 
         <div className="shrink-0">
           <Text className={labelClass}>Kategori</Text>
-          <Checkbox.Group
-            options={categories.map(c => ({ label: c.charAt(0) + c.slice(1).toLowerCase(), value: c }))}
-            value={filters.categories}
-            onChange={(val) => handleChange('categories', val)}
-            className="flex flex-row gap-3 text-xs"
-          />
+          {loading && categories.length === 0 ? (
+            <div className="flex flex-row gap-3 items-center">
+              <Skeleton.Button active size="small" className="h-5 w-20" />
+              <Skeleton.Button active size="small" className="h-5 w-20" />
+              <Skeleton.Button active size="small" className="h-5 w-20" />
+              <Skeleton.Button active size="small" className="h-5 w-20" />
+            </div>
+          ) : (
+            <Checkbox.Group
+              options={categories.map(c => ({ label: c.charAt(0) + c.slice(1).toLowerCase(), value: c }))}
+              value={filters.categories}
+              onChange={(val) => handleChange('categories', val)}
+              className="flex flex-row gap-3 text-xs"
+            />
+          )}
         </div>
 
         <Divider type="vertical" className="h-8 mx-0 mb-1" />

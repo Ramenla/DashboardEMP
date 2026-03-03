@@ -2,12 +2,13 @@
  * @file ProjectList.jsx
  * @description Halaman daftar proyek dengan filtering multi-kriteria.
  * Menampilkan tabel proyek yang dapat difilter berdasarkan pencarian teks,
- * kategori, status, prioritas, dan lokasi. Klik baris membuka drawer detail.
+ * kategori, status, prioritas, lokasi, dan rentang tanggal.
+ * Filter ditampilkan dalam popup (Popover) saat klik tombol "Filter".
  * Data diambil dari backend API (MySQL).
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Input, message, Space, Spin } from 'antd';
+import { Input, Space, Badge } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 import FilterCard from './components/FilterCard';
@@ -27,14 +28,14 @@ const ProjectList = () => {
     status: '',
     priority: '',
     location: '',
+    dateRange: null,
   });
 
   const [filteredData, setFilteredData] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [metadata, setMetadata] = useState({ categories: [], statuses: [], locations: [], priorities: [] }); // priorities can be added if backend supports it
+  const [metadata, setMetadata] = useState({ categories: [], statuses: [], locations: [], priorities: [] });
 
-  // fetch data dari backend
   const fetchMetadata = useCallback(async () => {
     try {
       const data = await projectService.getMetadata();
@@ -51,7 +52,6 @@ const ProjectList = () => {
       const projects = Array.isArray(result) ? result : (result.projects || []);
       setAllData(projects);
     } catch (err) {
-      // Error handled by interceptor
       console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
@@ -74,7 +74,22 @@ const ProjectList = () => {
       const matchLocation = !filters.location ||
         (item.location || '').toLowerCase().includes(filters.location.toLowerCase());
 
-      return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation;
+      // Date range filter
+      let matchDate = true;
+      if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
+        const from = filters.dateRange[0].startOf('day').valueOf();
+        const to = filters.dateRange[1].endOf('day').valueOf();
+        const startDate = item.startDate ? new Date(item.startDate).getTime() : null;
+        const endDate = item.endDate ? new Date(item.endDate).getTime() : null;
+
+        if (startDate && endDate) {
+          matchDate = startDate <= to && endDate >= from;
+        } else if (startDate) {
+          matchDate = startDate >= from && startDate <= to;
+        }
+      }
+
+      return matchSearch && matchCategory && matchStatus && matchPriority && matchLocation && matchDate;
     });
     setFilteredData(result);
   }, [filters, allData]);
@@ -90,14 +105,24 @@ const ProjectList = () => {
   };
 
   const handleReset = () => {
-    setFilters({ search: filters.search, categories: [], status: '', priority: '', location: '' });
+    setFilters({ search: '', categories: [], status: '', priority: '', location: '', dateRange: null });
   };
 
+  // Hitung jumlah proyek total dan yang terfilter
+  const totalCount = allData.length;
+  const filteredCount = filteredData.length;
 
   return (
     <div className="pb-4 -mt-10">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold text-[#001529] m-0">Project List</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-bold text-[#001529] m-0">Project List</h2>
+          <Badge
+            count={loading ? '...' : `${filteredCount} Proyek`}
+            showZero
+            className="[&>.ant-badge-count]:!bg-gray-100 [&>.ant-badge-count]:!text-gray-500 [&>.ant-badge-count]:!shadow-none [&>.ant-badge-count]:!text-[11px] [&>.ant-badge-count]:!font-medium [&>.ant-badge-count]:!rounded-full [&>.ant-badge-count]:!px-2.5"
+          />
+        </div>
         <Space size="middle">
           <Input
             placeholder="Cari kode, nama, atau manager..."
@@ -106,28 +131,26 @@ const ProjectList = () => {
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             className="rounded-lg"
-            style={{ width: 320 }}
+            style={{ width: 280 }}
+            size="small"
+          />
+          <FilterCard
+            filters={filters}
+            onFilterChange={setFilters}
+            onReset={handleReset}
+            metadata={metadata}
+            loading={loading}
           />
         </Space>
       </div>
 
-      {/* filter bar */}
-      <FilterCard
-        filters={filters}
-        onFilterChange={setFilters}
-        onReset={handleReset}
-        metadata={metadata}
-        loading={loading}
-      />
-
-      <div className="mt-3">
+      <div className="mt-1">
         <ProjectTable
           dataSource={filteredData}
           onRowClick={handleProjectClick}
           loading={loading}
         />
       </div>
-
 
       <ProjectDetailDrawer project={selectedProject} open={isDrawerOpen} onClose={closeDrawer} />
     </div>

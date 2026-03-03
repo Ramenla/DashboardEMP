@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Input, Space, Badge } from 'antd';
+import { Input, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 import FilterCard from './components/FilterCard';
@@ -115,14 +115,7 @@ const ProjectList = () => {
   return (
     <div className="pb-4 -mt-10">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-[#001529] m-0">Project List</h2>
-          <Badge
-            count={loading ? '...' : `${filteredCount} Proyek`}
-            showZero
-            className="[&>.ant-badge-count]:!bg-gray-100 [&>.ant-badge-count]:!text-gray-500 [&>.ant-badge-count]:!shadow-none [&>.ant-badge-count]:!text-[11px] [&>.ant-badge-count]:!font-medium [&>.ant-badge-count]:!rounded-full [&>.ant-badge-count]:!px-2.5"
-          />
-        </div>
+        <h2 className="text-lg font-bold text-[#001529] m-0">Project List</h2>
         <Space size="middle">
           <Input
             placeholder="Cari kode, nama, atau manager..."
